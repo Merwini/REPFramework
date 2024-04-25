@@ -74,7 +74,7 @@ namespace rep.heframework
             }
 			else
             {
-				Log.Error("Using HEF_SiteWorker_Expansion on site for non-HEF faction " + parms.faction.Name);
+				Log.Error("Using HEF_SitePartWorker_Expansion on site for non-HEF faction " + parms.faction.Name);
 				pawnGroupMaker = null;
 				return false;
             }

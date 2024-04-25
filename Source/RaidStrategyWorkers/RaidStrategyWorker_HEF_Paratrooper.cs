@@ -9,7 +9,7 @@ using Verse.AI.Group;
 
 namespace rep.heframework
 {
-    public class RaidStrategyWorker_AMP_Paratrooper : RaidStrategyWorker
+    public class RaidStrategyWorker_HEF_Paratrooper : RaidStrategyWorker
     {
         protected override LordJob MakeLordJob(IncidentParms parms, Map map, List<Pawn> pawns, int raidSeed)
         {

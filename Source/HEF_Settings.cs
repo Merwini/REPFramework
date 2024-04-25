@@ -12,7 +12,7 @@ namespace rep.heframework
 {
     public class HEF_Settings : ModSettings
     {
-        public static bool FriendlyAMPsCanExpand = false;
+        public static bool FriendlyHEFsCanExpand = false;
         public static bool SitesMustBeUnique = true;
 
         public static int minimumExpansionDistance = 2;

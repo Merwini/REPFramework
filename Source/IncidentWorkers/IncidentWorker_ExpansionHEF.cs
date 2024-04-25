@@ -10,11 +10,10 @@ using Verse;
 
 namespace rep.heframework
 {
-    public class IncidentWorker_ExpansionAMP : IncidentWorker
+    public class IncidentWorker_ExpansionHEF : IncidentWorker
     {
         internal List<Faction> hefFactions;
-        //internal List<SitePartDef> existingAMPSites;
-        internal List<SitePartDef> eligibleAMPSites;
+        internal List<SitePartDef> eligibleHEFSites;
         
         internal SitePartDef sitePartDef;
         internal int tile;
@@ -55,9 +54,9 @@ namespace rep.heframework
                 return true;
             }
 
-            //Get a list of AMP factions. Incident fails if no legal targets are available.
+            //Get a list of HEF factions. Incident fails if no legal targets are available.
             hefFactions = Find.FactionManager.AllFactions.Where(f => (f.def.HasModExtension<PawnGroupMakerExtension>())).ToList();
-            if (!HEF_Settings.FriendlyAMPsCanExpand)
+            if (!HEF_Settings.FriendlyHEFsCanExpand)
             {
                 hefFactions = hefFactions.Where(f => f.HostileTo(Find.FactionManager.OfPlayer)).ToList();
             }
@@ -70,12 +69,12 @@ namespace rep.heframework
 
         internal virtual bool TryResolveExpansionDef(IncidentParms parms)
         {
-            eligibleAMPSites = HEF_Utils.FindEligibleHEFSiteDefsFor(parms.faction);
-            if (eligibleAMPSites.NullOrEmpty())
+            eligibleHEFSites = HEF_Utils.FindEligibleHEFSiteDefsFor(parms.faction);
+            if (eligibleHEFSites.NullOrEmpty())
                 return false;
 
             //TODO custom expansion patterns for different storytellers? e.x. has to spawn X minor expansions before doing a major one, random, spawn in a set pattern
-            sitePartDef = eligibleAMPSites.RandomElementByWeight(s => s.selectionWeight);
+            sitePartDef = eligibleHEFSites.RandomElementByWeight(s => s.selectionWeight);
 
             return sitePartDef != null;
         }

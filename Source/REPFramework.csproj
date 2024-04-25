@@ -75,13 +75,13 @@
     <Compile Include="HEF_Settings.cs" />
     <Compile Include="GenStep_TaggedPawnGroup.cs" />
     <Compile Include="PawnGroupMakerExtension.cs" />
-    <Compile Include="SitePartWorkers\AMP_SitePartWorker_Expansion.cs" />
+    <Compile Include="SitePartWorkers\HEF_SitePartWorker_Expansion.cs" />
     <Compile Include="HEF_Utils.cs" />
     <Compile Include="DebugActions.cs" />
-    <Compile Include="IncidentWorkers\IncidentWorker_ExpansionAMP.cs" />
-    <Compile Include="IncidentWorkers\IncidentWorker_RaidAMP.cs" />
+    <Compile Include="IncidentWorkers\IncidentWorker_ExpansionHEF.cs" />
+    <Compile Include="IncidentWorkers\IncidentWorker_RaidHEF.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="RaidStrategyWorkers\RaidStrategyWorker_AMP_Paratrooper.cs" />
+    <Compile Include="RaidStrategyWorkers\RaidStrategyWorker_HEF_Paratrooper.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="IncidentFlow.txt" />

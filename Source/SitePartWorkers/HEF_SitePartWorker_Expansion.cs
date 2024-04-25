@@ -12,7 +12,7 @@ using Verse.Grammar;
 
 namespace rep.heframework
 {
-    public class AMP_SitePartWorker_Expansion : SitePartWorker_Outpost
+    public class HEF_SitePartWorker_Expansion : SitePartWorker_Outpost
     {
 		public override void Notify_GeneratedByQuestGen(SitePart part, Slate slate, List<Rule> outExtraDescriptionRules, Dictionary<string, string> outExtraDescriptionConstants)
 		{

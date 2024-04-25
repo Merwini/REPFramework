@@ -10,7 +10,7 @@ using UnityEngine;
 
 namespace rep.heframework
 {
-	public class IncidentWorker_RaidAMP : IncidentWorker_RaidEnemy
+	public class IncidentWorker_RaidHEF : IncidentWorker_RaidEnemy
     {
         
 		protected override bool CanFireNowSub(IncidentParms parms)
@@ -157,9 +157,9 @@ namespace rep.heframework
                 return true;
             }
 
-            //AMP factions will always have Combat groups, so we don't need to use PawnGroupMakerUtility to select a faction that has one
+            //HEF factions will always have Combat groups, so we don't need to use PawnGroupMakerUtility to select a faction that has one
 
-            //get hostile AMP factions
+            //get hostile HEF factions
             List<Faction> possibleFactions = (Find.FactionManager.AllFactions.Where(f => f.def.HasModExtension<PawnGroupMakerExtension>() && f.HostileTo(Faction.OfPlayer))).ToList();
 
             return possibleFactions.TryRandomElement(out parms.faction);

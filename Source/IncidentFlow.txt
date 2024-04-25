@@ -1,0 +1,30 @@
+﻿Storyteller selects IncidentDef to add to incident queue
+Instantiates an IncidentParms
+Storyteller calls TryFire on the queuedIncident
+	has a tick timer, if it fires or fails to fire before the timer hits 0, it is removed from the queue
+TryFire calls the IncidentWorker.CanFireNow and IncidentWorker.TryExecute, if both return true, incident is considered fired
+CanFireNow is mainly for checking game state against conditions set in the IncidentDef, should not be overriden, calls CanFireNowSub as its final check
+	CanFireNowSub is a better place to put custom logic
+TryExecute checks if the incident requires pawns on the map and, if so, that pawns are present on that map. Then calls TryExecuteWorker
+	TryExecuteWorker is where you should put custom logic
+
+Default raid TryExecuteWorker:
+	Calls TryGenerateRaidInfo(IncidentParms parms, out List<Pawn> pawns, bool debugTest = false)
+		Clears pawns list
+		Calls ResolveRaidPoints
+			makes sure that parms.points is greater than 0
+		Calls TryResolveRaidFaction !!! NEED TO OVERRIDE
+			if the parms already has a faction set, early return (for if player forces raid from specific faction via debug tool)
+			Tries to select a random faction for the raid, weighted against whichever faction raided last, and has to have a PawnGroupMaker that matches the PawnGroupKind (i.e. Combat)
+			If that fails, tries again but with flag desperate which makes it ignore earliestRaidDays in the factionDef (e.g. for mechanoids)
+		Calls ResolveRaidStrategy !!! NEED TO OVERRIDE
+			checks if the raidStrategy of the parms is legal with the faction (for if specific raidStrategy has been called by debug)
+			If not legal/not set, tries to select a random RaidStrategyDef from the database, weighted based on faction settings
+				if it fails to select one, sets to ImmediateAttack
+		Calls ResolveRaidArriveMode !!! NEED TO OVERRIDE
+			checks if raidArrivalMode of the parms already is set
+			checks if the raid is an ally sending immediate aid, in which case selects edge or center drop
+			checks if raid strategy is null, in which case sets it to immediateAttack
+			tries to select a random arriveMode for the selected strategy, sets to edgeWalkin as fallback
+		Calls ResolveRaidAgeRestriction
+			not important

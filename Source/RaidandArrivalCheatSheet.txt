@@ -1,0 +1,18 @@
+﻿RaidStrategyDefs
+
+ImmediateAttack
+ImmediateAttackSmart
+StageThenAttack
+ImmediateAttackSappers
+Siege
+ImmediateAttackBreaching
+ImmediateAttackBreachingSmart
+
+
+PawnsArrivalModeDefs
+EdgeWalkIn;
+EdgeWalkInGroups;
+CenterDrop;
+EdgeDrop;
+RandomDrop;
++3 more for 1.5

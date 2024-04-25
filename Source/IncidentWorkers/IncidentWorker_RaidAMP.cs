@@ -8,14 +8,14 @@ using System.Threading.Tasks;
 using Verse;
 using UnityEngine;
 
-namespace rep.framework
+namespace rep.heframework
 {
 	public class IncidentWorker_RaidAMP : IncidentWorker_RaidEnemy
     {
         
 		protected override bool CanFireNowSub(IncidentParms parms)
         {
-            return (float)GenDate.DaysPassedSinceSettle >= AMP_Settings.earliestRaidDays;
+            return (float)GenDate.DaysPassedSinceSettle >= HEF_Settings.earliestRaidDays;
         }
 
         protected override bool TryExecuteWorker(IncidentParms parms)
@@ -81,8 +81,8 @@ namespace rep.framework
 
         public new bool TryGenerateRaidInfo(IncidentParms parms, out List<Pawn> pawns, bool debugTest = false)
         {
-            List<Site> ampSites;
-            List<SitePartDef> ampSiteDefs;
+            List<Site> hefSites;
+            List<SitePartDef> hefSiteDefs;
 
             pawns = null;
 
@@ -91,13 +91,13 @@ namespace rep.framework
             if (!TryResolveRaidFaction(parms))
                 return false;
 
-            ampSites = AMP_Utils.FindAMPSitesFor(parms.faction);
-            ampSiteDefs = AMP_Utils.FindDefsForSites(ampSites);
+            hefSites = HEF_Utils.FindHEFSitesFor(parms.faction);
+            hefSiteDefs = HEF_Utils.FindDefsForSites(hefSites);
 
             PawnGroupKindDef combat = PawnGroupKindDefOf.Combat;
 
             //Due to the Expansion Site system, it will be easiest to select the PawnGroupMaker first, as there is otherwise a high probability that selected Strategy/ArrivalMode will have no legal PawnGroup
-            if (!TryResolvePawnGroup(parms, ampSiteDefs, out AMP_PawnGroupMaker groupMaker))
+            if (!TryResolvePawnGroup(parms, hefSiteDefs, out TaggedPawnGroupMaker groupMaker))
                 return false;
 
             ResolveRaidStrategy(parms, groupMaker);
@@ -160,37 +160,38 @@ namespace rep.framework
             //AMP factions will always have Combat groups, so we don't need to use PawnGroupMakerUtility to select a faction that has one
 
             //get hostile AMP factions
-            List<Faction> possibleFactions = (Find.FactionManager.AllFactions.Where(f => f.def is AMP_FactionDef && f.HostileTo(Faction.OfPlayer))).ToList();
+            List<Faction> possibleFactions = (Find.FactionManager.AllFactions.Where(f => f.def.HasModExtension<PawnGroupMakerExtension>() && f.HostileTo(Faction.OfPlayer))).ToList();
 
             return possibleFactions.TryRandomElement(out parms.faction);
         }
 
-        protected bool TryResolvePawnGroup(IncidentParms parms, List<SitePartDef> siteDefs, out AMP_PawnGroupMaker groupMaker)
+        protected bool TryResolvePawnGroup(IncidentParms parms, List<SitePartDef> siteDefs, out TaggedPawnGroupMaker groupMaker)
         {
-            List<AMP_PawnGroupMaker> possibleGroupMakers = new List<AMP_PawnGroupMaker>();
+            List<TaggedPawnGroupMaker> possibleGroupMakers = new List<TaggedPawnGroupMaker>();
 
-            List<string> ampTags = AMP_Utils.FindStringsForDefs(siteDefs);
-            AMP_FactionDef factionDef = (AMP_FactionDef)parms.faction.def;
-            foreach (AMP_PawnGroupMaker pgm in factionDef.pawnGroupMakers)
+            List<string> hefTags = HEF_Utils.FindStringsForDefs(siteDefs);
+            FactionDef factionDef = parms.faction.def;
+            PawnGroupMakerExtension extension = factionDef.GetModExtension<PawnGroupMakerExtension>();
+            foreach (TaggedPawnGroupMaker tpgm in extension.taggedPawnGroupMakers)
             {
-                if (AMP_Utils.CheckIfAllTagsPresent(pgm.requiredSiteTags, ampTags))
+                if (HEF_Utils.CheckIfAllTagsPresent(tpgm.requiredSiteTags, hefTags))
                 {
                     if (Prefs.DevMode)
                     {
-                        if (pgm.groupName != null)
+                        if (tpgm.groupName != null)
                         {
-                            Log.Message($"Adding {pgm.groupName} as pgm option");
+                            Log.Message($"Adding {tpgm.groupName} as pgm option");
                         }
                         else
                         {
                             Log.Message($"Adding unnamed pgm as pgm option");
                         }
                     }
-                    possibleGroupMakers.Add(pgm);
+                    possibleGroupMakers.Add(tpgm);
                 }
             }
 
-            possibleGroupMakers.TryRandomElementByWeight((AMP_PawnGroupMaker gm) => gm.commonality, out groupMaker);
+            possibleGroupMakers.TryRandomElementByWeight((TaggedPawnGroupMaker gm) => gm.commonality, out groupMaker);
             if (Prefs.DevMode)
             {
                 if (groupMaker.groupName != null)
@@ -206,7 +207,7 @@ namespace rep.framework
             return groupMaker != null;
         }
 
-        public void ResolveRaidStrategy(IncidentParms parms, AMP_PawnGroupMaker groupMaker)
+        public void ResolveRaidStrategy(IncidentParms parms, TaggedPawnGroupMaker groupMaker)
         {
             if (parms.raidStrategy != null)
                 return;
@@ -214,7 +215,7 @@ namespace rep.framework
             parms.raidStrategy = groupMaker.allowedRaidStrategies.RandomElement(); //TODO consider using point curve weight
         }
 
-        public void ResolveRaidArriveMode(IncidentParms parms, AMP_PawnGroupMaker groupMaker)
+        public void ResolveRaidArriveMode(IncidentParms parms, TaggedPawnGroupMaker groupMaker)
         {
             if (parms.raidArrivalMode != null)
                 return;

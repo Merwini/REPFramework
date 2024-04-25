@@ -8,7 +8,7 @@ using System.Text;
 using Verse;
 using Verse.AI.Group;
 
-namespace rep.framework
+namespace rep.heframework
 {
     public class GenStep_TaggedPawnGroup : GenStep
     {
@@ -23,9 +23,17 @@ namespace rep.framework
         public override void Generate(Map map, GenStepParams parms)
         {
             Faction faction = parms.sitePart.site.Faction;
-            AMP_FactionDef factionDef = (AMP_FactionDef)faction.def;
+            FactionDef factionDef = faction.def;
+            PawnGroupMakerExtension extension = factionDef.GetModExtension<PawnGroupMakerExtension>();
+
+            if (extension == null)
+            {
+                Log.Error("Tried to generate pawns for site " + parms.sitePart.site.Label + ", but faction lacks a PawnGroupMakerExtension.");
+                return;
+            }
+
             Lord lord = LordMaker.MakeNewLord(faction, new LordJob_DefendBase(faction, map.Center), map);
-            IEnumerable<Pawn> pawns = GeneratePawnsFromTaggedGroup(map, factionDef, pawnGroupMakerName, parms);
+            IEnumerable<Pawn> pawns = GeneratePawnsFromTaggedGroup(map, extension, pawnGroupMakerName, parms);
 
             if (pawns == null)
             {
@@ -46,8 +54,9 @@ namespace rep.framework
             }
         }
 
-        internal IEnumerable<Pawn> GeneratePawnsFromTaggedGroup(Map map, AMP_FactionDef factionDef, string pawnGroupMakerName, GenStepParams parms)
+        internal IEnumerable<Pawn> GeneratePawnsFromTaggedGroup(Map map, PawnGroupMakerExtension extension, string pawnGroupMakerName, GenStepParams parms)
         {
+
             float threatPoints = ClampToRange(parms.sitePart.parms.threatPoints, threatPointsRange) + threatPointAdjustmentFlat;
             if (threatPoints < 0)
                 threatPoints = 0;
@@ -59,21 +68,15 @@ namespace rep.framework
 
             if (pawnGroupMakerName == null)
             {
-                Log.Warning("Tried generating pawns for site " + parms.sitePart.site.Label + ", but no tag was set. Setting to default.");
-                pawnGroupMakerName = factionDef.pawnGroupMakers.FirstOrDefault()?.groupName;
+                Log.Warning("Tried generating pawns for site " + parms.sitePart.site.Label + ", but no pawnGroupMakerName was set. No pawns will be generated.");
+                return null;
             }
 
-            PawnGroupMaker groupMaker = factionDef.pawnGroupMakers.FirstOrDefault(pgm => pgm.groupName == pawnGroupMakerName);
+            PawnGroupMaker groupMaker = extension.taggedPawnGroupMakers.FirstOrDefault(pgm => pgm.groupName == pawnGroupMakerName);
 
             if (groupMaker == null)
             {
-                Log.Warning("Tried generating pawns for site " + parms.sitePart.site.Label + ", but no pawnGroupMaker could be selected from the tag. Setting to default");
-                groupMaker = factionDef.pawnGroupMakers.FirstOrDefault();
-            }
-
-            if (groupMaker == null)
-            {
-                Log.Error("Tried generating pawns for site " + parms.sitePart.site.Label + ", but no pawnGroupMaker could be selected from the Faction. No pawns will be generated");
+                Log.Warning("Tried generating pawns for site " + parms.sitePart.site.Label + ", but no pawnGroupMaker could be selected with the name \"" + pawnGroupMakerName + "\". No pawns will be generated.");
                 return null;
             }
 

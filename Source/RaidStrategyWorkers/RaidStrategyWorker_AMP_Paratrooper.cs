@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using Verse;
 using Verse.AI.Group;
 
-namespace rep.framework
+namespace rep.heframework
 {
     public class RaidStrategyWorker_AMP_Paratrooper : RaidStrategyWorker
     {

@@ -8,9 +8,9 @@ using System.Reflection;
 using System.Text;
 using Verse;
 
-namespace rep.framework
+namespace rep.heframework
 {
-    public class AMP_Settings : ModSettings
+    public class HEF_Settings : ModSettings
     {
         public static bool FriendlyAMPsCanExpand = false;
         public static bool SitesMustBeUnique = true;

@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ModMetaData>
+	<name>REP Framework</name>
+	<author>Serina and Nuff</author>
+	<supportedVersions>
+		<li>1.5</li>
+	</supportedVersions>
+	<description>Framework for the Rimworld Extended Project.</description>
+	<packageId>rep.framework</packageId>
+	<modDependencies>
+		<li>
+			<packageId>OskarPotocki.VanillaFactionsExpanded.Core</packageId>
+			<displayName>Vanilla Expanded Framework</displayName>
+			<steamWorkshopUrl>https://steamcommunity.com/sharedfiles/filedetails/?id=2023507013</steamWorkshopUrl>
+		</li>
+	</modDependencies>
+</ModMetaData>

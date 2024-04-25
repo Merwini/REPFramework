@@ -9,27 +9,27 @@ using System.Reflection;
 using System.Text;
 using Verse;
 
-namespace rep.framework
+namespace rep.heframework
 {
-    public static class AMP_Utils
+    public static class HEF_Utils
     {
-        public static List<Faction> ReturnAMPFactions()
+        public static List<Faction> ReturnHEFFactions()
         {
-            List<Faction> amps = Find.FactionManager.AllFactions.Where(f => (f.def == AMP_DefOf.AMP_FactionFriendly || f.def == AMP_DefOf.AMP_FactionHostile)).ToList();
+            List<Faction> factions = Find.FactionManager.AllFactions.Where(f => (f.def.HasModExtension<PawnGroupMakerExtension>())).ToList();
 
-            return amps;
+            return factions;
         }
 
-        public static List<Faction> ReturnHostileAMPFactions()
+        public static List<Faction> ReturnHostileHEFFactions()
         {
-            List<Faction> hamps = ReturnAMPFactions().Where(f => f.HostileTo(Find.FactionManager.OfPlayer)).ToList();
+            List<Faction> hostileFactions = ReturnHEFFactions().Where(f => f.HostileTo(Find.FactionManager.OfPlayer)).ToList();
 
-            return hamps;
+            return hostileFactions;
         }
 
-        public static List<Site> FindAMPSitesFor(Faction fact)
+        public static List<Site> FindHEFSitesFor(Faction fact)
         {
-            List<Site> ampSites = new List<Site>();
+            List<Site> hefSites = new List<Site>();
 
             List<Site> worldSites = Find.WorldObjects.Sites;
             foreach (Site site in worldSites)
@@ -40,38 +40,38 @@ namespace rep.framework
                     continue;
                 if (site.MainSitePartDef == null)
                     continue;
-                if (site.MainSitePartDef.defName.StartsWith("AMP_"))
+                if (site.MainSitePartDef.HasModExtension<SiteDefendersExtension>())
                 {
-                    ampSites.Add(site);
+                    hefSites.Add(site);
                     continue;
                 }
             }
 
-            return ampSites;
+            return hefSites;
         }
 
-        public static List<SitePartDef> FindExistingAMPSiteDefsFor(Faction fact)
+        public static List<SitePartDef> FindExistingHEFSiteDefsFor(Faction fact)
         {
-            List<Site> ampSites = FindAMPSitesFor(fact);
-            List<SitePartDef> ampSitePartDefs = FindDefsForSites(ampSites);
+            List<Site> hefSites = FindHEFSitesFor(fact);
+            List<SitePartDef> hefSitePartDefs = FindDefsForSites(hefSites);
             
-            return ampSitePartDefs;
+            return hefSitePartDefs;
         }
 
-        public static List<SitePartDef> FindEligibleAMPSiteDefsFor(Faction fact)
+        public static List<SitePartDef> FindEligibleHEFSiteDefsFor(Faction fact)
         {
             HashSet<SitePartDef> eligibleDefs = new HashSet<SitePartDef>();
 
             foreach (SitePartDef def in DefDatabase<SitePartDef>.AllDefs)
             {
-                if (def.defName.StartsWith("AMP_"))
+                SiteDefendersExtension extension = def.GetModExtension<SiteDefendersExtension>();
+                if (extension != null && extension.factionsToPawnGroups.Any(x => x.faction == fact.def.defName))
                 {
-                    Log.Message("Found AMP SPD " + def.defName);
                     eligibleDefs.Add(def);
                 }
             }
 
-            List<SitePartDef> usedDefs = FindExistingAMPSiteDefsFor(fact);
+            List<SitePartDef> usedDefs = FindExistingHEFSiteDefsFor(fact);
 
             if (!usedDefs.NullOrEmpty())
             {
@@ -110,10 +110,7 @@ namespace rep.framework
                     //the list is initialized empty in the class, so no null check needed
                     foreach (string tag in def.tags)
                     {
-                        if (tag.StartsWith("AMP_PGM_"))
-                        {
-                            tags.Add(tag);
-                        }
+                        tags.Add(tag);
                     }
                 }
             }

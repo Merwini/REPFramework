@@ -10,7 +10,7 @@ using System.Text;
 using Verse;
 using Verse.Grammar;
 
-namespace rep.framework
+namespace rep.heframework
 {
     public class AMP_SitePartWorker_Expansion : SitePartWorker_Outpost
     {
@@ -65,41 +65,64 @@ namespace rep.framework
 
 		public bool TryGetPawnGroupMakerForExpansion(PawnGroupMakerParms parms, out PawnGroupMaker pawnGroupMaker, Site site)
         {
-			SitePartDef mainPart = site.MainSitePartDef;
-			AMP_FactionDef factionDef;
-			if (parms.faction.def is AMP_FactionDef)
+			//Check that the site's faction is HEF
+			FactionDef factionDef;
+			PawnGroupMakerExtension factExtension = (PawnGroupMakerExtension)parms.faction.def.modExtensions?.FirstOrDefault(x => x is PawnGroupMakerExtension);
+			if (factExtension != null)
             {
-				factionDef = (AMP_FactionDef)parms.faction.def;
+				factionDef = parms.faction.def;
             }
 			else
             {
-				Log.Error("Using AMP_SiteWorker_Expansion on site for non-AMP faction " + parms.faction.Name);
+				Log.Error("Using HEF_SiteWorker_Expansion on site for non-HEF faction " + parms.faction.Name);
 				pawnGroupMaker = null;
 				return false;
             }
 
-			if (!mainPart.tags.Any(t => t.StartsWith("AMP_")))
+			//Check that the site is HEF
+			SitePartDef mainPart = site.MainSitePartDef;
+			SiteDefendersExtension siteExtension = (SiteDefendersExtension)mainPart.modExtensions?.FirstOrDefault(x => x is SiteDefendersExtension);
+			if (siteExtension == null)
 			{
-				Log.Error("Using AMP_SiteWorker_Expansion on non-AMP site " + site.Label);
+				Log.Error("Using HEF_SiteWorker_Expansion on non-HEF site " + site.Label);
 				pawnGroupMaker = null;
 				return false;
             }
 
-			List<PawnGroupMaker> possibleGroups = new List<PawnGroupMaker>();
-
-			foreach (AMP_PawnGroupMaker apgm in factionDef.pawnGroupMakers)
-			{
-				foreach (String tag in apgm.requiredSiteTags)
+			//Check that the site's extension is properly configured
+			if (siteExtension.factionsToPawnGroups.NullOrEmpty())
+            {
+				Log.Error("Site " + site.Label + " has misconfigured SiteDefendersExtension. No factionsToPawnGroups.");
+				pawnGroupMaker = null;
+				return false;
+            }
+			int factionIndex = -1;
+			for (int i = 0; i < siteExtension.factionsToPawnGroups.Count; i++)
+            {
+				if (siteExtension.factionsToPawnGroups[i].faction == factionDef.defName)
                 {
-					if (mainPart.tags.Contains(tag))
-                    {
-						possibleGroups.Add(apgm);
-                    }
+					factionIndex = i;
+					break;
                 }
 			}
+			if (factionIndex == -1)
+            {
+				Log.Error("Site " + site.Label + " has misconfigured SiteDefendersExtension. Site faction has no factionsToPawnGroups entry.");
+				pawnGroupMaker = null;
+				return false;
+			}
+			//TODO checks to make sure that pawnGroups for the given faction exist
+
+			List<TaggedPawnGroupMaker> possibleGroups = new List<TaggedPawnGroupMaker>();
+
+			foreach (string str in siteExtension.factionsToPawnGroups[factionIndex].pawnGroups)
+            {
+				possibleGroups.Add(factExtension.taggedPawnGroupMakers.FirstOrDefault(tpgm => tpgm.groupName == str));
+            }
+
 			if (possibleGroups.Count == 0)
             {
-				possibleGroups.Add(parms.faction.def.pawnGroupMakers.First());
+				Log.Error("Site " + site.Label + " has misconfigured SiteDefendersExtension. No pawnGroupMakers could be selected from factionsToPawnGroups entry.");
             }
 
 			pawnGroupMaker = possibleGroups.RandomElement();

@@ -7,10 +7,14 @@ using System.Reflection;
 using System.Text;
 using Verse;
 
-namespace rep.framework
+namespace rep.heframework
 {
-    public class AMP_PawnGroupMaker : PawnGroupMaker
+    public class TaggedPawnGroupMaker : PawnGroupMaker
     {
+        public string groupName;
+
+        List<string> upgradesFrom;
+
         //Intended use is that if the PawnGroupMaker has multiple tags, ALL tags must be present in Expansion sites
         public List<string> requiredSiteTags = new List<string>();
 
@@ -19,7 +23,5 @@ namespace rep.framework
 
         //Want to be able to use vanilla RaidStrategies without being tied to their arrival modes
         public List<PawnsArrivalModeDef> allowedArrivalModes;
-
-        public string groupName;
     }
 }

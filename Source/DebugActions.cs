@@ -9,7 +9,7 @@ using System.Text;
 using Verse;
 //using LudeonTK;
 
-namespace rep.framework
+namespace rep.heframework
 {
     public static class DebugActions
     {

@@ -1,0 +1,19 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Defs>
+	<ThingDef ParentName="DoorBase">
+		<thingClass>rep.heframework.Building_DoorNoNPC</thingClass>
+		<defName>REP_DoorNoNPC</defName>
+		<label>secure door</label>
+		<description>Divides rooms. Simple doors must be manually opened, which slows people down. The amount of slowdown depends on what the door is made of.</description>
+		<graphicData>
+			<texPath>Things/Building/Door/DoorSimple_Mover</texPath>
+			<graphicClass>Graphic_Single</graphicClass>
+			<damageData>
+				<enabled>false</enabled>
+			</damageData>
+		</graphicData>
+		<uiIconPath>Things/Building/Door/DoorSimple_MenuIcon</uiIconPath>
+		<costStuffCount>25</costStuffCount>
+		<designationCategory Inherit="False"></designationCategory>
+	</ThingDef>
+</Defs>

@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.32802.440
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "REPFramework", "REPFramework.csproj", "{867FD963-905C-4848-B5BD-5590209D7AAB}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HEFramework", "HEFramework.csproj", "{867FD963-905C-4848-B5BD-5590209D7AAB}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

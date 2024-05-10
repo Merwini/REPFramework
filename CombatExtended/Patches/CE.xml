@@ -1,0 +1,68 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Patch>
+	<Operation Class="PatchOperationFindMod">
+		<mods>
+			<li>Combat Extended</li>
+		</mods>
+		<match Class="PatchOperationSequence">
+			<operations>
+				<li Class="PatchOperationReplace">
+					<xpath>Defs/ThingDef[@Name="HEF_RangeFinderBase"]/tools</xpath>
+					<value>
+						<tools>
+							<li Class="CombatExtended.ToolCE">
+								<label>nothing</label>
+								<capacities>
+									<li>Poke</li>
+								</capacities>
+								<power>0</power>
+								<cooldownTime>1</cooldownTime>
+								<armorPenetrationBlunt>0</armorPenetrationBlunt>
+							</li>
+						</tools>
+					</value>
+				</li>
+				<li Class="CombatExtended.PatchOperationMakeGunCECompatible">
+					<defName>HEF_RF_100C</defName>
+					<Properties>
+						<verbClass>rep.heframework.Verb_RangeFinder</verbClass>
+						<hasStandardCommand>true</hasStandardCommand>
+						<defaultProjectile>HEF_RF_Blip</defaultProjectile>
+						<warmupTime>1</warmupTime>
+						<range>100</range>
+					</Properties>
+				</li>
+				<li Class="CombatExtended.PatchOperationMakeGunCECompatible">
+					<defName>HEF_RF_75C</defName>
+					<Properties>
+						<verbClass>rep.heframework.Verb_RangeFinder</verbClass>
+						<hasStandardCommand>true</hasStandardCommand>
+						<defaultProjectile>HEF_RF_Blip</defaultProjectile>
+						<warmupTime>1</warmupTime>
+						<range>75</range>
+					</Properties>
+				</li>
+				<li Class="CombatExtended.PatchOperationMakeGunCECompatible">
+					<defName>HEF_RF_50C</defName>
+					<Properties>
+						<verbClass>rep.heframework.Verb_RangeFinder</verbClass>
+						<hasStandardCommand>true</hasStandardCommand>
+						<defaultProjectile>HEF_RF_Blip</defaultProjectile>
+						<warmupTime>1</warmupTime>
+						<range>50</range>
+					</Properties>
+				</li>
+				<li Class="CombatExtended.PatchOperationMakeGunCECompatible">
+					<defName>HEF_RF_25C</defName>
+					<Properties>
+						<verbClass>rep.heframework.Verb_RangeFinder</verbClass>
+						<hasStandardCommand>true</hasStandardCommand>
+						<defaultProjectile>HEF_RF_Blip</defaultProjectile>
+						<warmupTime>1</warmupTime>
+						<range>25</range>
+					</Properties>
+				</li>
+			</operations>
+		</match>
+	</Operation>
+</Patch>

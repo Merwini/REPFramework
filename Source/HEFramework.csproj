@@ -36,10 +36,6 @@
       <HintPath>..\..\..\RimWorldWin64_Data\Managed\Assembly-CSharp.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="CombatExtended">
-      <HintPath>..\..\..\..\..\workshop\content\294100\2890901044\Assemblies\CombatExtended.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -70,6 +66,12 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Comps\PawnCarrier\CompCarrierActivator_Combat.cs" />
+    <Compile Include="Comps\PawnCarrier\CompProperties_CarrierActivator.cs" />
+    <Compile Include="Comps\PawnCarrier\CompCarrierActivator.cs" />
+    <Compile Include="Comps\PawnCarrier\CompProperties_PawnCarrier.cs" />
+    <Compile Include="Building_DoorNoNPC.cs" />
+    <Compile Include="Comps\PawnCarrier\CompPawnCarrier.cs" />
     <Compile Include="SiteDefendersExtension.cs" />
     <Compile Include="TaggedPawnGroupMaker.cs" />
     <Compile Include="HEF_Settings.cs" />
@@ -82,6 +84,7 @@
     <Compile Include="IncidentWorkers\IncidentWorker_RaidHEF.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RaidStrategyWorkers\RaidStrategyWorker_HEF_Paratrooper.cs" />
+    <Compile Include="Verb_RangeFinder.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="IncidentFlow.txt" />

@@ -66,12 +66,15 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Comps\CompProperties_Smokescreen.cs" />
+    <Compile Include="Comps\CompSmokescreen.cs" />
     <Compile Include="Comps\PawnCarrier\CompCarrierActivator_Combat.cs" />
     <Compile Include="Comps\PawnCarrier\CompProperties_CarrierActivator.cs" />
     <Compile Include="Comps\PawnCarrier\CompCarrierActivator.cs" />
     <Compile Include="Comps\PawnCarrier\CompProperties_PawnCarrier.cs" />
     <Compile Include="Building_DoorNoNPC.cs" />
     <Compile Include="Comps\PawnCarrier\CompPawnCarrier.cs" />
+    <Compile Include="DamageWorkers\DamageWorker_SelfDestruct.cs" />
     <Compile Include="SiteDefendersExtension.cs" />
     <Compile Include="TaggedPawnGroupMaker.cs" />
     <Compile Include="HEF_Settings.cs" />

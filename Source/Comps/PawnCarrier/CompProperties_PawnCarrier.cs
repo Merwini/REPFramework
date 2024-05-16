@@ -37,7 +37,9 @@ namespace rep.heframework
 
         public bool randomPawnKinds = true;
 
-        public Type lordJob;
+        public Type lordJobType;
+
+        public bool joinParentLord = false;
 
         public bool sappers = false;
 

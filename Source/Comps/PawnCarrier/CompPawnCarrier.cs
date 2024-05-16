@@ -39,7 +39,6 @@ namespace rep.heframework
         {
             if (!respawningAfterLoad)
             {
-                lord = GetOrMakeLord();
                 GenerateInitialPawns();
                 ticksUntilNextPawnRelease = Props.ticksBetweenPawnRelease;
             }
@@ -193,6 +192,12 @@ namespace rep.heframework
         //returns a bool in case I add more logic later
         private bool ReleasePawn(int index)
         {
+            //moved this here to give the parent a chance to be assigned a lord before checking for one
+            if (lord == null)
+            {
+                lord = GetOrMakeLord();
+            }
+
             Pawn pawn = pawnsInStorage[index];
             GenSpawn.Spawn(pawn, ReturnSpawnCell, parent.Map);
             lord.AddPawn(pawn);
@@ -204,7 +209,7 @@ namespace rep.heframework
                 TryAddPawn();
             }
 
-            return true;
+                return true;
         }
 
         public void SpawnPause()
@@ -215,26 +220,48 @@ namespace rep.heframework
         public void SpawnUnpause()
         {
             canSpawnPawns = true;
+            //TODO immobilize?
         }
 
+        //Will try to return the parent's lord if configured to do so.
+        //If not, will try to return an existing lord for its faction of the configured type
+        //If none are found, will return a new lord of that type
         public Lord GetOrMakeLord()
         {
             Lord lord;
-            ((Pawn)parent).TryGetLord(out lord);
+
+            if (Props.joinParentLord)
+            {
+                ((Pawn)parent).TryGetLord(out lord);
+            }
+            else
+            {
+                lord = null;
+                for (int i = 0; i < parent.Map.lordManager.lords.Count; i++)
+                {
+                    if (parent.Map.lordManager.lords[i].faction == parent.Faction && parent.Map.lordManager.lords[i].GetType() == Props.lordJobType)
+                    {
+                        lord = parent.Map.lordManager.lords[i];
+                        break;
+                    }
+                }
+            }
 
             if (lord == null)
             {
-                object[] lordJobProps = GetLordJobProps(Props.lordJob);
+                object[] lordJobProps = GetLordJobProps(Props.lordJobType);
                 if (lordJobProps == null)
                 {
                     Log.Error("Tried to make unsupported LordJob for CompPawnCarrier on " + parent.Label);
                 }
 
-                lord = LordMaker.MakeNewLord(parent.Faction, Activator.CreateInstance(Props.lordJob, lordJobProps) as LordJob, parent.Map);
+                lord = LordMaker.MakeNewLord(parent.Faction, Activator.CreateInstance(Props.lordJobType, lordJobProps) as LordJob, parent.Map);
             }
 
             return lord;
         }
+
+
 
         //not needed, just call the TryReleasePawn(int) method
         //public bool TryReleaseAllPawns()
@@ -267,6 +294,7 @@ namespace rep.heframework
             else
             {
                 TryReleasePawn(Props.releaseNumberOnDowned);
+                //TODO clean up pawns not released
             }
         }
 
@@ -280,6 +308,7 @@ namespace rep.heframework
             else
             {
                 TryReleasePawn(Props.releaseNumberOnKilled);
+                //TODO clean up pawns not released
             }
         }
 
@@ -342,10 +371,16 @@ namespace rep.heframework
             }
         }
 
+        //TODO integration with Smokescreen to pop smoke when unloading begins
+
         public override void PostExposeData()
         {
             base.PostExposeData();
-            //TODO saving
+            Scribe_Values.Look(ref canSpawnPawns, "canSpawnPawns", false);
+            Scribe_Values.Look(ref ticksUntilNextPawnRelease, "ticksUntilNextPawnRelease", 0);
+            Scribe_Collections.Look(ref pawnsInStorage, "pawnsInStorage", LookMode.Reference);
+
+            Scribe_References.Look(ref lord, "lord");
         }
     }
 }

@@ -46,7 +46,7 @@ namespace rep.heframework
         public override void CompTick()
         {
             base.CompTick();
-            if ((chargesLeft != 0) && (ticksUntilReady < 0))
+            if ((chargesLeft != 0) && (ticksUntilReady > 0))
             {
                 ticksUntilReady--;
             }
@@ -54,7 +54,7 @@ namespace rep.heframework
 
         public bool ShouldPopSmoke(float damage)
         {
-            return (chargesLeft > 0 && ticksUntilReady == 0 && damage > Props.damageThreshold);
+            return (chargesLeft != 0 && ticksUntilReady == 0 && damage > Props.damageThreshold);
         }
 
         public bool PopSmoke(IntVec3 targetSource)

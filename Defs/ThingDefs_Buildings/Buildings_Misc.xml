@@ -1,0 +1,23 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Defs>
+	<ThingDef ParentName="BuildingBase">
+		<defName>HEF_SpawnPoint</defName>
+		<label>spawn point</label>
+		<description>A potential spawn point for enemies when generating a map. If you are seeing this in-game, something has gone wrong, please make a bug report to the HEF team.</description>
+		<drawerType>MapMeshAndRealTime</drawerType>
+		<containedItemsSelectable>true</containedItemsSelectable>
+		<graphicData>
+			<texPath>Things/Building/Misc/EggBox</texPath>
+			<graphicClass>Graphic_Single</graphicClass>
+		</graphicData>
+		<altitudeLayer>Building</altitudeLayer>
+		<statBases>
+			<MaxHitPoints>50</MaxHitPoints>
+			<WorkToBuild>2000</WorkToBuild>
+			<Flammability>1</Flammability>
+			<Mass>3</Mass>
+		</statBases>
+		<designationCategory Inherit="False"></designationCategory>
+		<rotatable>false</rotatable>
+	</ThingDef>
+</Defs>

@@ -14,6 +14,6 @@
 		</graphicData>
 		<uiIconPath>Things/Building/Door/DoorSimple_MenuIcon</uiIconPath>
 		<costStuffCount>25</costStuffCount>
-		<designationCategory Inherit="False"></designationCategory>
+		<designationCategory Inherit="False">Misc</designationCategory>	<!--Todo remove this after making maps-->
 	</ThingDef>
 </Defs>

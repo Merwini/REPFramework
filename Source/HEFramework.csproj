@@ -32,6 +32,10 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="0Harmony">
+      <HintPath>..\..\..\..\..\workshop\content\294100\2009463077\Current\Assemblies\0Harmony.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
     <Reference Include="Assembly-CSharp">
       <HintPath>..\..\..\RimWorldWin64_Data\Managed\Assembly-CSharp.dll</HintPath>
       <Private>False</Private>
@@ -66,8 +70,12 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Comps\CompProperties_Smokescreen.cs" />
-    <Compile Include="Comps\CompSmokescreen.cs" />
+    <Compile Include="Comps\Antiarmor\CompAntiarmor.cs" />
+    <Compile Include="Comps\Antiarmor\CompProperties_Antiarmor.cs" />
+    <Compile Include="Comps\ReplaceMe\CompProperties_ReplaceMe.cs" />
+    <Compile Include="Comps\ReplaceMe\CompReplaceMe.cs" />
+    <Compile Include="Comps\SmokeScreen\CompProperties_Smokescreen.cs" />
+    <Compile Include="Comps\SmokeScreen\CompSmokescreen.cs" />
     <Compile Include="Comps\PawnCarrier\CompCarrierActivator_Combat.cs" />
     <Compile Include="Comps\PawnCarrier\CompProperties_CarrierActivator.cs" />
     <Compile Include="Comps\PawnCarrier\CompCarrierActivator.cs" />
@@ -75,19 +83,22 @@
     <Compile Include="Building_DoorNoNPC.cs" />
     <Compile Include="Comps\PawnCarrier\CompPawnCarrier.cs" />
     <Compile Include="DamageWorkers\DamageWorker_SelfDestruct.cs" />
-    <Compile Include="SiteDefendersExtension.cs" />
+    <Compile Include="DefModExtensions\SiteDefendersExtension.cs" />
+    <Compile Include="HarmonyPatches.cs" />
+    <Compile Include="HefDefOf.cs" />
+    <Compile Include="JobGivers\JobGiver_AIAbilityAntiarmor.cs" />
     <Compile Include="TaggedPawnGroupMaker.cs" />
     <Compile Include="HEF_Settings.cs" />
-    <Compile Include="GenStep_TaggedPawnGroup.cs" />
-    <Compile Include="PawnGroupMakerExtension.cs" />
+    <Compile Include="GenSteps\GenStep_TaggedPawnGroup.cs" />
+    <Compile Include="DefModExtensions\PawnGroupMakerExtension.cs" />
     <Compile Include="SitePartWorkers\HEF_SitePartWorker_Expansion.cs" />
     <Compile Include="HEF_Utils.cs" />
     <Compile Include="DebugActions.cs" />
     <Compile Include="IncidentWorkers\IncidentWorker_ExpansionHEF.cs" />
-    <Compile Include="IncidentWorkers\IncidentWorker_RaidHEF.cs" />
+    <None Include="IncidentWorkers\IncidentWorker_RaidHEF" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RaidStrategyWorkers\RaidStrategyWorker_HEF_Paratrooper.cs" />
-    <Compile Include="Verb_RangeFinder.cs" />
+    <Compile Include="Verbs\Verb_RangeFinder.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="IncidentFlow.txt" />
@@ -95,6 +106,8 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Assemblies\" />
+    <Folder Include="Comps\MapComponents\" />
+    <Folder Include="DroneTank\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

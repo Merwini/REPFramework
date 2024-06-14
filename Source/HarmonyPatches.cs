@@ -69,6 +69,8 @@ namespace rep.heframework
                     List<CodeInstruction> newCodes = new List<CodeInstruction>()
                     {
                         new CodeInstruction(OpCodes.Ldarg_1),
+                        new CodeInstruction(OpCodes.Ldarg_2),
+                        new CodeInstruction(OpCodes.Ldarg_3),
                         new CodeInstruction(OpCodes.Call, methodHelper),
                         new CodeInstruction(OpCodes.Brfalse_S, continueLabel),
                         new CodeInstruction(OpCodes.Ldc_I4_1),
@@ -92,7 +94,7 @@ namespace rep.heframework
             }
         }
 
-        public static bool IncidentWorker_Raid_Helper(IncidentParms parms)
+        public static bool IncidentWorker_Raid_Helper(IncidentParms parms, out List<Pawn> pawns, bool debugTest = false)
         {
             //TODO
             Log.Message("divert successful");
@@ -100,11 +102,13 @@ namespace rep.heframework
             if (ext == null)
             {
                 Log.Message("Faction is not hef");
+                pawns = null;
                 return false;
             }
             else
             {
                 Log.Message("Faction is hef");
+                HEF_Utils.TryGenerateExtendedRaidInfo(parms, out pawns, debugTest);
                 return true;
             }
         }

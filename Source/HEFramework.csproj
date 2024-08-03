@@ -84,6 +84,8 @@
     <Compile Include="Comps\PawnCarrier\CompPawnCarrier.cs" />
     <Compile Include="DamageWorkers\DamageWorker_SelfDestruct.cs" />
     <Compile Include="DefModExtensions\SiteDefendersExtension.cs" />
+    <Compile Include="GenSteps\GenStep_ExclusionArea.cs" />
+    <Compile Include="GenSteps\GenStep_PlantsExc.cs" />
     <Compile Include="HarmonyPatches.cs" />
     <Compile Include="HefDefOf.cs" />
     <Compile Include="JobGivers\JobGiver_AIAbilityAntiarmor.cs" />

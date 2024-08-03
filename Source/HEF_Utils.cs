@@ -188,8 +188,16 @@ namespace rep.heframework
         public static bool TryResolveTaggedPawnGroup(IncidentParms parms, List<SitePartDef> siteDefs, out TaggedPawnGroupMaker groupMaker)
         {
             List<TaggedPawnGroupMaker> possibleGroupMakers = new List<TaggedPawnGroupMaker>();
+            int highestTier = 0;
 
             List<string> hefTags = HEF_Utils.FindStringsForDefs(siteDefs);
+            if (Prefs.DevMode)
+            {
+                foreach (string str in hefTags)
+                {
+                    Log.Message($"found site tag: {str}");
+                }
+            }
             FactionDef factionDef = parms.faction.def;
             PawnGroupMakerExtension extension = factionDef.GetModExtension<PawnGroupMakerExtension>();
             foreach (TaggedPawnGroupMaker tpgm in extension.taggedPawnGroupMakers)
@@ -198,30 +206,36 @@ namespace rep.heframework
                 {
                     if (Prefs.DevMode)
                     {
-                        if (tpgm.groupName != null)
-                        {
-                            Log.Message($"Adding {tpgm.groupName} as pgm option");
-                        }
-                        else
-                        {
-                            Log.Message($"Adding unnamed pgm as pgm option");
-                        }
+                        Log.Message($"Adding {(tpgm.groupName ?? "unnamed")} as pgm option");
                     }
                     possibleGroupMakers.Add(tpgm);
+                    if (tpgm.groupTier > highestTier)
+                    {
+                        highestTier = tpgm.groupTier;
+                    }
+
+                }
+            }
+
+            if (extension.alwaysUseHighestTier)
+            {
+                for (int i = possibleGroupMakers.Count - 1; i >= 0; i--)
+                {
+                    if (possibleGroupMakers[i].groupTier < highestTier)
+                    {
+                        if (Prefs.DevMode)
+                        {
+                            Log.Message($"Removing {(possibleGroupMakers[i].groupName ?? "unnamed")} as pgm option due to low tier");
+                        }
+                        possibleGroupMakers.RemoveAt(i);
+                    }
                 }
             }
 
             possibleGroupMakers.TryRandomElementByWeight((TaggedPawnGroupMaker gm) => gm.commonality, out groupMaker);
             if (Prefs.DevMode)
             {
-                if (groupMaker.groupName != null)
-                {
-                    Log.Message($"Selected {groupMaker.groupName} as pgm");
-                }
-                else
-                {
-                    Log.Message($"Selected unnamed pgm as pgm");
-                }
+                Log.Message($"Selected {(groupMaker.groupName ?? "unnamed pgm")} as pgm");
             }
 
             return groupMaker != null;

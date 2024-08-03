@@ -15,6 +15,8 @@ namespace rep.heframework
 
         List<string> upgradesFrom;
 
+        public int groupTier;
+
         //Intended use is that if the PawnGroupMaker has multiple tags, ALL tags must be present in Expansion sites
         public List<string> requiredSiteTags = new List<string>();
 

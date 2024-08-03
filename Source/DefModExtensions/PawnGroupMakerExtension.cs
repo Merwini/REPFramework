@@ -12,6 +12,8 @@ namespace rep.heframework
     public class PawnGroupMakerExtension : DefModExtension
     {
         #region Fields
+        public bool alwaysUseHighestTier = false;
+
         public List<TaggedPawnGroupMaker> taggedPawnGroupMakers;
 
 

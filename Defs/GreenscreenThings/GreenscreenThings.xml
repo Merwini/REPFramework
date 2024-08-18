@@ -1,0 +1,189 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Defs>
+    <ThingDef ParentName="BuildingBase">
+        <defName>HEF_GreenWall</defName>
+        <label>greenscreen wall</label>
+        <description>A greenscreen wall that should be converted to a stone wall on map generation. If seeing this in-game, please post a bug report.</description>
+        <thingClass>Building</thingClass>
+        <category>Building</category>
+        <graphicData>
+            <texPath>HEFramework/Green_Wall_Atlas</texPath>
+            <graphicClass>Graphic_Single</graphicClass>
+            <linkType>CornerFiller</linkType>
+            <linkFlags>
+                <li>Wall</li>
+                <li>Rock</li>
+            </linkFlags>
+        </graphicData>
+        <uiIconPath>HEFramework/Green_Wall_Atlas</uiIconPath>
+        <statBases>
+            <MaxHitPoints>300</MaxHitPoints>
+            <WorkToBuild>135</WorkToBuild>
+            <Flammability>1.0</Flammability>
+        </statBases>
+        <altitudeLayer>Building</altitudeLayer>
+        <passability>Impassable</passability>
+        <blockWind>true</blockWind>
+        <castEdgeShadows>true</castEdgeShadows>
+        <fillPercent>1</fillPercent>
+        <coversFloor>true</coversFloor>
+        <placingDraggableDimensions>1</placingDraggableDimensions>
+        <tickerType>Never</tickerType>
+        <rotatable>false</rotatable>
+        <selectable>true</selectable>
+        <neverMultiSelect>true</neverMultiSelect>
+        <useStuffTerrainAffordance>true</useStuffTerrainAffordance>
+        <terrainAffordanceNeeded>Heavy</terrainAffordanceNeeded>
+        <!-- Best affordance needed for stone -->
+        <holdsRoof>true</holdsRoof>
+        <designationCategory>Structure</designationCategory>
+        <uiOrder>2000</uiOrder>
+        <staticSunShadowHeight>1.0</staticSunShadowHeight>
+        <blockLight>true</blockLight>
+        <canOverlapZones>false</canOverlapZones>
+        <fertility>0</fertility>
+        <stuffCategories>
+            <li>Stony</li>
+        </stuffCategories>
+        <building>
+            <isInert>true</isInert>
+            <isPlaceOverableWall>true</isPlaceOverableWall>
+            <ai_chillDestination>false</ai_chillDestination>
+            <supportsWallAttachments>true</supportsWallAttachments>
+            <blueprintGraphicData>
+                <texPath>Things/Building/Linked/Wall_Blueprint_Atlas</texPath>
+            </blueprintGraphicData>
+            <relatedBuildCommands>
+                <li>Door</li>
+                <li>Autodoor</li>
+                <li>HEF_DoorNoNPC</li>
+            </relatedBuildCommands>
+        </building>
+        <designationHotKey>Misc3</designationHotKey>
+    </ThingDef>
+
+    <ThingDef ParentName="BuildingBase">
+        <defName>HEF_GreenRock</defName>
+        <label>greenscreen rock</label>
+        <description>A greenscreen rock that should be converted to natural rock on map generation. If seeing this in-game, please post a bug report.</description>
+        <thingClass>Building</thingClass>
+        <category>Building</category>
+        <graphicData>
+            <texPath>HEFramework/Green_Rock_Atlas</texPath>
+            <graphicClass>Graphic_Single</graphicClass>
+            <linkType>CornerFiller</linkType>
+            <linkFlags>
+                <li>Wall</li>
+                <li>Rock</li>
+            </linkFlags>
+        </graphicData>
+        <uiIconPath>HEFramework/Green_Rock_Atlas</uiIconPath>
+        <statBases>
+            <MaxHitPoints>300</MaxHitPoints>
+            <WorkToBuild>135</WorkToBuild>
+            <Flammability>1.0</Flammability>
+        </statBases>
+        <altitudeLayer>Building</altitudeLayer>
+        <passability>Impassable</passability>
+        <blockWind>true</blockWind>
+        <castEdgeShadows>true</castEdgeShadows>
+        <fillPercent>1</fillPercent>
+        <coversFloor>true</coversFloor>
+        <placingDraggableDimensions>1</placingDraggableDimensions>
+        <tickerType>Never</tickerType>
+        <rotatable>false</rotatable>
+        <selectable>true</selectable>
+        <neverMultiSelect>true</neverMultiSelect>
+        <useStuffTerrainAffordance>true</useStuffTerrainAffordance>
+        <terrainAffordanceNeeded>Heavy</terrainAffordanceNeeded>
+        <!-- Best affordance needed for stone -->
+        <holdsRoof>true</holdsRoof>
+        <designationCategory>Structure</designationCategory>
+        <uiOrder>2000</uiOrder>
+        <staticSunShadowHeight>1.0</staticSunShadowHeight>
+        <blockLight>true</blockLight>
+        <canOverlapZones>false</canOverlapZones>
+        <fertility>0</fertility>
+        <stuffCategories>
+            <li>Stony</li>
+        </stuffCategories>
+        <building>
+            <isInert>true</isInert>
+            <isPlaceOverableWall>true</isPlaceOverableWall>
+            <ai_chillDestination>false</ai_chillDestination>
+            <supportsWallAttachments>true</supportsWallAttachments>
+            <blueprintGraphicData>
+                <texPath>Things/Building/Linked/Wall_Blueprint_Atlas</texPath>
+            </blueprintGraphicData>
+            <relatedBuildCommands>
+                <li>Door</li>
+                <li>Autodoor</li>
+                <li>HEF_DoorNoNPC</li>
+            </relatedBuildCommands>
+        </building>
+        <designationHotKey>Misc3</designationHotKey>
+    </ThingDef>
+
+    <TerrainDef Abstract="True" Name="HEF_GreenTerrainBase">
+        <designationCategory>Floors</designationCategory>
+        <uiOrder>3000</uiOrder>
+        <layerable>true</layerable>
+        <description>Greenscreen ground that should be converted to another ground type during map generation. If seeing this in-game, please post a bug report.</description>
+        <affordances>
+            <li>Light</li>
+            <li>Medium</li>
+            <li>Heavy</li>
+            <li>GrowSoil</li>
+            <li>Diggable</li>
+        </affordances>
+        <statBases>
+            <Beauty>-3</Beauty>
+            <BeautyOutdoors>0</BeautyOutdoors>
+            <Cleanliness>-1</Cleanliness>
+        </statBases>
+    </TerrainDef>
+
+    <TerrainDef ParentName="HEF_GreenTerrainBase">
+        <defName>HEF_GreenSoil</defName>
+        <label>greenscreen ground</label>
+        <texturePath>HEFramework/GreenSoil</texturePath>
+        <edgeType>FadeRough</edgeType>
+        <categoryType>Soil</categoryType>
+        <renderPrecedence>340</renderPrecedence>
+        <pathCost>2</pathCost>
+        <fertility>1.0</fertility>
+    </TerrainDef>
+
+    <TerrainDef ParentName="HEF_GreenTerrainBase">
+        <defName>HEF_GreenRockFloor</defName>
+        <label>greenscreen rock ground</label>
+        <texturePath>HEFramework/RedRoughStone</texturePath>
+        <edgeType>FadeRough</edgeType>
+        <categoryType>Soil</categoryType>
+        <renderPrecedence>340</renderPrecedence>
+        <pathCost>2</pathCost>
+        <fertility>1.0</fertility>
+    </TerrainDef>
+
+    <TerrainDef ParentName="HEF_GreenTerrainBase">
+        <defName>HEF_GreenFlagstone</defName>
+        <label>greenscreen cobblestone</label>
+        <texturePath>HEFramework/GreenFlagstone</texturePath>
+        <edgeType>Hard</edgeType>
+        <categoryType>Soil</categoryType>
+        <renderPrecedence>340</renderPrecedence>
+        <pathCost>2</pathCost>
+        <fertility>1.0</fertility>
+    </TerrainDef>
+
+    <TerrainDef ParentName="HEF_GreenTerrainBase">
+        <defName>HEF_GreenBrick</defName>
+        <label>greenscreen brick</label>
+        <texturePath>HEFramework/GreenTileStone</texturePath>
+        <edgeType>Hard</edgeType>
+        <categoryType>Soil</categoryType>
+        <renderPrecedence>340</renderPrecedence>
+        <pathCost>2</pathCost>
+        <fertility>1.0</fertility>
+    </TerrainDef>
+</Defs>

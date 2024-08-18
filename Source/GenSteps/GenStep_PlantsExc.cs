@@ -3,16 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using RimWorld;
 using Verse;
+using RimWorld;
 
 namespace rep.heframework
 {
-    class Verb_RangeFinder : Verb
+    class GenStep_PlantsExc
     {
-        public override bool TryCastShot()
-        {
-            return true;
-        }
     }
 }

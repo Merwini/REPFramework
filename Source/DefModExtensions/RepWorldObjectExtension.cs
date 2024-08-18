@@ -10,10 +10,12 @@ using Verse;
 
 namespace rep.heframework
 {
-    public class SiteDefendersExtension : DefModExtension
+    public class RepWorldObjectExtension : DefModExtension
     {
         #region Fields
         public List<FactionGroupLink> factionsToPawnGroups;
+
+        public MapGeneratorDef mapGenerator;
         #endregion
     }
 
@@ -23,5 +25,6 @@ namespace rep.heframework
         public string faction;
 
         public List<string> pawnGroups;
+
     }
 }

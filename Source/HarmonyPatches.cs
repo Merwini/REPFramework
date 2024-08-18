@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using HarmonyLib;
 using RimWorld;
+using RimWorld.Planet;
 using Verse;
 using System.Reflection;
 using System.Reflection.Emit;
@@ -63,7 +64,7 @@ namespace rep.heframework
                     }
                 }
 
-                if (jumpIndex >= 0 && continueIndex >=0)
+                if (jumpIndex >= 0 && continueIndex >= 0)
                 {
                     //make new instructions
                     List<CodeInstruction> newCodes = new List<CodeInstruction>()
@@ -110,6 +111,44 @@ namespace rep.heframework
                 Log.Message("Faction is hef");
                 HEF_Utils.TryGenerateExtendedRaidInfo(parms, out pawns, debugTest);
                 return true;
+            }
+        }
+
+        [HarmonyPatch(typeof(MapParent), "MapGeneratorDef", MethodType.Getter)]
+        public static class MapParent_MapGeneratorDef_Patch
+        {
+            static void Postfix(MapParent __instance, ref MapGeneratorDef __result)
+            {
+                Log.Warning("MapParent postfix running");
+                if (__instance is Site site)
+                {
+                    RepWorldObjectExtension extension = (RepWorldObjectExtension)site.MainSitePartDef.modExtensions?.FirstOrDefault(x => x is RepWorldObjectExtension);
+
+                    Log.Warning($"extension null: {(extension == null).ToString()}");
+                    Log.Warning($"mapGenerator null: {(extension.mapGenerator == null).ToString()}");
+                    Log.Warning($"MapParent postfix running");
+                    if (extension != null && extension.mapGenerator != null)
+                    {
+                        Log.Warning("Changing mapGenerator");
+                        __result = extension.mapGenerator;
+                    }
+                }
+                
+            }
+        }
+
+        [HarmonyPatch(typeof(Settlement), "MapGeneratorDef", MethodType.Getter)]
+        public static class Settlement_MapGeneratorDef_Patch
+        {
+            static void Postfix(Settlement __instance, ref MapGeneratorDef __result)
+            {
+                Log.Warning("Settlement postfix running");
+                RepWorldObjectExtension extension = (RepWorldObjectExtension)__instance.def.modExtensions?.FirstOrDefault(x => x is RepWorldObjectExtension);
+                if (extension != null && extension.mapGenerator != null)
+                {
+                    Log.Warning("Changing mapGenerator");
+                    __result = extension.mapGenerator;
+                }
             }
         }
     }

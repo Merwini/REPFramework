@@ -44,17 +44,17 @@ namespace rep.heframework
 		{
 			if (parms.groupKind == null)
 			{
-				Log.Error("Tried to generate pawn kinds with null pawn group kind def. parms=" + parms);
+				Log.Error("Tried to generate pawn kinds with null pawn group kind def. parms: \n" + parms);
 				yield break;
 			}
 			if (parms.faction == null)
 			{
-				Log.Error("Tried to generate pawn kinds with null faction. parms=" + parms);
+				Log.Error("Tried to generate pawn kinds with null faction. parms: \n" + parms);
 				yield break;
 			}
 			if (!TryGetPawnGroupMakerForExpansion(parms, out var pawnGroupMaker, site))
 			{
-				Log.Error(string.Concat("Faction ", parms.faction, " of def ", parms.faction.def, " has no usable PawnGroupMakers for parms ", parms));
+				Log.Warning(string.Concat($"Faction {parms.faction} of def {parms.faction.def} has no usable PawnGroupMakers for parms: \n", parms));
 				yield break;
 			}
 			foreach (PawnKindDef item in pawnGroupMaker.GeneratePawnKindsExample(parms))
@@ -74,25 +74,27 @@ namespace rep.heframework
             }
 			else
             {
-				Log.Error("Using HEF_SitePartWorker_Expansion on site for non-HEF faction " + parms.faction.Name);
+				Log.Error($"Using HEF_SitePartWorker_Expansion on site for non-HEF faction {parms.faction.Name}. Destroying site.");
 				pawnGroupMaker = null;
+                site.Destroy();
 				return false;
             }
 
 			//Check that the site is HEF
 			SitePartDef mainPart = site.MainSitePartDef;
-			SiteDefendersExtension siteExtension = (SiteDefendersExtension)mainPart.modExtensions?.FirstOrDefault(x => x is SiteDefendersExtension);
+			RepWorldObjectExtension siteExtension = (RepWorldObjectExtension)mainPart.modExtensions?.FirstOrDefault(x => x is RepWorldObjectExtension);
 			if (siteExtension == null)
 			{
-				Log.Error("Using HEF_SiteWorker_Expansion on non-HEF site " + site.Label);
+				Log.Error($"Using HEF_SiteWorker_Expansion on non-HEF site {site.Label}. Destroying site.");
 				pawnGroupMaker = null;
+				site.Destroy();
 				return false;
             }
 
 			//Check that the site's extension is properly configured
 			if (siteExtension.factionsToPawnGroups.NullOrEmpty())
             {
-				Log.Error("Site " + site.Label + " has misconfigured SiteDefendersExtension. No factionsToPawnGroups.");
+				Log.Error($"Site {site.Label} has misconfigured SiteDefendersExtension. No factionsToPawnGroups.");
 				pawnGroupMaker = null;
 				return false;
             }

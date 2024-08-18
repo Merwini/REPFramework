@@ -11,7 +11,7 @@ namespace rep.heframework
 {
     public class RaidStrategyWorker_HEF_Paratrooper : RaidStrategyWorker
     {
-        protected override LordJob MakeLordJob(IncidentParms parms, Map map, List<Pawn> pawns, int raidSeed)
+        public override LordJob MakeLordJob(IncidentParms parms, Map map, List<Pawn> pawns, int raidSeed)
         {
             throw new NotImplementedException();
         }

@@ -19,12 +19,12 @@ namespace rep.heframework
         internal int tile;
         internal Site site;
 
-        protected override bool CanFireNowSub(IncidentParms parms)
+        public override bool CanFireNowSub(IncidentParms parms)
         {
             return (float)GenDate.DaysPassedSinceSettle >= HEF_Settings.earliestExpansionDays;
         }
 
-        protected override bool TryExecuteWorker(IncidentParms parms)
+        public override bool TryExecuteWorker(IncidentParms parms)
         {
             if (!TryResolveExpansionFaction(parms))
                 return false;
@@ -40,6 +40,9 @@ namespace rep.heframework
 
             if (!TryPlaceSite())
                 return false;
+
+            //if (!TrySetMapGenerator())
+            //    return false;
 
             SendStandardLetter(parms, site, parms.faction.Name, site.Label, ""); //TODO set up letter and translate //TODO find a way to sneak explanations into site info
 
@@ -99,6 +102,16 @@ namespace rep.heframework
             Find.WorldObjects.Add(site);
             return true;
         }
+
+        //internal bool TrySetMapGenerator()
+        //{
+        //    RepWorldObjectExtension extension = (RepWorldObjectExtension)sitePartDef.modExtensions?.FirstOrDefault(x => x is RepWorldObjectExtension);
+        //    if (extension != null && extension.mapGenerator != null)
+        //    {
+        //        MapGeneratorDef siteGen = site.MapGeneratorDef;
+        //    }fghdfgh
+        //    return true;
+        //}
     }
 
 }

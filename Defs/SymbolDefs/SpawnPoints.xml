@@ -1,0 +1,22 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Defs>
+	<KCSG.SymbolDef>
+		<defName>HEF_SpawnPoint</defName>
+		<thing>HEF_SpawnPoint</thing>
+	</KCSG.SymbolDef>
+
+	<KCSG.SymbolDef>
+		<defName>HEF_SpawnPointRandom</defName>
+		<thing>HEF_SpawnPointRandom</thing>
+	</KCSG.SymbolDef>
+
+	<KCSG.SymbolDef>
+		<defName>HEF_SpawnPointSingle</defName>
+		<thing>HEF_SpawnPointSingle</thing>
+	</KCSG.SymbolDef>
+
+	<KCSG.SymbolDef>
+		<defName>HEF_SpawnPointSingleRandom</defName>
+		<thing>HEF_SpawnPointSingleRandom</thing>
+	</KCSG.SymbolDef>
+</Defs>

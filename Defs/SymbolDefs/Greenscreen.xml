@@ -1,0 +1,14 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Defs>
+    <KCSG.SymbolDef>
+        <defName>HEF_GreenRock_BlocksGranite</defName>
+        <thing>HEF_GreenRock</thing>
+        <stuff>BlocksGranite</stuff>
+    </KCSG.SymbolDef>
+
+    <KCSG.SymbolDef>
+        <defName>HEF_GreenWall_BlocksGranite</defName>
+        <thing>HEF_GreenWall</thing>
+        <stuff>BlocksGranite</stuff>
+    </KCSG.SymbolDef>
+</Defs>

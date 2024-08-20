@@ -16,6 +16,23 @@
         </genSteps>
     </MapGeneratorDef>
 
+    <MapGeneratorDef>
+        <defName>HEFMapGeneratorSettlement</defName>
+        <genSteps>
+            <li>ElevationFertility</li>
+            <li>Terrain</li>
+            <li>Roads</li>
+            <li>FindPlayerStartSpot</li>
+            <li>ScenParts</li>
+            <li>Plants</li>
+            <li>Snow</li>
+            <li>Animals</li>
+            <li>Fog</li>
+            <li>KCSG_Settlement</li>
+            <li>HEF_Degreenify</li>
+        </genSteps>
+    </MapGeneratorDef>
+
     <GenStepDef>
         <defName>HEF_Degreenify</defName>
         <order>452</order>

@@ -143,7 +143,7 @@ namespace rep.heframework
             static void Postfix(Settlement __instance, ref MapGeneratorDef __result)
             {
                 Log.Warning("Settlement postfix running");
-                RepWorldObjectExtension extension = (RepWorldObjectExtension)__instance.def.modExtensions?.FirstOrDefault(x => x is RepWorldObjectExtension);
+                RepWorldObjectExtension extension = (RepWorldObjectExtension)__instance.Faction?.def.modExtensions?.FirstOrDefault(x => x is RepWorldObjectExtension);
                 if (extension != null && extension.mapGenerator != null)
                 {
                     Log.Warning("Changing mapGenerator");

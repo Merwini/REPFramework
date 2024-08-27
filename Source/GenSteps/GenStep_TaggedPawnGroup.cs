@@ -20,38 +20,35 @@ namespace rep.heframework
 
         public string pawnGroupMakerName;
 
-        private List<IntVec3> spawnPoints = new List<IntVec3>();
+        bool usingFallbackSpawnPoint = false;
+        //private int nextSpawnPointIndex = 0;
 
-        private int nextSpawnPointIndex = 0;
+        Map map;
 
-        public int NextSpawnPointIndex
-        {
-            get
-            {
-                int num = nextSpawnPointIndex;
-                if (nextSpawnPointIndex == spawnPoints.Count - 1)
-                {
-                    nextSpawnPointIndex = 0;
-                }
-                else
-                {
-                    nextSpawnPointIndex++;
-                }
+        //public int NextSpawnPointIndex
+        //{
+        //    get
+        //    {
+        //        int num = nextSpawnPointIndex;
+        //        if (nextSpawnPointIndex >= spawnPoints.Count - 1)
+        //        {
+        //            nextSpawnPointIndex = 0;
+        //        }
+        //        else
+        //        {
+        //            nextSpawnPointIndex++;
+        //        }
 
-                return num;
-            }
-        }
+        //        return num;
+        //    }
+        //}
         public override void Generate(Map map, GenStepParams parms)
         {
             Faction faction = parms.sitePart.site.Faction;
             FactionDef factionDef = faction.def;
+            this.map = map;
             PawnGroupMakerExtension extension = factionDef.GetModExtension<PawnGroupMakerExtension>();
-            spawnPoints = FindSpawnPoints(map);
-
-            if (spawnPoints.Count == 0)
-            {
-                spawnPoints.Add(map.Center);
-            }
+            List<SpawnCounter> spawnPoints = FindSpawnPoints(map);
 
             if (extension == null)
             {
@@ -59,29 +56,118 @@ namespace rep.heframework
                 return;
             }
 
+            //TODO see if need a different lord for each spawn point
             Lord lord = LordMaker.MakeNewLord(faction, new LordJob_DefendBase(faction, map.Center), map);
-            IEnumerable<Pawn> pawns = GeneratePawnsFromTaggedGroup(map, extension, pawnGroupMakerName, parms);
+            List<Pawn> pawns = GeneratePawnsFromTaggedGroup(map, extension, pawnGroupMakerName, parms);
 
             if (pawns == null)
             {
                 return; //will have already errored in the GeneratePawnsFromTaggedGroup method. Not sure if LordJob with no pawns will cause errors.
             }
 
-            foreach (Pawn pawn in pawns)
-            {
-                IntVec3 cell;
-                if (!RCellFinder.TryFindRandomCellNearWith(spawnPoints[NextSpawnPointIndex], c => c.Walkable(map), map, out cell, 1, 4))
-                {
-                    pawn.Discard();
-                    Log.Error("Unable to find cell to spawn pawn for site " + parms.sitePart.site.Label + ". Pawn discarded.");
-                    break;
-                }
-                GenSpawn.Spawn(pawn, cell, map);
-                lord.AddPawn(pawn);
-            }
+            SpawnPawnsAtPoints(pawns, spawnPoints, lord);
         }
 
-        internal IEnumerable<Pawn> GeneratePawnsFromTaggedGroup(Map map, PawnGroupMakerExtension extension, string pawnGroupMakerName, GenStepParams parms)
+        //TODO maybe the spawn points should be picked randomly instead of round-robin?
+        //TODO maybe the pawns list should be divided into a List<List<Pawn>> and then all spawned at the end?
+        void SpawnPawnsAtPoints(List<Pawn> pawns, List<SpawnCounter> spawnLocations, Lord lord)
+        {
+            Log.Warning($"pawns {pawns.Count}");
+            Log.Warning($"spawns {spawnLocations.Count}");
+            int locationIndex = 0;
+            bool stopSpawning = false;
+
+            foreach (Pawn pawn in pawns)
+            {
+                if (stopSpawning)
+                {
+                    break;
+                }
+
+                bool tryingToSpawn = true;
+                while (tryingToSpawn)
+                {
+                    //loop through spawn locations until a valid one is found, add the default if all locations are exhausted
+                    bool lookingForPoint = true;
+                    while (lookingForPoint)
+                    {
+                        //make sure we haven't run out of valid spawn points
+                        if (spawnLocations.Count == 0)
+                        {
+                            AddDefaultSpawnPoint(spawnLocations);
+                        }
+
+                        //reset the index if it is larger than the collection
+                        if (locationIndex >= spawnLocations.Count)
+                        {
+                            locationIndex = 0;
+                        }
+
+                        //check if the current index has spawns left, if not, remove it and continue
+                        if (spawnLocations[locationIndex].possibleSpawns == 0)
+                        {
+                            spawnLocations.RemoveAt(locationIndex);
+                            continue;
+                        }
+
+                        //if code has passed the prior checks, can now use the location and break the loop
+                        lookingForPoint = false;
+
+                        continue;
+                    }
+
+                    if (!TrySpawnPawnAt(pawn, spawnLocations[locationIndex].point, lord))
+                    {
+                        //if no usable cell is available at that location, remove that spawn point and go back to looking for one. If the fallback was already being used, throw an error and discontinue spawning
+                        if (usingFallbackSpawnPoint)
+                        {
+                            Log.Error("Unable to find cell to spawn pawn for new site, and was already using fallback. Giving up on spawning more pawns.");
+                            stopSpawning = true;
+                            break;
+                        }
+                        else
+                        {
+                            spawnLocations.RemoveAt(locationIndex);
+                            continue;
+                        }
+                    }
+                    //if location was used, increment the index now and break the outer loop
+                    else
+                    {
+                        locationIndex++;
+                        tryingToSpawn = false;
+                    }
+                }
+
+
+            }
+
+            //return true;
+        }
+
+        bool TrySpawnPawnAt(Pawn pawn, IntVec3 location, Lord lord)
+        {
+            IntVec3 cell;
+            if (!RCellFinder.TryFindRandomCellNearWith(location, c => c.Walkable(map), map, out cell, 1, 4))
+            {
+                pawn.Discard();
+                Log.Warning($"Unable to find cell to spawn pawn for new site at location {location.ToString()}, removing this as a spawn point");
+                return false;
+            }
+            GenSpawn.Spawn(pawn, cell, map);
+            lord.AddPawn(pawn);
+
+            return true;
+        }
+
+        void AddDefaultSpawnPoint(List<SpawnCounter> spawnLocations)
+        {
+            Log.Warning("Map has run out of valid spawn locations. Adding a fallback spawn point at the center.");
+            spawnLocations.Add(new SpawnCounter { point = map.Center });
+            usingFallbackSpawnPoint = true;
+        }
+
+        internal List<Pawn> GeneratePawnsFromTaggedGroup(Map map, PawnGroupMakerExtension extension, string pawnGroupMakerName, GenStepParams parms)
         {
 
             float threatPoints = ClampToRange(parms.sitePart.parms.threatPoints, threatPointsRange) + threatPointAdjustmentFlat;
@@ -113,8 +199,10 @@ namespace rep.heframework
                 tile = map.Tile,
                 faction = parms.sitePart.site.Faction,
                 points = threatPoints
-            });
+            }).ToList();
         }
+
+        
 
         public float ClampToRange(float value, FloatRange range)
         {
@@ -132,17 +220,21 @@ namespace rep.heframework
             }
         }
 
-        public List<IntVec3> FindSpawnPoints(Map map)
+        public List<SpawnCounter> FindSpawnPoints(Map map)
         {
-            List<IntVec3> spawnPoints = new List<IntVec3>();
+            List<SpawnCounter> spawnPoints = new List<SpawnCounter>();
             List<Thing> spawnerPointThings = new List<Thing>();
 
             foreach (Thing thing in map.listerThings.AllThings)
             {
-                if (thing.def == HefDefOf.HEF_SpawnPoint)
+                if (thing is MapToolBuilding spawner && spawner.isSpawnPoint)
                 {
-                    spawnPoints.Add(thing.Position);
                     spawnerPointThings.Add(thing);
+                    if (Rand.Value <= spawner.chance)
+                    {
+                        SpawnCounter spawnCounter = new SpawnCounter() { point = spawner.Position, possibleSpawns = spawner.count };
+                        spawnPoints.Add(spawnCounter);
+                    }
                 }
             }
 
@@ -154,7 +246,15 @@ namespace rep.heframework
                 }
             }
 
+            spawnPoints.Shuffle();
             return spawnPoints;
         }
+    }
+
+    public class SpawnCounter
+    {
+        public IntVec3 point = new IntVec3(0,0,0);
+
+        public int possibleSpawns = -1;
     }
 }

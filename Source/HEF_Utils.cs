@@ -75,6 +75,7 @@ namespace rep.heframework
 
             if (!usedDefs.NullOrEmpty())
             {
+                //TODO add check for tag marking site as non-unique, skip removing from eligible list if so
                 foreach (SitePartDef def in usedDefs)
                 {
                     eligibleDefs.Remove(def);

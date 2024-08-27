@@ -1,83 +1,57 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Defs>
-	<ThingDef ParentName="BuildingBase">
-		<defName>HEF_SpawnPoint</defName>
-		<label>spawn point</label>
-		<description>A guaranteed spawn point for enemies when generating a map. If you are seeing this in-game, something has gone wrong, please make a bug report to the HEF team.</description>
-		<drawerType>MapMeshAndRealTime</drawerType>
-		<graphicData>
-			<texPath>HEFramework/SpawnPoint</texPath>
-			<graphicClass>Graphic_Single</graphicClass>
-		</graphicData>
-		<altitudeLayer>Building</altitudeLayer>
-		<statBases>
-			<MaxHitPoints>50</MaxHitPoints>
-			<WorkToBuild>2000</WorkToBuild>
-			<Flammability>1</Flammability>
-			<Mass>3</Mass>
-		</statBases>
-		<designationCategory Inherit="False">Misc</designationCategory> <!--Todo remove this after making maps-->
-		<rotatable>false</rotatable>
-	</ThingDef>
+    <rep.heframework.MapToolDef ParentName="BuildingBase" Abstract="True" Name="HEF_SpawnPointBase">
+        <thingClass>rep.heframework.MapToolBuilding</thingClass>
+        <description>A guaranteed spawn point for enemies when generating a map. If you are seeing this in-game, something has gone wrong, please make a bug report to the HEF team.</description>
+        <altitudeLayer>Building</altitudeLayer>
+        <drawerType>MapMeshAndRealTime</drawerType>
+        <statBases>
+            <MaxHitPoints>9999999</MaxHitPoints>
+            <WorkToBuild>0</WorkToBuild>
+        </statBases>
+        <!--Todo remove this after making maps-->
+        <designationCategory Inherit="False">Misc</designationCategory>
+        <rotatable>false</rotatable>
+        <isSpawnPoint>true</isSpawnPoint>
+    </rep.heframework.MapToolDef>
 
-	<ThingDef ParentName="BuildingBase">
+    <rep.heframework.MapToolDef ParentName="HEF_SpawnPointBase">
+        <defName>HEF_SpawnPoint</defName>
+        <label>spawn point</label>
+        <graphicData>
+            <texPath>HEFramework/SpawnPoint</texPath>
+            <graphicClass>Graphic_Single</graphicClass>
+        </graphicData>
+	</rep.heframework.MapToolDef>
+
+    <rep.heframework.MapToolDef ParentName="HEF_SpawnPointBase">
 		<defName>HEF_SpawnPointRandom</defName>
 		<label>random spawn point</label>
-		<description>A potential spawn point for enemies when generating a map. If you are seeing this in-game, something has gone wrong, please make a bug report to the HEF team.</description>
-		<drawerType>MapMeshAndRealTime</drawerType>
 		<graphicData>
 			<texPath>HEFramework/SpawnPoint50</texPath>
 			<graphicClass>Graphic_Single</graphicClass>
 		</graphicData>
-		<altitudeLayer>Building</altitudeLayer>
-		<statBases>
-			<MaxHitPoints>50</MaxHitPoints>
-			<WorkToBuild>2000</WorkToBuild>
-			<Flammability>1</Flammability>
-			<Mass>3</Mass>
-		</statBases>
-		<designationCategory Inherit="False">Misc</designationCategory> <!--Todo remove this after making maps-->
-		<rotatable>false</rotatable>
-	</ThingDef>
+	</rep.heframework.MapToolDef>
 
-	<ThingDef ParentName="BuildingBase">
+    <rep.heframework.MapToolDef ParentName="HEF_SpawnPointBase">
 		<defName>HEF_SpawnPointSingle</defName>
 		<label>spawn point single</label>
-		<description>A guaranteed spawn point for a single enemy when generating a map. If you are seeing this in-game, something has gone wrong, please make a bug report to the HEF team.</description>
-		<drawerType>MapMeshAndRealTime</drawerType>
 		<graphicData>
 			<texPath>HEFramework/SpawnPointSingle</texPath>
 			<graphicClass>Graphic_Single</graphicClass>
 		</graphicData>
-		<altitudeLayer>Building</altitudeLayer>
-		<statBases>
-			<MaxHitPoints>50</MaxHitPoints>
-			<WorkToBuild>2000</WorkToBuild>
-			<Flammability>1</Flammability>
-			<Mass>3</Mass>
-		</statBases>
-		<designationCategory Inherit="False">Misc</designationCategory> <!--Todo remove this after making maps-->
-		<rotatable>false</rotatable>
-	</ThingDef>
+        <count>1</count>
+        <chance>0.5</chance>
+	</rep.heframework.MapToolDef>
 
-	<ThingDef ParentName="BuildingBase">
+    <rep.heframework.MapToolDef ParentName="HEF_SpawnPointBase">
 		<defName>HEF_SpawnPointSingleRandom</defName>
 		<label>spawn point single random</label>
-		<description>A possible spawn point for a single enemy when generating a map. If you are seeing this in-game, something has gone wrong, please make a bug report to the HEF team.</description>
-		<drawerType>MapMeshAndRealTime</drawerType>
 		<graphicData>
 			<texPath>HEFramework/SpawnPointSingle50</texPath>
 			<graphicClass>Graphic_Single</graphicClass>
 		</graphicData>
-		<altitudeLayer>Building</altitudeLayer>
-		<statBases>
-			<MaxHitPoints>50</MaxHitPoints>
-			<WorkToBuild>2000</WorkToBuild>
-			<Flammability>1</Flammability>
-			<Mass>3</Mass>
-		</statBases>
-		<designationCategory Inherit="False">Misc</designationCategory>
-		<!--Todo remove this after making maps-->
-		<rotatable>false</rotatable>
-	</ThingDef>
+        <count>1</count>
+        <chance>0.5</chance>
+	</rep.heframework.MapToolDef>
 </Defs>

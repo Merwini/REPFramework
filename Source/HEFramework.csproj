@@ -63,6 +63,8 @@
     <Compile Include="HarmonyPatches.cs" />
     <Compile Include="HefDefOf.cs" />
     <Compile Include="JobGivers\JobGiver_AIAbilityAntiarmor.cs" />
+    <Compile Include="MapToolBuilding.cs" />
+    <Compile Include="MapToolDef.cs" />
     <Compile Include="TaggedPawnGroupMaker.cs" />
     <Compile Include="HEF_Settings.cs" />
     <Compile Include="GenSteps\GenStep_TaggedPawnGroup.cs" />

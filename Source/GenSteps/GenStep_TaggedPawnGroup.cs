@@ -49,6 +49,8 @@ namespace rep.heframework
             this.map = map;
             PawnGroupMakerExtension extension = factionDef.GetModExtension<PawnGroupMakerExtension>();
             List<SpawnCounter> spawnPoints = FindSpawnPoints(map);
+            List<Pawn> pawns;
+            Dictionary<SpawnCounter, List<Pawn>> spawnDict;
 
             if (extension == null)
             {
@@ -56,93 +58,111 @@ namespace rep.heframework
                 return;
             }
 
-            //TODO see if need a different lord for each spawn point
-            Lord lord = LordMaker.MakeNewLord(faction, new LordJob_DefendBase(faction, map.Center), map);
-            List<Pawn> pawns = GeneratePawnsFromTaggedGroup(map, extension, pawnGroupMakerName, parms);
-
-            if (pawns == null)
+            pawns = GeneratePawnsFromTaggedGroup(map, extension, pawnGroupMakerName, parms);
+            if (pawns.NullOrEmpty())
             {
-                return; //will have already errored in the GeneratePawnsFromTaggedGroup method. Not sure if LordJob with no pawns will cause errors.
+                return;
             }
 
-            SpawnPawnsAtPoints(pawns, spawnPoints, lord);
+            spawnDict = SplitPawnsUp(spawnPoints, pawns);
+
+            //Lord lord = LordMaker.MakeNewLord(faction, new LordJob_DefendBase(faction, map.Center), map);
+            SpawnPawnsAtPoints(spawnDict, faction);
         }
 
-        //TODO maybe the spawn points should be picked randomly instead of round-robin?
-        //TODO maybe the pawns list should be divided into a List<List<Pawn>> and then all spawned at the end?
-        void SpawnPawnsAtPoints(List<Pawn> pawns, List<SpawnCounter> spawnLocations, Lord lord)
+        Dictionary<SpawnCounter, List<Pawn>> SplitPawnsUp(List<SpawnCounter> spawns, List<Pawn> pawns)
         {
-            Log.Warning($"pawns {pawns.Count}");
-            Log.Warning($"spawns {spawnLocations.Count}");
+            Dictionary<SpawnCounter, List<Pawn>> spawnDict = new Dictionary<SpawnCounter, List<Pawn>>();
+            spawns.Shuffle();
+
             int locationIndex = 0;
-            bool stopSpawning = false;
+
+            //debug
+            Log.Warning(spawns.Count.ToString());
+            Log.Warning(pawns.Count.ToString());
+
+            //initial dictionary add
+            foreach (SpawnCounter spawn in spawns)
+            {
+                if (spawn.possibleSpawns != 0)
+                {
+                    spawnDict.Add(spawn, new List<Pawn>());
+                }
+            }
 
             foreach (Pawn pawn in pawns)
             {
-                if (stopSpawning)
+                //loop through spawn locations until a valid one is found, add the default if all locations are exhausted
+                bool lookingForSpawn = true;
+                while (lookingForSpawn)
                 {
-                    break;
-                }
-
-                bool tryingToSpawn = true;
-                while (tryingToSpawn)
-                {
-                    //loop through spawn locations until a valid one is found, add the default if all locations are exhausted
-                    bool lookingForPoint = true;
-                    while (lookingForPoint)
+                    //make sure we haven't run out of valid spawn points
+                    if (spawns.Count == 0)
                     {
-                        //make sure we haven't run out of valid spawn points
-                        if (spawnLocations.Count == 0)
-                        {
-                            AddDefaultSpawnPoint(spawnLocations);
-                        }
+                        AddDefaultSpawnPoint(spawns);
+                    }
 
-                        //reset the index if it is larger than the collection
-                        if (locationIndex >= spawnLocations.Count)
-                        {
-                            locationIndex = 0;
-                        }
+                    //reset the index if it is larger than the collection
+                    if (locationIndex >= spawns.Count)
+                    {
+                        locationIndex = 0;
+                    }
 
-                        //check if the current index has spawns left, if not, remove it and continue
-                        if (spawnLocations[locationIndex].possibleSpawns == 0)
-                        {
-                            spawnLocations.RemoveAt(locationIndex);
-                            continue;
-                        }
-
-                        //if code has passed the prior checks, can now use the location and break the loop
-                        lookingForPoint = false;
-
+                    //check if the current index has spawns left, if not, remove it and continue
+                    if (spawns[locationIndex].possibleSpawns == 0)
+                    {
+                        spawns.RemoveAt(locationIndex);
                         continue;
                     }
 
-                    if (!TrySpawnPawnAt(pawn, spawnLocations[locationIndex].point, lord))
+                    //if code has passed the prior checks, can now use the location and break the loop
+                    if (spawnDict.TryGetValue(spawns[locationIndex], out List<Pawn> list))
                     {
-                        //if no usable cell is available at that location, remove that spawn point and go back to looking for one. If the fallback was already being used, throw an error and discontinue spawning
-                        if (usingFallbackSpawnPoint)
-                        {
-                            Log.Error("Unable to find cell to spawn pawn for new site, and was already using fallback. Giving up on spawning more pawns.");
-                            stopSpawning = true;
-                            break;
-                        }
-                        else
-                        {
-                            spawnLocations.RemoveAt(locationIndex);
-                            continue;
-                        }
+                        list.Add(pawn);
                     }
-                    //if location was used, increment the index now and break the outer loop
-                    else
-                    {
-                        locationIndex++;
-                        tryingToSpawn = false;
-                    }
+
+                    lookingForSpawn = false;
+                    locationIndex++;
+                    continue;
                 }
-
-
             }
 
-            //return true;
+            return spawnDict;
+        }
+
+        //TODO maybe the spawn points should be picked randomly instead of round-robin?
+        void SpawnPawnsAtPoints(Dictionary<SpawnCounter, List<Pawn>> dict, Faction faction)
+        {
+            foreach (var pair in dict)
+            {
+                Lord lord = LordMaker.MakeNewLord(faction, new LordJob_DefendPoint(pair.Key.point), map);
+                foreach (Pawn pawn in pair.Value)
+                {
+                    TrySpawnPawnAt(pawn, pair.Key.point, lord);
+                }
+            }
+
+            //if (!TrySpawnPawnAt(pawn, spawns[locationIndex].point, lord))
+            //{
+            //    //if no usable cell is available at that location, remove that spawn point and go back to looking for one. If the fallback was already being used, throw an error and discontinue spawning
+            //    if (usingFallbackSpawnPoint)
+            //    {
+            //        Log.Error("Unable to find cell to spawn pawn for new site, and was already using fallback. Giving up on spawning more pawns.");
+            //        stopSpawning = true;
+            //        break;
+            //    }
+            //    else
+            //    {
+            //        spawnLocations.RemoveAt(locationIndex);
+            //        continue;
+            //    }
+            //}
+            ////if location was used, increment the index now and break the outer loop
+            //else
+            //{
+            //    locationIndex++;
+            //    tryingToSpawn = false;
+            //}
         }
 
         bool TrySpawnPawnAt(Pawn pawn, IntVec3 location, Lord lord)
@@ -151,7 +171,7 @@ namespace rep.heframework
             if (!RCellFinder.TryFindRandomCellNearWith(location, c => c.Walkable(map), map, out cell, 1, 4))
             {
                 pawn.Discard();
-                Log.Warning($"Unable to find cell to spawn pawn for new site at location {location.ToString()}, removing this as a spawn point");
+                Log.Warning($"Unable to find cell to spawn pawn for new site at location {location.ToString()}, discarding this pawn");
                 return false;
             }
             GenSpawn.Spawn(pawn, cell, map);
@@ -227,12 +247,14 @@ namespace rep.heframework
 
             foreach (Thing thing in map.listerThings.AllThings)
             {
-                if (thing is MapToolBuilding spawner && spawner.isSpawnPoint)
+                MapToolExtension extension = (MapToolExtension)thing.def.GetModExtension<MapToolExtension>();
+                if (extension != null)
                 {
+                    Log.Warning($"found spawner at {thing.Position.ToString()} with count {extension.count}");
                     spawnerPointThings.Add(thing);
-                    if (Rand.Value <= spawner.chance)
+                    if (Rand.Value <= extension.chance)
                     {
-                        SpawnCounter spawnCounter = new SpawnCounter() { point = spawner.Position, possibleSpawns = spawner.count };
+                        SpawnCounter spawnCounter = new SpawnCounter() { point = thing.Position, possibleSpawns = extension.count };
                         spawnPoints.Add(spawnCounter);
                     }
                 }
@@ -246,7 +268,6 @@ namespace rep.heframework
                 }
             }
 
-            spawnPoints.Shuffle();
             return spawnPoints;
         }
     }

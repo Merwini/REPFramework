@@ -12,10 +12,10 @@ namespace rep.heframework
     [DefOf]
     public class HefDefOf
     {
-        public static MapToolDef HEF_SpawnPoint;
-        public static MapToolDef HEF_SpawnPointRandom;
-        public static MapToolDef HEF_SpawnPointSingle;
-        public static MapToolDef HEF_SpawnPointSingleRandom;
+        public static ThingDef HEF_SpawnPoint;
+        public static ThingDef HEF_SpawnPointRandom;
+        public static ThingDef HEF_SpawnPointSingle;
+        public static ThingDef HEF_SpawnPointSingleRandom;
 
         public static ThingDef HEF_GreenWall;
         public static ThingDef HEF_GreenRock;

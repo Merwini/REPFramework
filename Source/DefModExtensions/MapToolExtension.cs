@@ -8,7 +8,7 @@ using RimWorld;
 
 namespace rep.heframework
 {
-    public class MapToolDef : ThingDef
+    class MapToolExtension : DefModExtension
     {
         public int count = -1;
 

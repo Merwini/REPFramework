@@ -97,18 +97,14 @@ namespace rep.heframework
 
         public static bool IncidentWorker_Raid_Helper(IncidentParms parms, out List<Pawn> pawns, bool debugTest = false)
         {
-            //TODO
-            Log.Message("divert successful");
             PawnGroupMakerExtension ext = parms.faction.def.GetModExtension<PawnGroupMakerExtension>();
             if (ext == null)
             {
-                Log.Message("Faction is not hef");
                 pawns = null;
                 return false;
             }
             else
             {
-                Log.Message("Faction is hef");
                 HEF_Utils.TryGenerateExtendedRaidInfo(parms, out pawns, debugTest);
                 return true;
             }
@@ -119,17 +115,12 @@ namespace rep.heframework
         {
             static void Postfix(MapParent __instance, ref MapGeneratorDef __result)
             {
-                Log.Warning("MapParent postfix running");
                 if (__instance is Site site)
                 {
-                    RepWorldObjectExtension extension = (RepWorldObjectExtension)site.MainSitePartDef.modExtensions?.FirstOrDefault(x => x is RepWorldObjectExtension);
+                    RepWorldObjectExtension extension = (RepWorldObjectExtension)site.MainSitePartDef?.modExtensions?.FirstOrDefault(x => x is RepWorldObjectExtension);
 
-                    Log.Warning($"extension null: {(extension == null).ToString()}");
-                    Log.Warning($"mapGenerator null: {(extension.mapGenerator == null).ToString()}");
-                    Log.Warning($"MapParent postfix running");
                     if (extension != null && extension.mapGenerator != null)
                     {
-                        Log.Warning("Changing mapGenerator");
                         __result = extension.mapGenerator;
                     }
                 }
@@ -142,12 +133,22 @@ namespace rep.heframework
         {
             static void Postfix(Settlement __instance, ref MapGeneratorDef __result)
             {
-                Log.Warning("Settlement postfix running");
                 RepWorldObjectExtension extension = (RepWorldObjectExtension)__instance.Faction?.def.modExtensions?.FirstOrDefault(x => x is RepWorldObjectExtension);
                 if (extension != null && extension.mapGenerator != null)
                 {
-                    Log.Warning("Changing mapGenerator");
                     __result = extension.mapGenerator;
+                }
+            }
+        }
+
+        [HarmonyPatch(typeof(Site), "ShouldRemoveMapNow")]
+        public static class Site_ShouldRemoveMapNow_Postfix
+        {
+            static void Postfix(Site __instance, ref bool alsoRemoveWorldObject)
+            {
+                if (__instance.parts.Any(p => p.def.Worker is HEF_SitePartWorker_Expansion) && GenHostility.AnyHostileActiveThreatToPlayer(__instance.Map, countDormantPawnsAsHostile: true))
+                {
+                    alsoRemoveWorldObject = false;
                 }
             }
         }

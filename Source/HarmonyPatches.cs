@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using HarmonyLib;
 using RimWorld;
 using RimWorld.Planet;
+using RimWorld.BaseGen;
 using Verse;
 using System.Reflection;
 using System.Reflection.Emit;
@@ -129,7 +130,7 @@ namespace rep.heframework
         }
 
         [HarmonyPatch(typeof(Settlement), "MapGeneratorDef", MethodType.Getter)]
-        public static class Settlement_MapGeneratorDef_Patch
+        public static class Settlement_MapGeneratorDef_Postfix
         {
             static void Postfix(Settlement __instance, ref MapGeneratorDef __result)
             {
@@ -151,6 +152,21 @@ namespace rep.heframework
                     alsoRemoveWorldObject = false;
                 }
             }
+        }
+
+        [HarmonyPatch(typeof(SymbolResolver_PawnGroup), "Resolve")]
+        public static class SymbolResolver_PawnGroup_Resolve_Prefix
+        {
+            static bool Prefix()
+            {
+                Map map = BaseGen.globalSettings.map;
+                if (map.generatorDef.genSteps.Any(g => g.defName == "HEF_TaggedPawnGroup"))
+                {
+                    return false;
+                }
+                return true;
+            }
+  
         }
     }
 }

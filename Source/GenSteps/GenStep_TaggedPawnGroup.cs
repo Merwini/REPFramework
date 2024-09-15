@@ -1,4 +1,5 @@
 ﻿using RimWorld;
+using RimWorld.Planet;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -10,63 +11,72 @@ using Verse.AI.Group;
 
 namespace rep.heframework
 {
-    public class GenStep_TaggedPawnGroup : GenStep
+    public abstract class GenStep_TaggedPawnGroup : GenStep
     {
         public override int SeedPart => 987654321; //I have no idea if this matters or can be any number
-
-        public FloatRange threatPointsRange = new FloatRange(240f, 10000f);
 
         public float threatPointAdjustmentFlat = 0;
 
         public string pawnGroupMakerName;
 
         bool usingFallbackSpawnPoint = false;
-        //private int nextSpawnPointIndex = 0;
 
         Map map;
 
-        //public int NextSpawnPointIndex
-        //{
-        //    get
-        //    {
-        //        int num = nextSpawnPointIndex;
-        //        if (nextSpawnPointIndex >= spawnPoints.Count - 1)
-        //        {
-        //            nextSpawnPointIndex = 0;
-        //        }
-        //        else
-        //        {
-        //            nextSpawnPointIndex++;
-        //        }
-
-        //        return num;
-        //    }
-        //}
         public override void Generate(Map map, GenStepParams parms)
         {
-            Faction faction = parms.sitePart.site.Faction;
-            FactionDef factionDef = faction.def;
             this.map = map;
-            PawnGroupMakerExtension extension = factionDef.GetModExtension<PawnGroupMakerExtension>();
             List<SpawnCounter> spawnPoints = FindSpawnPoints(map);
-            List<Pawn> pawns;
-            Dictionary<SpawnCounter, List<Pawn>> spawnDict;
 
-            if (extension == null)
+            Faction faction = GetMapFaction(map, parms);
+            if (faction == null)
             {
-                Log.Error("Tried to generate pawns for site " + parms.sitePart.site.Label + ", but faction lacks a PawnGroupMakerExtension.");
+                Log.Error("Tried to generate pawns for new map, but could not find the faction that owns the map");
                 return;
             }
 
-            pawns = GeneratePawnsFromTaggedGroup(map, extension, pawnGroupMakerName, parms);
+            FactionDef factionDef = faction.def;
+
+            PawnGroupMakerExtension factionExtension = factionDef.GetModExtension<PawnGroupMakerExtension>();
+            if (factionExtension == null)
+            {
+                Log.Error("Tried to generate pawns for new map, but faction lacks a PawnGroupMakerExtension.");
+                return;
+            }
+
+            WorldObjectExtension objectExtension = GetWorldObjectExtension(factionDef, parms);
+            if (objectExtension == null)
+            {
+                Log.Error("Tried to generate pawns for new map, but world object (site or settlement) lacks a WorldObjectExtension");
+                return;
+            }
+
+            PawnGroupMaker pawnGroupMaker = GetPawnGroupMaker(factionDef, factionExtension, objectExtension);
+            if (pawnGroupMaker == null)
+            {
+                Log.Error("Tried to generate pawns for new map, but could not pick a PawnGroupMaker");
+                return;
+            }
+
+            //TODO get a threat point target which will be modified by active world objects and quests
+            //for sites it will be a modification of parms.threatPoints, for Settlements it will pull from the WorldObjectExtension
+            float threatPointTarget = 0;
+
+
+            float threatPoints = GetClampedThreatPoints(parms, objectExtension, threatPointTarget);
+            if (threatPoints < 0f)
+            {
+                Log.Error("Tried to generate pawns for new map, but could not calculate threat points for pawns");
+            }
+
+            List<Pawn> pawns = GeneratePawnsFromGroupMaker(map, pawnGroupMaker, faction, threatPoints);
             if (pawns.NullOrEmpty())
             {
                 return;
             }
 
-            spawnDict = SplitPawnsUp(spawnPoints, pawns);
+            Dictionary<SpawnCounter, List<Pawn>> spawnDict = SplitPawnsUp(spawnPoints, pawns);
 
-            //Lord lord = LordMaker.MakeNewLord(faction, new LordJob_DefendBase(faction, map.Center), map);
             SpawnPawnsAtPoints(spawnDict, faction);
         }
 
@@ -75,13 +85,7 @@ namespace rep.heframework
             Dictionary<SpawnCounter, List<Pawn>> spawnDict = new Dictionary<SpawnCounter, List<Pawn>>();
             spawns.Shuffle();
 
-            int locationIndex = 0;
-
-            //debug
-            Log.Warning(spawns.Count.ToString());
-            Log.Warning(pawns.Count.ToString());
-
-            //initial dictionary add
+            //initial dictionary add with some cleaning
             foreach (SpawnCounter spawn in spawns)
             {
                 if (spawn.possibleSpawns != 0)
@@ -90,6 +94,7 @@ namespace rep.heframework
                 }
             }
 
+            int locationIndex = 0;
             foreach (Pawn pawn in pawns)
             {
                 //loop through spawn locations until a valid one is found, add the default if all locations are exhausted
@@ -141,28 +146,6 @@ namespace rep.heframework
                     TrySpawnPawnAt(pawn, pair.Key.point, lord);
                 }
             }
-
-            //if (!TrySpawnPawnAt(pawn, spawns[locationIndex].point, lord))
-            //{
-            //    //if no usable cell is available at that location, remove that spawn point and go back to looking for one. If the fallback was already being used, throw an error and discontinue spawning
-            //    if (usingFallbackSpawnPoint)
-            //    {
-            //        Log.Error("Unable to find cell to spawn pawn for new site, and was already using fallback. Giving up on spawning more pawns.");
-            //        stopSpawning = true;
-            //        break;
-            //    }
-            //    else
-            //    {
-            //        spawnLocations.RemoveAt(locationIndex);
-            //        continue;
-            //    }
-            //}
-            ////if location was used, increment the index now and break the outer loop
-            //else
-            //{
-            //    locationIndex++;
-            //    tryingToSpawn = false;
-            //}
         }
 
         bool TrySpawnPawnAt(Pawn pawn, IntVec3 location, Lord lord)
@@ -187,37 +170,18 @@ namespace rep.heframework
             usingFallbackSpawnPoint = true;
         }
 
-        internal List<Pawn> GeneratePawnsFromTaggedGroup(Map map, PawnGroupMakerExtension extension, string pawnGroupMakerName, GenStepParams parms)
+        internal List<Pawn> GeneratePawnsFromGroupMaker(Map map, PawnGroupMaker pawnGroupMaker, Faction faction, float threatPoints)
         {
-
-            float threatPoints = ClampToRange(parms.sitePart.parms.threatPoints, threatPointsRange) + threatPointAdjustmentFlat;
-            if (threatPoints < 0)
-                threatPoints = 0;
-
             if (Prefs.DevMode)
             {
                 Log.Message("threat points used for pawn gen: " + threatPoints.ToString());
             }
 
-            if (pawnGroupMakerName == null)
-            {
-                Log.Warning("Tried generating pawns for site " + parms.sitePart.site.Label + ", but no pawnGroupMakerName was set. No pawns will be generated.");
-                return null;
-            }
-
-            PawnGroupMaker groupMaker = extension.taggedPawnGroupMakers.FirstOrDefault(pgm => pgm.groupName == pawnGroupMakerName);
-
-            if (groupMaker == null)
-            {
-                Log.Warning("Tried generating pawns for site " + parms.sitePart.site.Label + ", but no pawnGroupMaker could be selected with the name \"" + pawnGroupMakerName + "\". No pawns will be generated.");
-                return null;
-            }
-
-            return groupMaker.GeneratePawns(new PawnGroupMakerParms
+            return pawnGroupMaker.GeneratePawns(new PawnGroupMakerParms
             {
                 groupKind = PawnGroupKindDefOf.Combat,
                 tile = map.Tile,
-                faction = parms.sitePart.site.Faction,
+                faction = faction,
                 points = threatPoints
             }).ToList();
         }
@@ -270,6 +234,14 @@ namespace rep.heframework
 
             return spawnPoints;
         }
+
+        public abstract Faction GetMapFaction(Map map, GenStepParams parms);
+
+        public abstract WorldObjectExtension GetWorldObjectExtension(FactionDef factionDef, GenStepParams parms);
+
+        public abstract PawnGroupMaker GetPawnGroupMaker(FactionDef factionDef, PawnGroupMakerExtension pext, WorldObjectExtension wext);
+
+        public abstract float GetClampedThreatPoints(GenStepParams parms, WorldObjectExtension extension, float targetPoints);
     }
 
     public class SpawnCounter

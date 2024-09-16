@@ -70,8 +70,8 @@ namespace rep.heframework
                 }
 
                 float armorValue = GetPawnOverallArmor(pawn, StatDefOf.ArmorRating_Sharp);
-                Log.Warning("target is " + pawn.Name);
-                Log.Warning("target armor value is " + armorValue.ToString());
+                //Log.Warning("target is " + pawn.Name);
+                //Log.Warning("target armor value is " + armorValue.ToString());
                 if (armorValue >= Props.armorSharpThreshold)
                 {
                     tempTarget = ((Pawn)parent).TargetCurrentlyAimingAt;

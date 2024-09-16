@@ -58,7 +58,6 @@ namespace rep.heframework
 			}
 			foreach (PawnKindDef item in pawnGroupMaker.GeneratePawnKindsExample(parms))
 			{
-				Log.Warning(item.defName);
 				yield return item;
 			}
 		}

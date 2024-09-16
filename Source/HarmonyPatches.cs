@@ -118,7 +118,7 @@ namespace rep.heframework
             {
                 if (__instance is Site site)
                 {
-                    RepWorldObjectExtension extension = (RepWorldObjectExtension)site.MainSitePartDef?.modExtensions?.FirstOrDefault(x => x is RepWorldObjectExtension);
+                    WorldObjectExtension extension = (WorldObjectExtension)site.MainSitePartDef?.modExtensions?.FirstOrDefault(x => x is WorldObjectExtension);
 
                     if (extension != null && extension.mapGenerator != null)
                     {
@@ -134,7 +134,7 @@ namespace rep.heframework
         {
             static void Postfix(Settlement __instance, ref MapGeneratorDef __result)
             {
-                RepWorldObjectExtension extension = (RepWorldObjectExtension)__instance.Faction?.def.modExtensions?.FirstOrDefault(x => x is RepWorldObjectExtension);
+                WorldObjectExtension extension = (WorldObjectExtension)__instance.Faction?.def.modExtensions?.FirstOrDefault(x => x is WorldObjectExtension);
                 if (extension != null && extension.mapGenerator != null)
                 {
                     __result = extension.mapGenerator;

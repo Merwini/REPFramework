@@ -13,6 +13,7 @@
             <li>Animals</li>
             <li>Fog</li>
             <li>HEF_Degreenify</li>
+            <!--HEF_TaggedPawnGroupSite added by linkWithSite-->
         </genSteps>
     </MapGeneratorDef>
 
@@ -30,13 +31,27 @@
             <li>Fog</li>
             <li>KCSG_Settlement</li>
             <li>HEF_Degreenify</li>
+            <li>HEF_TaggedPawnGroupSettlement</li>
         </genSteps>
     </MapGeneratorDef>
 
     <GenStepDef>
         <defName>HEF_Degreenify</defName>
-        <order>452</order>
+        <!--KCSG Settlement GenStep is 599-->
+        <order>601</order>
         <genStep Class="rep.heframework.GenStep_DeGreenify"/>
+    </GenStepDef>
+
+    <GenStepDef>
+        <defName>HEF_TaggedPawnGroupSite</defName>
+        <order>602</order>
+        <genStep Class="rep.heframework.GenStep_TaggedPawnGroupSite"/>
+    </GenStepDef>
+        
+    <GenStepDef>
+        <defName>HEF_TaggedPawnGroupSettlement</defName>
+        <order>602</order>
+        <genStep Class="rep.heframework.GenStep_TaggedPawnGroupSettlement"/>
     </GenStepDef>
     
 </Defs>

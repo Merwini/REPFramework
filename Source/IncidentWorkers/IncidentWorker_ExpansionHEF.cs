@@ -32,6 +32,9 @@ namespace rep.heframework
             if (!TryResolveExpansionDef(parms))
                 return false;
 
+            if (!TryAdjustPoints(parms))
+                return false;
+
             if (!TrySelectTile())
                 return false;
 
@@ -40,9 +43,6 @@ namespace rep.heframework
 
             if (!TryPlaceSite())
                 return false;
-
-            //if (!TrySetMapGenerator())
-            //    return false;
 
             SendStandardLetter(parms, site, parms.faction.Name, site.Label, ""); //TODO set up letter and translate //TODO find a way to sneak explanations into site info
 
@@ -65,7 +65,10 @@ namespace rep.heframework
             }
 
             if (hefFactions.NullOrEmpty())
+            {
+                Log.Warning("Tried to fire incident to create a Hostility Extended expansion, but no eligible factions were found.");
                 return false;
+            }
 
             return hefFactions.TryRandomElement(out parms.faction);
         }
@@ -74,12 +77,43 @@ namespace rep.heframework
         {
             eligibleHEFSites = HEF_Utils.FindEligibleHEFSiteDefsFor(parms.faction);
             if (eligibleHEFSites.NullOrEmpty())
+            {
+                //TODO try to find a different faction that can still do an expansion before returning false - cache faction list in TryResolveExpansionFaction and remove them if they can't place an expansion
+                //TODO but also need to implement the repeatable expansions for e.g. adding threat points
+                //TODO cull choices based on min and max threat point values, so ou can separate early-game and late-game sites
+                Log.Warning($"Tried to fire incident to create a Hostility Extended expansion for {parms.faction}, but no eligible expansions were found.");
                 return false;
+            }
 
             //TODO custom expansion patterns for different storytellers? e.x. has to spawn X minor expansions before doing a major one, random, spawn in a set pattern
+            //TODO able to configure minimum threat points (pre-curve? since parms.points are curved by SiteTuning.ThreatPointsToSiteThreatPointsCurve) for these sites
             sitePartDef = eligibleHEFSites.RandomElementByWeight(s => s.selectionWeight);
 
             return sitePartDef != null;
+        }
+
+        internal bool TryAdjustPoints(IncidentParms parms)
+        {
+            WorldObjectExtension extension = (WorldObjectExtension)sitePartDef.GetModExtension<WorldObjectExtension>();
+            if (extension == null)
+            {
+                //TODO fallback, try a different one
+                Log.Warning($"Tried to fire incident to create a Hostility Extended expansion, but selected expansion {sitePartDef.defName} is missing its WorldObjectExtension");
+                return false;
+            }
+
+            if (extension.threatPointCurve != null)
+            {
+                Log.Warning($"TODO DEBUG threat points pre-curve: {parms.points}");
+                float defaultPoints = StorytellerUtility.DefaultThreatPointsNow(Find.World);
+                parms.points = extension.threatPointCurve.Evaluate(defaultPoints) * SiteTuning.SitePointRandomFactorRange.RandomInRange;
+                if (Prefs.DevMode)
+                {
+                    Log.Message($"Making Hostility Expanded expansion with threat points post curve: {parms.points}");
+                }
+            }
+
+            return true;
         }
 
         internal bool TrySelectTile()
@@ -91,7 +125,7 @@ namespace rep.heframework
         
         internal bool TryMakeSite(IncidentParms parms)
         {
-            site = SiteMaker.MakeSite(sitePartDef, tile, parms.faction);
+            site = SiteMaker.MakeSite(sitePartDef, tile, parms.faction, threatPoints: parms.points);
             site.sitePartsKnown = true; //TODO site that hides information for sites
 
             return site != null;

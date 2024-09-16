@@ -214,7 +214,10 @@ namespace rep.heframework
                 MapToolExtension extension = (MapToolExtension)thing.def.GetModExtension<MapToolExtension>();
                 if (extension != null)
                 {
-                    Log.Warning($"found spawner at {thing.Position.ToString()} with count {extension.count}");
+                    if (Prefs.DevMode)
+                    {
+                        Log.Message($"found spawner at {thing.Position.ToString()} with count {extension.count} and probability {extension.chance}");
+                    }
                     spawnerPointThings.Add(thing);
                     if (Rand.Value <= extension.chance)
                     {

@@ -40,7 +40,7 @@ namespace rep.heframework
                     continue;
                 if (site.MainSitePartDef == null)
                     continue;
-                if (site.MainSitePartDef.HasModExtension<RepWorldObjectExtension>())
+                if (site.MainSitePartDef.HasModExtension<WorldObjectExtension>())
                 {
                     hefSites.Add(site);
                     continue;
@@ -64,8 +64,8 @@ namespace rep.heframework
 
             foreach (SitePartDef def in DefDatabase<SitePartDef>.AllDefs)
             {
-                RepWorldObjectExtension extension = def.GetModExtension<RepWorldObjectExtension>();
-                if (extension != null && extension.factionsToPawnGroups.Any(x => x.faction == fact.def.defName))
+                WorldObjectExtension extension = def.GetModExtension<WorldObjectExtension>();
+                if (extension != null && extension.factionsToPawnGroups.Any(x => x.faction == fact.def))
                 {
                     eligibleDefs.Add(def);
                 }

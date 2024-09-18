@@ -22,6 +22,9 @@ namespace rep.heframework
         public float maximumThreatPoints = 10000f;
 
         public SimpleCurve threatPointCurve;
+
+        public List<LootPerPawnLink> lootLinks;
+
         #endregion
     }
 
@@ -32,5 +35,29 @@ namespace rep.heframework
 
         public List<string> pawnGroups;
 
+        public void LoadDataFromXmlCustom(XmlNode xmlRoot)
+        {
+            DirectXmlCrossRefLoader.RegisterObjectWantsCrossRef(this, "faction", xmlRoot.Name);
+
+            pawnGroups = new List<string>();
+
+            foreach (var group in xmlRoot.InnerText.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries))
+            {
+                pawnGroups.Add(group);
+            }
+        }
+    }
+
+    public class LootPerPawnLink
+    {
+        public ThingDef thingDef;
+
+        public int thingPerPawn;
+
+        public void LoadDataFromXmlCustom(XmlNode xmlRoot)
+        {
+            DirectXmlCrossRefLoader.RegisterObjectWantsCrossRef(this, "thingDef", xmlRoot.Name);
+            thingPerPawn = ParseHelper.FromString<int>(xmlRoot.FirstChild.Value);
+        }
     }
 }

@@ -295,5 +295,14 @@ namespace rep.heframework
                 yield return item;
             }
         }
+
+        public static WorldObjectExtension GetWorldObjectExtension(FactionDef factionDef, GenStepParams parms)
+        {
+            if (parms.sitePart != null)
+            {
+                return (WorldObjectExtension)parms.sitePart?.def.GetModExtension<WorldObjectExtension>();
+            }
+            return (WorldObjectExtension)factionDef.GetModExtension<WorldObjectExtension>();
+        }
     }
 }

@@ -19,11 +19,6 @@ namespace rep.heframework
             return map.ParentFaction;
         }
 
-        public override WorldObjectExtension GetWorldObjectExtension(FactionDef factionDef, GenStepParams parms)
-        {
-            return (WorldObjectExtension)factionDef.GetModExtension<WorldObjectExtension>();
-        }
-
         public override PawnGroupMaker GetPawnGroupMaker(FactionDef factionDef, PawnGroupMakerExtension pext, WorldObjectExtension wext)
         {
             return factionDef.pawnGroupMakers.Where(pgm => pgm.kindDef == PawnGroupKindDefOf.Settlement).RandomElement();

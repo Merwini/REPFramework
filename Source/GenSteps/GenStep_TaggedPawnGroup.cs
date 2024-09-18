@@ -44,7 +44,7 @@ namespace rep.heframework
                 return;
             }
 
-            WorldObjectExtension objectExtension = GetWorldObjectExtension(factionDef, parms);
+            WorldObjectExtension objectExtension = HEF_Utils.GetWorldObjectExtension(factionDef, parms);
             if (objectExtension == null)
             {
                 Log.Error("Tried to generate pawns for new map, but world object (site or settlement) lacks a WorldObjectExtension");
@@ -239,8 +239,6 @@ namespace rep.heframework
         }
 
         public abstract Faction GetMapFaction(Map map, GenStepParams parms);
-
-        public abstract WorldObjectExtension GetWorldObjectExtension(FactionDef factionDef, GenStepParams parms);
 
         public abstract PawnGroupMaker GetPawnGroupMaker(FactionDef factionDef, PawnGroupMakerExtension pext, WorldObjectExtension wext);
 

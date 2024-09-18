@@ -23,11 +23,6 @@ namespace rep.heframework
             return faction;
         }
 
-        public override WorldObjectExtension GetWorldObjectExtension(FactionDef factionDef, GenStepParams parms)
-        {
-            return (WorldObjectExtension)parms.sitePart?.def.GetModExtension<WorldObjectExtension>();
-        }
-
         public override PawnGroupMaker GetPawnGroupMaker(FactionDef factionDef, PawnGroupMakerExtension pext, WorldObjectExtension wext)
         {
             string groupName = wext.factionsToPawnGroups.FirstOrDefault(link => link.faction == factionDef).pawnGroups.RandomElement();

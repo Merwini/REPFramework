@@ -60,6 +60,7 @@
     <Compile Include="DefModExtensions\WorldObjectExtension.cs" />
     <Compile Include="GenSteps\GenStep_DeGreenify.cs" />
     <Compile Include="GenSteps\GenStep_ExclusionArea.cs" />
+    <Compile Include="GenSteps\GenStep_LootPerPawn.cs" />
     <Compile Include="GenSteps\GenStep_PlantsExc.cs" />
     <Compile Include="GenSteps\GenStep_TaggedPawnGroupSettlement.cs" />
     <Compile Include="GenSteps\GenStep_TaggedPawnGroupSite.cs" />

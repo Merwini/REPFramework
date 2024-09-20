@@ -3,7 +3,7 @@
 	<v1.5>
 		<li>/</li>
 		<li>1.5</li>
-		<li IfModActive="CETeam.CombatExtended">CombatExtended</li>
+		<li IfModActive="ceteam.combatextended">CombatExtended</li>
 		<li IfModActive="nuff.CombatExtended">CombatExtended</li>
 	</v1.5>
 </loadFolders>

@@ -104,12 +104,11 @@ namespace rep.heframework
 
             if (extension.threatPointCurve != null)
             {
-                Log.Warning($"TODO DEBUG threat points pre-curve: {parms.points}");
                 float defaultPoints = StorytellerUtility.DefaultThreatPointsNow(Find.World);
                 parms.points = extension.threatPointCurve.Evaluate(defaultPoints) * SiteTuning.SitePointRandomFactorRange.RandomInRange;
                 if (Prefs.DevMode)
                 {
-                    Log.Message($"Making Hostility Expanded expansion with threat points post curve: {parms.points}");
+                    Log.Message($"Making Hostility Expanded expansion. Threat points pre-curve: {defaultPoints}, post-curve: {parms.points}");
                 }
             }
 

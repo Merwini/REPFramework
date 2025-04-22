@@ -135,17 +135,6 @@ namespace rep.heframework
             Find.WorldObjects.Add(site);
             return true;
         }
-
-        //internal bool TrySetMapGenerator()
-        //{
-        //    RepWorldObjectExtension extension = (RepWorldObjectExtension)sitePartDef.modExtensions?.FirstOrDefault(x => x is RepWorldObjectExtension);
-        //    if (extension != null && extension.mapGenerator != null)
-        //    {
-        //        MapGeneratorDef siteGen = site.MapGeneratorDef;
-        //    }fghdfgh
-        //    return true;
-        //}
     }
-
 }
 

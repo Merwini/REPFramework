@@ -15,7 +15,7 @@ namespace rep.heframework
     {
         public static List<Faction> ReturnHEFFactions()
         {
-            List<Faction> factions = Find.FactionManager.AllFactions.Where(f => (f.def.HasModExtension<PawnGroupMakerExtension>())).ToList();
+            List<Faction> factions = Find.FactionManager.AllFactions.Where(f => (f.def.HasModExtension<PawnGroupMakerExtensionHEF>())).ToList();
 
             return factions;
         }
@@ -40,7 +40,7 @@ namespace rep.heframework
                     continue;
                 if (site.MainSitePartDef == null)
                     continue;
-                if (site.MainSitePartDef.HasModExtension<WorldObjectExtension>())
+                if (site.MainSitePartDef.HasModExtension<WorldObjectExtensionHEF>())
                 {
                     hefSites.Add(site);
                     continue;
@@ -60,29 +60,21 @@ namespace rep.heframework
 
         public static List<SitePartDef> FindEligibleHEFSiteDefsFor(Faction fact)
         {
-            HashSet<SitePartDef> eligibleDefs = new HashSet<SitePartDef>();
+            List<SitePartDef> usedDefs = FindExistingHEFSiteDefsFor(fact);
+            List<SitePartDef> eligibleDefs = new List<SitePartDef>();
 
             foreach (SitePartDef def in DefDatabase<SitePartDef>.AllDefs)
             {
-                WorldObjectExtension extension = def.GetModExtension<WorldObjectExtension>();
-                if (extension != null && extension.factionsToPawnGroups.Any(x => x.faction == fact.def))
+                WorldObjectExtensionHEF extension = def.GetModExtension<WorldObjectExtensionHEF>();
+                if (extension != null 
+                    && extension.factionsToPawnGroups.Any(x => x.Faction == fact.def)
+                    && (!usedDefs.Contains(def) || !extension.siteIsUnique)) // Either doesn't already have one, or is allowed to be non-unique
                 {
                     eligibleDefs.Add(def);
                 }
             }
 
-            List<SitePartDef> usedDefs = FindExistingHEFSiteDefsFor(fact);
-
-            if (!usedDefs.NullOrEmpty())
-            {
-                //TODO add check for tag marking site as non-unique, skip removing from eligible list if so
-                foreach (SitePartDef def in usedDefs)
-                {
-                    eligibleDefs.Remove(def);
-                }
-            }
-
-            return eligibleDefs.ToList();
+            return eligibleDefs;
         }
 
         public static List<SitePartDef> FindDefsForSites(List<Site> sites)
@@ -200,7 +192,7 @@ namespace rep.heframework
                 }
             }
             FactionDef factionDef = parms.faction.def;
-            PawnGroupMakerExtension extension = factionDef.GetModExtension<PawnGroupMakerExtension>();
+            PawnGroupMakerExtensionHEF extension = factionDef.GetModExtension<PawnGroupMakerExtensionHEF>();
             foreach (TaggedPawnGroupMaker tpgm in extension.taggedPawnGroupMakers)
             {
                 if (HEF_Utils.CheckIfAllTagsPresent(tpgm.requiredSiteTags, hefTags))
@@ -296,13 +288,13 @@ namespace rep.heframework
             }
         }
 
-        public static WorldObjectExtension GetWorldObjectExtension(FactionDef factionDef, GenStepParams parms)
+        public static WorldObjectExtensionHEF GetWorldObjectExtension(FactionDef factionDef, GenStepParams parms)
         {
             if (parms.sitePart != null)
             {
-                return (WorldObjectExtension)parms.sitePart?.def.GetModExtension<WorldObjectExtension>();
+                return (WorldObjectExtensionHEF)parms.sitePart?.def.GetModExtension<WorldObjectExtensionHEF>();
             }
-            return (WorldObjectExtension)factionDef.GetModExtension<WorldObjectExtension>();
+            return (WorldObjectExtensionHEF)factionDef.GetModExtension<WorldObjectExtensionHEF>();
         }
     }
 }

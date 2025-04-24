@@ -29,25 +29,12 @@ namespace rep.heframework
 
         public static List<Site> FindHEFSitesFor(Faction fact)
         {
-            List<Site> hefSites = new List<Site>();
-
-            List<Site> worldSites = Find.WorldObjects.Sites;
-            foreach (Site site in worldSites)
-            {
-                if (site == null)
-                    continue;
-                if (site.Faction != fact)
-                    continue;
-                if (site.MainSitePartDef == null)
-                    continue;
-                if (site.MainSitePartDef.HasModExtension<WorldObjectExtensionHEF>())
-                {
-                    hefSites.Add(site);
-                    continue;
-                }
-            }
-
-            return hefSites;
+            return Find.WorldObjects.Sites
+                .Where(site => site != null
+                               && site.Faction == fact
+                               && site.MainSitePartDef != null
+                               && site.MainSitePartDef.HasModExtension<WorldObjectExtensionHEF>())
+                .ToList();
         }
 
         public static List<SitePartDef> FindExistingHEFSiteDefsFor(Faction fact)

@@ -10,7 +10,7 @@ using Verse;
 
 namespace rep.heframework
 {
-    public class WorldObjectExtension : DefModExtension
+    public class WorldObjectExtensionHEF : DefModExtension
     {
         #region Fields
         public List<FactionGroupLink> factionsToPawnGroups;
@@ -31,9 +31,13 @@ namespace rep.heframework
     public class FactionGroupLink
     {
         //TODO maybe pre-resolve references like AmmoLinks
-        public FactionDef faction;
+        private FactionDef faction;
 
-        public List<string> pawnGroups;
+        private List<string> pawnGroups;
+
+        public FactionDef Faction => faction;
+
+        public List<string> PawnGroups => pawnGroups;
 
         public void LoadDataFromXmlCustom(XmlNode xmlRoot)
         {

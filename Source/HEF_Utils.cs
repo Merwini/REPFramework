@@ -39,10 +39,14 @@ namespace rep.heframework
 
         public static List<SitePartDef> FindExistingHEFSiteDefsFor(Faction fact)
         {
-            List<Site> hefSites = FindHEFSitesFor(fact);
-            List<SitePartDef> hefSitePartDefs = FindDefsForSites(hefSites);
-            
-            return hefSitePartDefs;
+            return FindDefsForSites(FindHEFSitesFor(fact));
+        }
+
+        public static List<SitePartDef> FindDefsForSites(List<Site> sites)
+        {
+            return sites?.Where(site => site != null)
+                         .Select(site => site.MainSitePartDef)
+                         .ToList() ?? new List<SitePartDef>();
         }
 
         public static List<SitePartDef> FindEligibleHEFSiteDefsFor(Faction fact)
@@ -62,21 +66,6 @@ namespace rep.heframework
             }
 
             return eligibleDefs;
-        }
-
-        public static List<SitePartDef> FindDefsForSites(List<Site> sites)
-        {
-            List<SitePartDef> defs = new List<SitePartDef>();
-
-            if (!sites.NullOrEmpty())
-            {
-                foreach (Site site in sites)
-                {
-                    defs.Add(site.MainSitePartDef);
-                }
-            }
-
-            return defs;
         }
 
         public static List<string> FindStringsForDefs(List<SitePartDef> defs)

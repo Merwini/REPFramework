@@ -17,6 +17,19 @@ namespace rep.heframework
         {
             List<Faction> factions = Find.FactionManager.AllFactions.Where(f => (f.def.HasModExtension<PawnGroupMakerExtensionHEF>())).ToList();
 
+            #region logging
+            if (HEF_Settings.debugLogging)
+            {
+                StringBuilder sb = new StringBuilder();
+                sb.AppendLine($"ReturnHEFFactions is returning:");
+                foreach (Faction f in factions)
+                {
+                    sb.AppendLine($"name: {f.Name}     def: {f.def.defName}");
+                    Log.Message(sb.ToString());
+                }
+            }
+            #endregion
+
             return factions;
         }
 
@@ -24,29 +37,87 @@ namespace rep.heframework
         {
             List<Faction> hostileFactions = ReturnHEFFactions().Where(f => f.HostileTo(Find.FactionManager.OfPlayer)).ToList();
 
+            #region logging
+            if (HEF_Settings.debugLogging)
+            {
+                StringBuilder sb = new StringBuilder();
+                sb.AppendLine($"ReturnHostileHEFFactions is returning:");
+                foreach (Faction f in hostileFactions)
+                {
+                    sb.AppendLine($"name: {f.Name}    def: {f.def.defName}");
+                    Log.Message(sb.ToString());
+                }
+            }
+            #endregion
+
             return hostileFactions;
         }
 
         public static List<Site> FindHEFSitesFor(Faction fact)
         {
-            return Find.WorldObjects.Sites
+            List<Site> list = Find.WorldObjects.Sites
                 .Where(site => site != null
                                && site.Faction == fact
                                && site.MainSitePartDef != null
                                && site.MainSitePartDef.HasModExtension<WorldObjectExtensionHEF>())
                 .ToList();
+
+            #region logging
+            if (HEF_Settings.debugLogging)
+            {
+                StringBuilder sb = new StringBuilder();
+                sb.AppendLine($"FindHEFSitesFor faction: {fact.Name} is returning:");
+                foreach (Site s in list)
+                {
+                    sb.AppendLine($"label: {s.Label}    tile: {s.Tile}    def: {s.def.defName}");
+                }
+                Log.Message(sb.ToString());
+            }
+            #endregion
+
+            return list;
         }
 
         public static List<SitePartDef> FindExistingHEFSiteDefsFor(Faction fact)
         {
-            return FindDefsForSites(FindHEFSitesFor(fact));
+            List<SitePartDef> list = FindDefsForSites(FindHEFSitesFor(fact));
+
+            #region logging
+            if (HEF_Settings.debugLogging)
+            {
+                StringBuilder sb = new StringBuilder();
+                sb.AppendLine($"FindExistingHEFSiteDefsFor faction: {fact.Name} is returning:");
+                foreach (SitePartDef spd in list)
+                {
+                    sb.AppendLine($"def: {spd.defName}");
+                }
+                Log.Message(sb.ToString());
+            }
+            #endregion
+
+            return list;
         }
 
         public static List<SitePartDef> FindDefsForSites(List<Site> sites)
         {
-            return sites?.Where(site => site != null)
+            List<SitePartDef> list = sites?.Where(site => site != null)
                          .Select(site => site.MainSitePartDef)
                          .ToList() ?? new List<SitePartDef>();
+
+            #region logging
+            if (HEF_Settings.debugLogging)
+            {
+                StringBuilder sb = new StringBuilder();
+                sb.AppendLine($"FindDefsForSites is returning:");
+                foreach (SitePartDef spd in list)
+                {
+                    sb.AppendLine($"def: {spd.defName}");
+                }
+                Log.Message(sb.ToString());
+            }
+            #endregion
+
+            return list;
         }
 
         public static List<SitePartDef> FindEligibleHEFSiteDefsFor(Faction fact)
@@ -65,24 +136,40 @@ namespace rep.heframework
                 }
             }
 
+            #region logging
+            if (HEF_Settings.debugLogging)
+            {
+                StringBuilder sb = new StringBuilder();
+                sb.AppendLine($"FindEligibleHEFSiteDefsFor faction: {fact.Name} is returning:");
+                foreach (SitePartDef spd in eligibleDefs)
+                {
+                    sb.AppendLine($"def: {spd.defName}");
+                }
+                Log.Message(sb.ToString());
+            }
+            #endregion
+
             return eligibleDefs;
         }
 
         public static List<string> FindStringsForDefs(List<SitePartDef> defs)
         {
-            List<string> tags = new List<string>();
+            List<string> tags = defs?.Where(def => def != null)
+                                     .SelectMany(def => def.tags)
+                                     .ToList() ?? new List<string>();
 
-            if (!defs.NullOrEmpty())
+            #region logging
+            if (HEF_Settings.debugLogging)
             {
-                foreach (SitePartDef def in defs)
+                StringBuilder sb = new StringBuilder();
+                sb.AppendLine($"FindStringsForDefs is returning:");
+                foreach (string tag in tags)
                 {
-                    //the list is initialized empty in the class, so no null check needed
-                    foreach (string tag in def.tags)
-                    {
-                        tags.Add(tag);
-                    }
+                    sb.AppendLine($"tag: {tag}");
                 }
+                Log.Message(sb.ToString());
             }
+            #endregion
 
             return tags;
         }

@@ -37,14 +37,14 @@ namespace rep.heframework
 
             FactionDef factionDef = faction.def;
 
-            PawnGroupMakerExtension factionExtension = factionDef.GetModExtension<PawnGroupMakerExtension>();
+            PawnGroupMakerExtensionHEF factionExtension = factionDef.GetModExtension<PawnGroupMakerExtensionHEF>();
             if (factionExtension == null)
             {
                 Log.Error("Tried to generate pawns for new map, but faction lacks a PawnGroupMakerExtension.");
                 return;
             }
 
-            WorldObjectExtension objectExtension = HEF_Utils.GetWorldObjectExtension(factionDef, parms);
+            WorldObjectExtensionHEF objectExtension = HEF_Utils.GetWorldObjectExtension(factionDef, parms);
             if (objectExtension == null)
             {
                 Log.Error("Tried to generate pawns for new map, but world object (site or settlement) lacks a WorldObjectExtension");
@@ -211,7 +211,7 @@ namespace rep.heframework
 
             foreach (Thing thing in map.listerThings.AllThings)
             {
-                MapToolExtension extension = (MapToolExtension)thing.def.GetModExtension<MapToolExtension>();
+                MapToolExtensionHEF extension = (MapToolExtensionHEF)thing.def.GetModExtension<MapToolExtensionHEF>();
                 if (extension != null)
                 {
                     if (Prefs.DevMode)
@@ -240,9 +240,9 @@ namespace rep.heframework
 
         public abstract Faction GetMapFaction(Map map, GenStepParams parms);
 
-        public abstract PawnGroupMaker GetPawnGroupMaker(FactionDef factionDef, PawnGroupMakerExtension pext, WorldObjectExtension wext);
+        public abstract PawnGroupMaker GetPawnGroupMaker(FactionDef factionDef, PawnGroupMakerExtensionHEF pext, WorldObjectExtensionHEF wext);
 
-        public abstract float GetClampedThreatPoints(GenStepParams parms, WorldObjectExtension extension, float targetPoints);
+        public abstract float GetClampedThreatPoints(GenStepParams parms, WorldObjectExtensionHEF extension, float targetPoints);
     }
 
     public class SpawnCounter

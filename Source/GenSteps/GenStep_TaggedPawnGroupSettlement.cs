@@ -19,12 +19,12 @@ namespace rep.heframework
             return map.ParentFaction;
         }
 
-        public override PawnGroupMaker GetPawnGroupMaker(FactionDef factionDef, PawnGroupMakerExtension pext, WorldObjectExtension wext)
+        public override PawnGroupMaker GetPawnGroupMaker(FactionDef factionDef, PawnGroupMakerExtensionHEF pext, WorldObjectExtensionHEF wext)
         {
             return factionDef.pawnGroupMakers.Where(pgm => pgm.kindDef == PawnGroupKindDefOf.Settlement).RandomElement();
         }
 
-        public override float GetClampedThreatPoints(GenStepParams parms, WorldObjectExtension extension, float targetPoints)
+        public override float GetClampedThreatPoints(GenStepParams parms, WorldObjectExtensionHEF extension, float targetPoints)
         {
             //TODO use targetPoints instead of extension.threatPointsRange once it is implemented
             return Mathf.Clamp(extension.threatPointsRange.RandomInRange, 0, extension.maximumThreatPoints);

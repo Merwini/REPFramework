@@ -23,15 +23,15 @@ namespace rep.heframework
             return faction;
         }
 
-        public override PawnGroupMaker GetPawnGroupMaker(FactionDef factionDef, PawnGroupMakerExtension pext, WorldObjectExtension wext)
+        public override PawnGroupMaker GetPawnGroupMaker(FactionDef factionDef, PawnGroupMakerExtensionHEF pext, WorldObjectExtensionHEF wext)
         {
-            string groupName = wext.factionsToPawnGroups.FirstOrDefault(link => link.faction == factionDef).pawnGroups.RandomElement();
+            string groupName = wext.factionsToPawnGroups.FirstOrDefault(link => link.Faction == factionDef).PawnGroups.RandomElement();
             PawnGroupMaker pawnGroupMaker = pext.taggedPawnGroupMakers.FirstOrDefault(pgm => pgm.groupName == groupName);
 
             return pawnGroupMaker;
         }
 
-        public override float GetClampedThreatPoints(GenStepParams parms, WorldObjectExtension extension, float targetPoints)
+        public override float GetClampedThreatPoints(GenStepParams parms, WorldObjectExtensionHEF extension, float targetPoints)
         {
             //TODO use targetPoints instead of parms.threatPoints once it is implemented
             Log.Warning($"parms points {parms.sitePart.parms.threatPoints}");

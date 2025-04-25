@@ -25,6 +25,12 @@ namespace rep.heframework
 
         public List<LootPerPawnLink> lootLinks;
 
+        public int minimumTileDistance = 2;
+
+        public int maximumTileDistance = 8;
+
+        public bool siteIsUnique = true;
+
         #endregion
     }
 

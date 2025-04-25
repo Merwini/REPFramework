@@ -14,6 +14,8 @@ namespace rep.heframework
     {
         internal List<Faction> hefFactions;
         internal List<SitePartDef> eligibleHEFSites;
+
+        internal Dictionary<Faction, List<SitePartDef>> factionEligibleSitesDict;
         
         internal SitePartDef sitePartDef;
         internal int tile;
@@ -26,6 +28,9 @@ namespace rep.heframework
 
         public override bool TryExecuteWorker(IncidentParms parms)
         {
+            if (!PopulateFactionSiteDictionary(parms))
+                return false;
+
             if (!TryResolveExpansionFaction(parms))
                 return false;
 
@@ -49,16 +54,56 @@ namespace rep.heframework
             return true;
         }
 
-        internal bool TryResolveExpansionFaction(IncidentParms parms)
+
+        internal bool PopulateFactionSiteDictionary(IncidentParms parms)
         {
-            //Early return for debug tool forcing a chosen faction
-            if (parms.faction != null && parms.faction.def.HasModExtension<PawnGroupMakerExtension>())
+            StringBuilder sb = new StringBuilder();
+
+            factionEligibleSitesDict = new Dictionary<Faction, List<SitePartDef>>();
+
+            List<Faction> possibleFactions = new List<Faction>();
+
+            // If debug tool forcing a chosen faction
+            if (parms.faction != null && parms.faction.def.HasModExtension<PawnGroupMakerExtensionHEF>())
             {
-                return true;
+                factionEligibleSitesDict[parms.faction] = HEF_Utils.FindEligibleHEFSiteDefsFor(parms.faction);
+                if (HEF_Settings.debugLogging)
+                {
+                    sb.AppendLine($"PopulateFactionSiteDictionary had faction forced: {parms.faction.Name} with {factionEligibleSitesDict.TryGetValue(parms.faction).Count} sites available.");
+                }
+            }
+            else
+            {
+                if (HEF_Settings.debugLogging)
+                {
+                    sb.AppendLine("PopulateFactionSiteDictionary searching all factions for eligible sites.");
+                }
+
+                foreach (Faction fact in Find.FactionManager.AllFactions.Where(f => f.def.HasModExtension<PawnGroupMakerExtensionHEF>()))
+                {
+                    List<SitePartDef> list = HEF_Utils.FindEligibleHEFSiteDefsFor(fact);
+                    if (list.Count != 0)
+                    {
+                        factionEligibleSitesDict[fact] = list;
+                        if (HEF_Settings.debugLogging)
+                        {
+                            sb.AppendLine($"Added {fact.Name} with {list.Count} sites available.");
+                        }
+                    }
+                }
+            }
+            if (HEF_Settings.debugLogging)
+            {
+                Log.Message(sb.ToString());
             }
 
+            return factionEligibleSitesDict.Any(x => x.Value.Count != 0);
+        }
+
+        internal bool TryResolveExpansionFaction(IncidentParms parms)
+        {
             //Get a list of HEF factions. Incident fails if no legal targets are available.
-            hefFactions = Find.FactionManager.AllFactions.Where(f => (f.def.HasModExtension<PawnGroupMakerExtension>())).ToList();
+            hefFactions = Find.FactionManager.AllFactions.Where(f => (f.def.HasModExtension<PawnGroupMakerExtensionHEF>())).ToList();
             if (!HEF_Settings.FriendlyHEFsCanExpand)
             {
                 hefFactions = hefFactions.Where(f => f.HostileTo(Find.FactionManager.OfPlayer)).ToList();
@@ -94,7 +139,7 @@ namespace rep.heframework
 
         internal bool TryAdjustPoints(IncidentParms parms)
         {
-            WorldObjectExtension extension = (WorldObjectExtension)sitePartDef.GetModExtension<WorldObjectExtension>();
+            WorldObjectExtensionHEF extension = (WorldObjectExtensionHEF)sitePartDef.GetModExtension<WorldObjectExtensionHEF>();
             if (extension == null)
             {
                 //TODO fallback, try a different one

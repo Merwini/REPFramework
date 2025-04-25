@@ -321,38 +321,62 @@ namespace rep.heframework
 
         public static void ResolveRaidStrategy(IncidentParms parms, TaggedPawnGroupMaker groupMaker)
         {
-            if (parms.raidStrategy != null)
-                return;
+            if (parms.raidStrategy == null)
+            {
+                parms.raidStrategy = groupMaker.allowedRaidStrategies.RandomElement(); //TODO consider using point curve weight
+            }
 
-            parms.raidStrategy = groupMaker.allowedRaidStrategies.RandomElement(); //TODO consider using point curve weight
+            #region logging
+            if (HEF_Settings.debugLogging)
+            {
+                Log.Message($"ResolveRaidStrategy selected: {parms.raidStrategy.defName}");
+            }
+            #endregion
         }
 
         public static void ResolveRaidArriveMode(IncidentParms parms, TaggedPawnGroupMaker groupMaker)
         {
-            if (parms.raidArrivalMode != null)
-                return;
+            if (parms.raidArrivalMode == null)
+            {
+                parms.raidArrivalMode = groupMaker.allowedArrivalModes.RandomElement();
+            }
 
-            parms.raidArrivalMode = groupMaker.allowedArrivalModes.RandomElement();
+            #region logging
+            if (HEF_Settings.debugLogging)
+            {
+                Log.Message($"ResolveRaidArriveMode selected: {parms.raidArrivalMode.defName}");
+            }
+            #endregion
         }
 
+        // Mostly copied from vanilla, small change to allow logging the points pre- and post-curving
         public static float AdjustedRaidPoints(float points, PawnsArrivalModeDef raidArrivalMode, RaidStrategyDef raidStrategy, Faction faction, PawnGroupKindDef groupKind, RaidAgeRestrictionDef ageRestriction = null)
         {
             //TODO adjust raid points based on certain sites
+            float newPoints = points;
 
             if (raidArrivalMode.pointsFactorCurve != null)
             {
-                points *= raidArrivalMode.pointsFactorCurve.Evaluate(points);
+                newPoints *= raidArrivalMode.pointsFactorCurve.Evaluate(points);
             }
             if (raidStrategy.pointsFactorCurve != null)
             {
-                points *= raidStrategy.pointsFactorCurve.Evaluate(points);
+                newPoints *= raidStrategy.pointsFactorCurve.Evaluate(points);
             }
             if (ageRestriction != null)
             {
-                points *= ageRestriction.threatPointsFactor;
+                newPoints *= ageRestriction.threatPointsFactor;
             }
-            points = Mathf.Max(points, raidStrategy.Worker.MinimumPoints(faction, groupKind) * 1.05f);
-            return points;
+            newPoints = Mathf.Max(points, raidStrategy.Worker.MinimumPoints(faction, groupKind) * 1.05f);
+
+            #region logging
+            if (HEF_Settings.debugLogging)
+            {
+                Log.Message($"AdjustedRaidPoints pre-curve: {points}, post-curve: {newPoints}");
+            }
+            #endregion
+
+            return newPoints;
         }
 
         public static IEnumerable<Pawn> GeneratePawns(PawnGroupMakerParms parms, PawnGroupMaker groupMaker, bool warnOnZeroResults = true)
@@ -379,6 +403,8 @@ namespace rep.heframework
             {
                 return (WorldObjectExtensionHEF)parms.sitePart?.def.GetModExtension<WorldObjectExtensionHEF>();
             }
+
+            // Getting the extension for a faction settlement instead of site
             return (WorldObjectExtensionHEF)factionDef.GetModExtension<WorldObjectExtensionHEF>();
         }
     }

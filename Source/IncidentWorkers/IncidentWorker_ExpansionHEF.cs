@@ -12,12 +12,10 @@ namespace rep.heframework
 {
     public class IncidentWorker_ExpansionHEF : IncidentWorker
     {
-        internal List<Faction> hefFactions;
-        internal List<SitePartDef> eligibleSitePartDefs;
-
         internal Dictionary<Faction, List<SitePartDef>> factionEligibleSitesDict;
         
         internal SitePartDef sitePartDef;
+        WorldObjectExtensionHEF extension;
         internal int tile;
         internal Site site;
 
@@ -36,6 +34,8 @@ namespace rep.heframework
 
             if (!TryResolveExpansionDef(parms))
                 return false;
+
+            extension = sitePartDef.GetModExtension<WorldObjectExtensionHEF>();
 
             if (!TryAdjustPoints(parms))
                 return false;
@@ -127,7 +127,7 @@ namespace rep.heframework
 
         internal bool TryResolveExpansionDef(IncidentParms parms)
         {
-            if (!factionEligibleSitesDict.TryGetValue(parms.faction, out eligibleSitePartDefs) || eligibleSitePartDefs.NullOrEmpty())
+            if (!factionEligibleSitesDict.TryGetValue(parms.faction, out List<SitePartDef> eligibleSitePartDefs) || eligibleSitePartDefs.NullOrEmpty())
             {
                 if (HEF_Settings.debugLogging)
                 {
@@ -149,21 +149,13 @@ namespace rep.heframework
 
         internal bool TryAdjustPoints(IncidentParms parms)
         {
-            WorldObjectExtensionHEF extension = (WorldObjectExtensionHEF)sitePartDef.GetModExtension<WorldObjectExtensionHEF>();
-            if (extension == null)
-            {
-                //TODO fallback, try a different one
-                Log.Warning($"Tried to fire incident to create a Hostility Extended expansion, but selected expansion {sitePartDef.defName} is missing its WorldObjectExtension");
-                return false;
-            }
-
             if (extension.threatPointCurve != null)
             {
                 float defaultPoints = StorytellerUtility.DefaultThreatPointsNow(Find.World);
                 parms.points = extension.threatPointCurve.Evaluate(defaultPoints) * SiteTuning.SitePointRandomFactorRange.RandomInRange;
-                if (Prefs.DevMode)
+                if (HEF_Settings.debugLogging)
                 {
-                    Log.Message($"Making Hostility Expanded expansion. Threat points pre-curve: {defaultPoints}, post-curve: {parms.points}");
+                    Log.Message($"TryAdjustPoints threat points pre-curve: {defaultPoints}, post-curve: {parms.points}");
                 }
             }
 
@@ -172,7 +164,7 @@ namespace rep.heframework
 
         internal bool TrySelectTile()
         {
-            TileFinder.TryFindNewSiteTile(out tile, HEF_Settings.minimumExpansionDistance, HEF_Settings.maximumExpansionDistance, false, TileFinderMode.Near);
+            TileFinder.TryFindNewSiteTile(out tile, extension.minimumTileDistance, extension.maximumTileDistance, false, TileFinderMode.Near);
 
             return tile >= 0;
         }

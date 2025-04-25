@@ -186,17 +186,14 @@ namespace rep.heframework
             return true;
         }
 
+        // debugTest represents whether the raid is being generated naturally or through dev tool, which would pre-fill some fields in parms
+        // about half of this is copied from vanilla TryGenerateRaidInfo
+        // this occurs after TryGenerateRaidInfo has already assigned parms.faction and diverted if that faction has PawnGroupMakerExtensionHEF
         public static bool TryGenerateExtendedRaidInfo(IncidentParms parms, out List<Pawn> pawns, bool debugTest = false)
         {
-            List<Site> hefSites;
-            List<SitePartDef> hefSiteDefs;
+            List<SitePartDef> hefSiteDefs = FindDefsForSites(FindHEFSitesFor(parms.faction));
 
-            hefSites = HEF_Utils.FindHEFSitesFor(parms.faction);
-            hefSiteDefs = HEF_Utils.FindDefsForSites(hefSites);
-
-            PawnGroupKindDef combat = PawnGroupKindDefOf.Combat;
-
-            //Due to the Expansion Site system, it will be easiest to select the PawnGroupMaker first, as there is otherwise a high probability that selected Strategy/ArrivalMode will have no legal PawnGroup
+            // Due to the Expansion Site system, it will be easiest to select the PawnGroupMaker first, as there is otherwise a high probability that selected Strategy/ArrivalMode will have no legal PawnGroup
             if (!TryResolveTaggedPawnGroup(parms, hefSiteDefs, out TaggedPawnGroupMaker groupMaker))
             {
                 pawns = new List<Pawn>();
@@ -207,14 +204,22 @@ namespace rep.heframework
             ResolveRaidArriveMode(parms, groupMaker);
             //ResolveRaidAgeRestriction(parms); //TODO - need to copy vanilla
 
+            // vanilla, only used for generating mech cluster sketch I think
+            if (!debugTest)
+            {
+                parms.raidStrategy.Worker.TryGenerateThreats(parms);
+            }
+
+            // vanilla
             if (!debugTest && !parms.raidArrivalMode.Worker.TryResolveRaidSpawnCenter(parms))
             {
                 pawns = null;
                 return false;
             }
+
             float points = parms.points;
-            parms.points = AdjustedRaidPoints(parms.points, parms.raidArrivalMode, parms.raidStrategy, parms.faction, combat, parms.raidAgeRestriction);
-            PawnGroupMakerParms defaultPawnGroupMakerParms = IncidentParmsUtility.GetDefaultPawnGroupMakerParms(combat, parms);
+            parms.points = AdjustedRaidPoints(parms.points, parms.raidArrivalMode, parms.raidStrategy, parms.faction, PawnGroupKindDefOf.Combat, parms.raidAgeRestriction);
+            PawnGroupMakerParms defaultPawnGroupMakerParms = IncidentParmsUtility.GetDefaultPawnGroupMakerParms(PawnGroupKindDefOf.Combat, parms);
             pawns = GeneratePawns(defaultPawnGroupMakerParms, groupMaker).ToList();
             if (pawns.Count == 0)
             {
@@ -243,56 +248,73 @@ namespace rep.heframework
 
         public static bool TryResolveTaggedPawnGroup(IncidentParms parms, List<SitePartDef> siteDefs, out TaggedPawnGroupMaker groupMaker)
         {
+            StringBuilder sb = new StringBuilder();
+
             List<TaggedPawnGroupMaker> possibleGroupMakers = new List<TaggedPawnGroupMaker>();
             int highestTier = 0;
 
-            List<string> hefTags = HEF_Utils.FindStringsForDefs(siteDefs);
-            if (Prefs.DevMode)
-            {
-                foreach (string str in hefTags)
-                {
-                    Log.Message($"found site tag: {str}");
-                }
-            }
-            FactionDef factionDef = parms.faction.def;
-            PawnGroupMakerExtensionHEF extension = factionDef.GetModExtension<PawnGroupMakerExtensionHEF>();
+            List<string> hefTags = FindStringsForDefs(siteDefs);
+            PawnGroupMakerExtensionHEF extension = parms.faction.def.GetModExtension<PawnGroupMakerExtensionHEF>();
             foreach (TaggedPawnGroupMaker tpgm in extension.taggedPawnGroupMakers)
             {
-                if (HEF_Utils.CheckIfAllTagsPresent(tpgm.requiredSiteTags, hefTags))
+                if (CheckIfAllTagsPresent(tpgm.requiredSiteTags, hefTags))
                 {
-                    if (Prefs.DevMode)
-                    {
-                        Log.Message($"Adding {(tpgm.groupName ?? "unnamed")} as pgm option");
-                    }
                     possibleGroupMakers.Add(tpgm);
                     if (tpgm.groupTier > highestTier)
                     {
                         highestTier = tpgm.groupTier;
                     }
-
                 }
+            }
+
+            #region logging
+            if (HEF_Settings.debugLogging)
+            {
+                sb.AppendLine($"TryResolveTaggedPawnGroup found the following potential TaggedPawnGroupMakers:");
+                foreach (TaggedPawnGroupMaker tpgm in possibleGroupMakers)
+                {
+                    sb.AppendLine($"name: {tpgm.groupName ?? "unnamed"}");
+                }
+            }
+            #endregion
+
+            if (possibleGroupMakers.Count == 0)
+            {
+                groupMaker = null;
+                #region logging
+                if (HEF_Settings.debugLogging)
+                {
+                    sb.AppendLine("No valid TaggedPawnGroupMakers found.");
+                    Log.Message(sb.ToString());
+                }
+                #endregion
+                return false;
             }
 
             if (extension.alwaysUseHighestTier)
             {
-                for (int i = possibleGroupMakers.Count - 1; i >= 0; i--)
+                possibleGroupMakers = possibleGroupMakers.Where(x => x.groupTier == highestTier).ToList();
+                #region moreLogging
+                if (HEF_Settings.debugLogging)
                 {
-                    if (possibleGroupMakers[i].groupTier < highestTier)
+                    sb.AppendLine($"TryResolveTaggedPawnGroup using only highest tier. Tier: {highestTier} Possible groups in that tier:");
+                    foreach (TaggedPawnGroupMaker tpgm in possibleGroupMakers)
                     {
-                        if (Prefs.DevMode)
-                        {
-                            Log.Message($"Removing {(possibleGroupMakers[i].groupName ?? "unnamed")} as pgm option due to low tier");
-                        }
-                        possibleGroupMakers.RemoveAt(i);
+                        sb.AppendLine($"name: {tpgm.groupName ?? "unnamed"}");
                     }
                 }
+                #endregion
             }
 
             possibleGroupMakers.TryRandomElementByWeight((TaggedPawnGroupMaker gm) => gm.commonality, out groupMaker);
-            if (Prefs.DevMode)
+
+            #region evenMoreLogging
+            if (HEF_Settings.debugLogging)
             {
-                Log.Message($"Selected {(groupMaker.groupName ?? "unnamed pgm")} as pgm");
+                sb.AppendLine($"TryResolveTaggedPawnGroup final groupMaker selection: {groupMaker.groupName ?? "unnamed"}");
+                Log.Message(sb.ToString());
             }
+            #endregion
 
             return groupMaker != null;
         }

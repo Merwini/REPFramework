@@ -56,8 +56,8 @@
     <Compile Include="Building_DoorNoNPC.cs" />
     <Compile Include="Comps\PawnCarrier\CompPawnCarrier.cs" />
     <Compile Include="DamageWorkers\DamageWorker_SelfDestruct.cs" />
-    <Compile Include="DefModExtensions\MapToolExtension.cs" />
-    <Compile Include="DefModExtensions\WorldObjectExtension.cs" />
+    <Compile Include="DefModExtensions\MapToolExtensionHEF.cs" />
+    <Compile Include="DefModExtensions\WorldObjectExtensionHEF.cs" />
     <Compile Include="GenSteps\GenStep_DeGreenify.cs" />
     <Compile Include="GenSteps\GenStep_ExclusionArea.cs" />
     <Compile Include="GenSteps\GenStep_LootPerPawn.cs" />
@@ -70,7 +70,7 @@
     <Compile Include="TaggedPawnGroupMaker.cs" />
     <Compile Include="HEF_Settings.cs" />
     <Compile Include="GenSteps\GenStep_TaggedPawnGroup.cs" />
-    <Compile Include="DefModExtensions\PawnGroupMakerExtension.cs" />
+    <Compile Include="DefModExtensions\PawnGroupMakerExtensionHEF.cs" />
     <Compile Include="SitePartWorkers\HEF_SitePartWorker_Expansion.cs" />
     <Compile Include="HEF_Utils.cs" />
     <Compile Include="DebugActions.cs" />
@@ -101,6 +101,9 @@
   </ItemGroup>
   <ItemGroup>
     <Publicize Include="Assembly-CSharp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="TODO" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

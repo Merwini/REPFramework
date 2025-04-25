@@ -13,7 +13,7 @@ namespace rep.heframework
     public class IncidentWorker_ExpansionHEF : IncidentWorker
     {
         internal List<Faction> hefFactions;
-        internal List<SitePartDef> eligibleHEFSites;
+        internal List<SitePartDef> eligibleSitePartDefs;
 
         internal Dictionary<Faction, List<SitePartDef>> factionEligibleSitesDict;
         
@@ -102,37 +102,47 @@ namespace rep.heframework
 
         internal bool TryResolveExpansionFaction(IncidentParms parms)
         {
-            //Get a list of HEF factions. Incident fails if no legal targets are available.
-            hefFactions = Find.FactionManager.AllFactions.Where(f => (f.def.HasModExtension<PawnGroupMakerExtensionHEF>())).ToList();
-            if (!HEF_Settings.FriendlyHEFsCanExpand)
-            {
-                hefFactions = hefFactions.Where(f => f.HostileTo(Find.FactionManager.OfPlayer)).ToList();
-            }
+            List<Faction> eligibleFactions = factionEligibleSitesDict.Keys
+                .Where(f => HEF_Settings.FriendlyHEFsCanExpand || f.HostileTo(Find.FactionManager.OfPlayer))
+                .ToList();
 
-            if (hefFactions.NullOrEmpty())
+            if (eligibleFactions.NullOrEmpty())
             {
-                Log.Warning("Tried to fire incident to create a Hostility Extended expansion, but no eligible factions were found.");
+                if (HEF_Settings.debugLogging)
+                {
+                    Log.Message("TryResolveExpansionFaction unable to choose a faction, no factions with available sites.");
+                }
                 return false;
             }
 
-            return hefFactions.TryRandomElement(out parms.faction);
+            eligibleFactions.TryRandomElement(out parms.faction);
+
+            if (HEF_Settings.debugLogging)
+            {
+                Log.Message($"TryResolveExpansionFaction selected faction: {parms.faction.Name}");
+            }
+
+            return true;
         }
 
-        internal virtual bool TryResolveExpansionDef(IncidentParms parms)
+        internal bool TryResolveExpansionDef(IncidentParms parms)
         {
-            eligibleHEFSites = HEF_Utils.FindEligibleHEFSiteDefsFor(parms.faction);
-            if (eligibleHEFSites.NullOrEmpty())
+            if (!factionEligibleSitesDict.TryGetValue(parms.faction, out eligibleSitePartDefs) || eligibleSitePartDefs.NullOrEmpty())
             {
-                //TODO try to find a different faction that can still do an expansion before returning false - cache faction list in TryResolveExpansionFaction and remove them if they can't place an expansion
-                //TODO but also need to implement the repeatable expansions for e.g. adding threat points
-                //TODO cull choices based on min and max threat point values, so ou can separate early-game and late-game sites
-                Log.Warning($"Tried to fire incident to create a Hostility Extended expansion for {parms.faction}, but no eligible expansions were found.");
+                if (HEF_Settings.debugLogging)
+                {
+                    Log.Message($"TryResolveExpansionDef unable to choose a SitePartDef, didn't get any eligible sites for faction: {parms.faction}");
+                }
                 return false;
             }
 
             //TODO custom expansion patterns for different storytellers? e.x. has to spawn X minor expansions before doing a major one, random, spawn in a set pattern
-            //TODO able to configure minimum threat points (pre-curve? since parms.points are curved by SiteTuning.ThreatPointsToSiteThreatPointsCurve) for these sites
-            sitePartDef = eligibleHEFSites.RandomElementByWeight(s => s.selectionWeight);
+            sitePartDef = eligibleSitePartDefs.RandomElementByWeight(s => s.selectionWeight);
+
+            if (HEF_Settings.debugLogging)
+            {
+                Log.Message($"TryResolveExpansionDef selected SitePartDef {sitePartDef.defName} for faction: {parms.faction.Name}");
+            }
 
             return sitePartDef != null;
         }

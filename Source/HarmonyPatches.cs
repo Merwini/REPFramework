@@ -99,7 +99,7 @@ namespace rep.heframework
 
         public static bool IncidentWorker_Raid_Helper(IncidentParms parms, out List<Pawn> pawns, bool debugTest = false)
         {
-            PawnGroupMakerExtension ext = parms.faction.def.GetModExtension<PawnGroupMakerExtension>();
+            PawnGroupMakerExtensionHEF ext = parms.faction.def.GetModExtension<PawnGroupMakerExtensionHEF>();
             if (ext == null)
             {
                 pawns = null;
@@ -119,7 +119,7 @@ namespace rep.heframework
             {
                 if (__instance is Site site)
                 {
-                    WorldObjectExtension extension = (WorldObjectExtension)site.MainSitePartDef?.modExtensions?.FirstOrDefault(x => x is WorldObjectExtension);
+                    WorldObjectExtensionHEF extension = (WorldObjectExtensionHEF)site.MainSitePartDef?.modExtensions?.FirstOrDefault(x => x is WorldObjectExtensionHEF);
 
                     if (extension != null && extension.mapGenerator != null)
                     {
@@ -135,7 +135,7 @@ namespace rep.heframework
         {
             static void Postfix(Settlement __instance, ref MapGeneratorDef __result)
             {
-                WorldObjectExtension extension = (WorldObjectExtension)__instance.Faction?.def.modExtensions?.FirstOrDefault(x => x is WorldObjectExtension);
+                WorldObjectExtensionHEF extension = (WorldObjectExtensionHEF)__instance.Faction?.def.modExtensions?.FirstOrDefault(x => x is WorldObjectExtensionHEF);
                 if (extension != null && extension.mapGenerator != null)
                 {
                     __result = extension.mapGenerator;

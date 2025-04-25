@@ -131,6 +131,7 @@ namespace rep.heframework
                 if (extension != null 
                     && extension.factionsToPawnGroups.Any(x => x.Faction == fact.def)
                     && (!usedDefs.Contains(def) || !extension.siteIsUnique)) // Either doesn't already have one, or is allowed to be non-unique
+                    //TODO && cull choices based on min and max threat point values, so ou can separate early-game and late-game sites
                 {
                     eligibleDefs.Add(def);
                 }

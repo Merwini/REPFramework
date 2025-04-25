@@ -69,7 +69,7 @@ namespace rep.heframework
 			//Check that the site's faction is HEF
 			FactionDef factionDef = parms.faction.def;
 
-			PawnGroupMakerExtension factExtension = (PawnGroupMakerExtension)parms.faction.def.GetModExtension<PawnGroupMakerExtension>();
+			PawnGroupMakerExtensionHEF factExtension = (PawnGroupMakerExtensionHEF)parms.faction.def.GetModExtension<PawnGroupMakerExtensionHEF>();
 			if (factExtension == null)
             {
 				Log.Error($"Using HEF_SitePartWorker_Expansion on site for non-HEF faction {parms.faction.Name}. Destroying site.");
@@ -86,7 +86,7 @@ namespace rep.heframework
 
 			//Check that the site is HEF
 			SitePartDef mainPart = site.MainSitePartDef;
-			WorldObjectExtension siteExtension = (WorldObjectExtension)mainPart.GetModExtension<WorldObjectExtension>();
+			WorldObjectExtensionHEF siteExtension = (WorldObjectExtensionHEF)mainPart.GetModExtension<WorldObjectExtensionHEF>();
 			if (siteExtension == null)
 			{
 				Log.Error($"Using HEF_SiteWorker_Expansion on non-HEF site {site.Label}. Destroying site.");
@@ -104,7 +104,7 @@ namespace rep.heframework
 
 			List<TaggedPawnGroupMaker> possibleGroups = new List<TaggedPawnGroupMaker>();
 
-			foreach (string str in siteExtension.factionsToPawnGroups.FirstOrDefault(link => link.faction == factionDef).pawnGroups)
+			foreach (string str in siteExtension.factionsToPawnGroups.FirstOrDefault(link => link.Faction == factionDef).PawnGroups)
             {
 				TaggedPawnGroupMaker possibleGroup = factExtension.taggedPawnGroupMakers.FirstOrDefault(tpgm => tpgm.groupName == str);
 				if (possibleGroup != null)

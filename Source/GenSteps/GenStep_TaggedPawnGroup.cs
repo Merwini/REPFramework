@@ -31,7 +31,7 @@ namespace rep.heframework
             Faction faction = GetMapFaction(map, parms);
             if (faction == null)
             {
-                Log.Error("Tried to generate pawns for new map, but could not find the faction that owns the map");
+                Log.Error($"Tried to generate pawns for new map, but could not find the faction that owns the map");
                 return;
             }
 
@@ -40,7 +40,7 @@ namespace rep.heframework
             PawnGroupMakerExtensionHEF factionExtension = factionDef.GetModExtension<PawnGroupMakerExtensionHEF>();
             if (factionExtension == null)
             {
-                Log.Error("Tried to generate pawns for new map, but faction lacks a PawnGroupMakerExtension.");
+                Log.Error($"Tried to generate pawns for new map, but def {factionDef.defName} for faction {faction.Name} lacks a PawnGroupMakerExtension.");
                 return;
             }
 
@@ -58,18 +58,20 @@ namespace rep.heframework
                 return;
             }
 
-            //TODO get a threat point target which will be modified by active world objects and quests
-            //for sites it will be a modification of parms.threatPoints, for Settlements it will pull from the WorldObjectExtension
-            float threatPointTarget = 0;
-
-
-            float threatPoints = GetClampedThreatPoints(parms, objectExtension, threatPointTarget);
-            if (threatPoints < 0f)
+            float modifiedThreatPoints = parms.sitePart.parms.threatPoints * HEF_Utils.GetThreatPointModifierForFaction(faction);
+            
+            float clampedThreatPoints = objectExtension.defenderThreatPointsRange.ClampToRange(modifiedThreatPoints);
+            if (clampedThreatPoints < 0f)
             {
                 Log.Error("Tried to generate pawns for new map, but could not calculate threat points for pawns");
             }
 
-            List<Pawn> pawns = GeneratePawnsFromGroupMaker(map, pawnGroupMaker, faction, threatPoints);
+            if (HEF_Settings.debugLogging)
+            {
+                Log.Message($"Generating map defenders using {clampedThreatPoints} points after clamping. Was {modifiedThreatPoints} after modified by world sites. {parms.sitePart.parms.threatPoints} originally.");
+            }
+
+            List<Pawn> pawns = GeneratePawnsFromGroupMaker(map, pawnGroupMaker, faction, clampedThreatPoints);
             if (pawns.NullOrEmpty())
             {
                 return;
@@ -186,39 +188,30 @@ namespace rep.heframework
             }).ToList();
         }
 
-        
-
-        public float ClampToRange(float value, FloatRange range)
-        {
-            if (value < range.min)
-            {
-                return range.min;
-            }
-            else if (value > range.max)
-            {
-                return range.max;
-            }
-            else
-            {
-                return value;
-            }
-        }
-
         public List<SpawnCounter> FindSpawnPoints(Map map)
         {
             List<SpawnCounter> spawnPoints = new List<SpawnCounter>();
             List<Thing> spawnerPointThings = new List<Thing>();
 
+            StringBuilder sb = new StringBuilder();
+
+            if (HEF_Settings.debugLogging)
+            {
+                sb.AppendLine($"GenStep_TaggedPawnGroup.FindSpawnPoints found the following spawn points:");
+            }
+
             foreach (Thing thing in map.listerThings.AllThings)
             {
-                MapToolExtensionHEF extension = (MapToolExtensionHEF)thing.def.GetModExtension<MapToolExtensionHEF>();
+                MapToolExtensionHEF extension = thing.def.GetModExtension<MapToolExtensionHEF>();
                 if (extension != null)
                 {
-                    if (Prefs.DevMode)
-                    {
-                        Log.Message($"found spawner at {thing.Position.ToString()} with count {extension.count} and probability {extension.chance}");
-                    }
                     spawnerPointThings.Add(thing);
+
+                    if (HEF_Settings.debugLogging)
+                    {
+                        sb.AppendLine($"position: {thing.Position}    count: {extension.count}    chance: {extension.chance}");
+                    }
+
                     if (Rand.Value <= extension.chance)
                     {
                         SpawnCounter spawnCounter = new SpawnCounter() { point = thing.Position, possibleSpawns = extension.count };
@@ -235,14 +228,17 @@ namespace rep.heframework
                 }
             }
 
+            if (HEF_Settings.debugLogging)
+            {
+                Log.Message(sb.ToString());
+            }
+
             return spawnPoints;
         }
 
         public abstract Faction GetMapFaction(Map map, GenStepParams parms);
 
         public abstract PawnGroupMaker GetPawnGroupMaker(FactionDef factionDef, PawnGroupMakerExtensionHEF pext, WorldObjectExtensionHEF wext);
-
-        public abstract float GetClampedThreatPoints(GenStepParams parms, WorldObjectExtensionHEF extension, float targetPoints);
     }
 
     public class SpawnCounter

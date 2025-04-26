@@ -31,12 +31,7 @@ namespace rep.heframework
             return pawnGroupMaker;
         }
 
-        public override float GetClampedThreatPoints(GenStepParams parms, WorldObjectExtensionHEF extension, float targetPoints)
-        {
-            //TODO use targetPoints instead of parms.threatPoints once it is implemented
-            Log.Warning($"parms points {parms.sitePart.parms.threatPoints}");
-            return Mathf.Clamp(parms.sitePart.parms.threatPoints, extension.threatPointsRange.min, extension.threatPointsRange.max);
-        }
+        
     }
 }
 

@@ -408,5 +408,26 @@ namespace rep.heframework
             // Getting the extension for a faction settlement instead of site
             return (WorldObjectExtensionHEF)factionDef.GetModExtension<WorldObjectExtensionHEF>();
         }
+
+        public static float GetThreatPointModifierForFaction(Faction fact)
+        {
+            float modifier = 1f;
+            List<SitePartDef> siteDefs = FindExistingHEFSiteDefsFor(fact);
+            foreach (SitePartDef spd in siteDefs)
+            {
+                WorldObjectExtensionHEF extension = spd.GetModExtension<WorldObjectExtensionHEF>();
+                if (extension != null)
+                {
+                    modifier += extension.threatPointModifier;
+                }
+            }
+
+            if (HEF_Settings.debugLogging)
+            {
+                Log.Message($"GetThreatPointModifierForFaction {fact.Name} is returning a modifier of {modifier} based on {siteDefs.Count} sites");
+            }
+
+            return modifier;
+        }
     }
 }

@@ -17,9 +17,11 @@ namespace rep.heframework
 
         public MapGeneratorDef mapGenerator;
 
-        public FloatRange threatPointsRange = new FloatRange(240f, 10000f);
+        public float threatPointModifier = 0f;
 
-        public float maximumThreatPoints = 10000f;
+        public FloatRange spawnThreatPointRange = new FloatRange(0, 1000000);
+
+        public FloatRange defenderThreatPointsRange = new FloatRange(240f, 10000f);
 
         public SimpleCurve threatPointCurve;
 

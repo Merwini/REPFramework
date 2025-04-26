@@ -23,12 +23,6 @@ namespace rep.heframework
         {
             return factionDef.pawnGroupMakers.Where(pgm => pgm.kindDef == PawnGroupKindDefOf.Settlement).RandomElement();
         }
-
-        public override float GetClampedThreatPoints(GenStepParams parms, WorldObjectExtensionHEF extension, float targetPoints)
-        {
-            //TODO use targetPoints instead of extension.threatPointsRange once it is implemented
-            return Mathf.Clamp(extension.threatPointsRange.RandomInRange, 0, extension.maximumThreatPoints);
-        }
     }
 }
 

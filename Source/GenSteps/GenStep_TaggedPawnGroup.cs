@@ -57,7 +57,7 @@ namespace rep.heframework
             }
 
             // Want to preserve this number for logging
-            float modifiedThreatPoints = parms.sitePart.parms.threatPoints * HEF_Utils.GetThreatPointModifierForFaction(faction);
+            float modifiedThreatPoints = parms.sitePart.parms.threatPoints * HEF_Utils.GetThreatPointModifierWithSites(HEF_Utils.FindExistingHEFSiteDefsFor(faction));
             
             float clampedThreatPoints = objectExtension.defenderThreatPointsRange.ClampToRange(modifiedThreatPoints);
             if (clampedThreatPoints < 0f)

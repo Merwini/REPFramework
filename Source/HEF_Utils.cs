@@ -219,7 +219,7 @@ namespace rep.heframework
             }
 
             float points = parms.points;
-            parms.points = AdjustedRaidPoints(parms.points, parms.raidArrivalMode, parms.raidStrategy, parms.faction, PawnGroupKindDefOf.Combat, parms.raidAgeRestriction);
+            parms.points = AdjustedRaidPoints(parms.points, hefSiteDefs, parms.raidArrivalMode, parms.raidStrategy, parms.faction, PawnGroupKindDefOf.Combat, parms.raidAgeRestriction);
             PawnGroupMakerParms defaultPawnGroupMakerParms = IncidentParmsUtility.GetDefaultPawnGroupMakerParms(PawnGroupKindDefOf.Combat, parms);
             pawns = GeneratePawns(defaultPawnGroupMakerParms, groupMaker).ToList();
             if (pawns.Count == 0)
@@ -350,34 +350,36 @@ namespace rep.heframework
             #endregion
         }
 
-        // Mostly copied from vanilla, small change to allow logging the points pre- and post-curving
-        public static float AdjustedRaidPoints(float points, PawnsArrivalModeDef raidArrivalMode, RaidStrategyDef raidStrategy, Faction faction, PawnGroupKindDef groupKind, RaidAgeRestrictionDef ageRestriction = null)
+        // Mostly copied from vanilla, with a multiplier based on world sites
+        public static float AdjustedRaidPoints(float points, List<SitePartDef> sites, PawnsArrivalModeDef raidArrivalMode, RaidStrategyDef raidStrategy, Faction faction, PawnGroupKindDef groupKind, RaidAgeRestrictionDef ageRestriction = null)
         {
-            //TODO adjust raid points based on certain sites
-            float newPoints = points;
+            float siteModifiedPoints = points * GetThreatPointModifierWithSites(sites);
+
+            float curvedPoints = siteModifiedPoints;
+
 
             if (raidArrivalMode.pointsFactorCurve != null)
             {
-                newPoints *= raidArrivalMode.pointsFactorCurve.Evaluate(points);
+                curvedPoints *= raidArrivalMode.pointsFactorCurve.Evaluate(points);
             }
             if (raidStrategy.pointsFactorCurve != null)
             {
-                newPoints *= raidStrategy.pointsFactorCurve.Evaluate(points);
+                curvedPoints *= raidStrategy.pointsFactorCurve.Evaluate(points);
             }
             if (ageRestriction != null)
             {
-                newPoints *= ageRestriction.threatPointsFactor;
+                curvedPoints *= ageRestriction.threatPointsFactor;
             }
-            newPoints = Mathf.Max(points, raidStrategy.Worker.MinimumPoints(faction, groupKind) * 1.05f);
+            siteModifiedPoints = Mathf.Max(points, raidStrategy.Worker.MinimumPoints(faction, groupKind) * 1.05f);
 
             #region logging
             if (HEF_Settings.debugLogging)
             {
-                Log.Message($"AdjustedRaidPoints pre-curve: {points}, post-curve: {newPoints}");
+                Log.Message($"AdjustedRaidPoints original: {points}, modified by world sites: {siteModifiedPoints}, post-curves: {curvedPoints}");
             }
             #endregion
 
-            return newPoints;
+            return curvedPoints;
         }
 
         public static IEnumerable<Pawn> GeneratePawns(PawnGroupMakerParms parms, PawnGroupMaker groupMaker, bool warnOnZeroResults = true)
@@ -409,10 +411,10 @@ namespace rep.heframework
             return (WorldObjectExtensionHEF)factionDef.GetModExtension<WorldObjectExtensionHEF>();
         }
 
-        public static float GetThreatPointModifierForFaction(Faction fact)
+        public static float GetThreatPointModifierWithSites(List<SitePartDef> siteDefs)
         {
             float modifier = 1f;
-            List<SitePartDef> siteDefs = FindExistingHEFSiteDefsFor(fact);
+
             foreach (SitePartDef spd in siteDefs)
             {
                 WorldObjectExtensionHEF extension = spd.GetModExtension<WorldObjectExtensionHEF>();
@@ -424,7 +426,7 @@ namespace rep.heframework
 
             if (HEF_Settings.debugLogging)
             {
-                Log.Message($"GetThreatPointModifierForFaction {fact.Name} is returning a modifier of {modifier} based on {siteDefs.Count} sites");
+                Log.Message($"GetThreatPointModifierForFactionis returning a modifier of {modifier} based on {siteDefs.Count} sites");
             }
 
             return modifier;

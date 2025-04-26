@@ -31,7 +31,7 @@ namespace rep.heframework
 
         public int maximumTileDistance = 8;
 
-        public bool siteIsUnique = true;
+        public bool siteIsUnique = false;
 
         #endregion
     }

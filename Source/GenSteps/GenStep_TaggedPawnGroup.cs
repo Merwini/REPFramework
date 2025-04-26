@@ -19,8 +19,6 @@ namespace rep.heframework
 
         public string pawnGroupMakerName;
 
-        bool usingFallbackSpawnPoint = false;
-
         Map map;
 
         public override void Generate(Map map, GenStepParams parms)
@@ -58,12 +56,13 @@ namespace rep.heframework
                 return;
             }
 
+            // Want to preserve this number for logging
             float modifiedThreatPoints = parms.sitePart.parms.threatPoints * HEF_Utils.GetThreatPointModifierForFaction(faction);
             
             float clampedThreatPoints = objectExtension.defenderThreatPointsRange.ClampToRange(modifiedThreatPoints);
             if (clampedThreatPoints < 0f)
             {
-                Log.Error("Tried to generate pawns for new map, but could not calculate threat points for pawns");
+                Log.Warning("While trying to generate pawns for new map, threat points ended up 0 or negative.");
             }
 
             if (HEF_Settings.debugLogging)
@@ -74,6 +73,7 @@ namespace rep.heframework
             List<Pawn> pawns = GeneratePawnsFromGroupMaker(map, pawnGroupMaker, faction, clampedThreatPoints);
             if (pawns.NullOrEmpty())
             {
+                Log.Warning($"While trying to generate pawns for new map, failed to generate any pawns using {clampedThreatPoints} threat points");
                 return;
             }
 
@@ -99,53 +99,50 @@ namespace rep.heframework
             int locationIndex = 0;
             foreach (Pawn pawn in pawns)
             {
-                //loop through spawn locations until a valid one is found, add the default if all locations are exhausted
-                bool lookingForSpawn = true;
-                while (lookingForSpawn)
+                // Loop through spawn locations until a valid one is found, add the default if all locations are exhausted
+                while (true)
                 {
-                    //make sure we haven't run out of valid spawn points
+                    // If all spawn points are exhausted, add the Default spawn point at map center.
                     if (spawns.Count == 0)
                     {
-                        AddDefaultSpawnPoint(spawns);
+                        AddDefaultSpawnPoint(spawns, spawnDict);
                     }
 
-                    //reset the index if it is larger than the collection
+                    // Reset the index if it is larger than the collection
                     if (locationIndex >= spawns.Count)
                     {
                         locationIndex = 0;
                     }
 
-                    //check if the current index has spawns left, if not, remove it and continue
+                    // If spawn point at current index is exhausted, remove it from the list and continue
                     if (spawns[locationIndex].possibleSpawns == 0)
                     {
                         spawns.RemoveAt(locationIndex);
                         continue;
                     }
 
-                    //if code has passed the prior checks, can now use the location and break the loop
+                    // If spawn point has passed the prior checks, add a pawn to that spawn point, and break to the next pawn
                     if (spawnDict.TryGetValue(spawns[locationIndex], out List<Pawn> list))
                     {
                         list.Add(pawn);
                     }
 
-                    lookingForSpawn = false;
                     locationIndex++;
-                    continue;
+                    break;
                 }
             }
 
             return spawnDict;
         }
 
-        //TODO maybe the spawn points should be picked randomly instead of round-robin?
         void SpawnPawnsAtPoints(Dictionary<SpawnCounter, List<Pawn>> dict, Faction faction)
         {
-            foreach (var pair in dict)
+            foreach (var entry in dict)
             {
-                Lord lord = LordMaker.MakeNewLord(faction, new LordJob_DefendPoint(pair.Key.point), map);
-                foreach (Pawn pawn in pair.Value)
+                Lord lord = LordMaker.MakeNewLord(faction, new LordJob_DefendPoint(entry.Key.point), map);
+                foreach (Pawn pawn in entry.Value)
                 {
-                    TrySpawnPawnAt(pawn, pair.Key.point, lord);
+                    TrySpawnPawnAt(pawn, entry.Key.point, lord);
                 }
             }
         }
@@ -156,7 +153,7 @@ namespace rep.heframework
             if (!RCellFinder.TryFindRandomCellNearWith(location, c => c.Walkable(map), map, out cell, 1, 4))
             {
                 pawn.Discard();
-                Log.Warning($"Unable to find cell to spawn pawn for new site at location {location.ToString()}, discarding this pawn");
+                Log.Warning($"Unable to find cell to spawn pawn for at location {location}, discarding this pawn");
                 return false;
             }
             GenSpawn.Spawn(pawn, cell, map);
@@ -165,20 +162,15 @@ namespace rep.heframework
             return true;
         }
 
-        void AddDefaultSpawnPoint(List<SpawnCounter> spawnLocations)
+        void AddDefaultSpawnPoint(List<SpawnCounter> spawnLocations, Dictionary<SpawnCounter, List<Pawn>> dict)
         {
             Log.Warning("Map has run out of valid spawn locations. Adding a fallback spawn point at the center.");
             spawnLocations.Add(new SpawnCounter { point = map.Center });
-            usingFallbackSpawnPoint = true;
+            dict[spawnLocations[0]] = new List<Pawn>();
         }
 
         internal List<Pawn> GeneratePawnsFromGroupMaker(Map map, PawnGroupMaker pawnGroupMaker, Faction faction, float threatPoints)
         {
-            if (Prefs.DevMode)
-            {
-                Log.Message("threat points used for pawn gen: " + threatPoints.ToString());
-            }
-
             return pawnGroupMaker.GeneratePawns(new PawnGroupMakerParms
             {
                 groupKind = PawnGroupKindDefOf.Combat,

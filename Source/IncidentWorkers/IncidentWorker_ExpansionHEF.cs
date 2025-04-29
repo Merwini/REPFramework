@@ -103,7 +103,7 @@ namespace rep.heframework
         internal bool TryResolveExpansionFaction(IncidentParms parms)
         {
             List<Faction> eligibleFactions = factionEligibleSitesDict.Keys
-                .Where(f => HEF_Settings.FriendlyHEFsCanExpand || f.HostileTo(Find.FactionManager.OfPlayer))
+                .Where(f => HEF_Settings.friendlyHEFsCanExpand || f.HostileTo(Find.FactionManager.OfPlayer))
                 .ToList();
 
             if (eligibleFactions.NullOrEmpty())

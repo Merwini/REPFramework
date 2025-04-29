@@ -20,7 +20,18 @@ namespace rep.heframework
             {
                 faction = map.ParentFaction;
             }
+
+            if (HEF_Settings.debugLogging)
+            {
+                Log.Message($"GetMapFaction (site) returning {faction}");
+            }
+
             return faction;
+        }
+
+        public override float GetUnmodifiedThreatPoints(WorldObjectExtensionHEF extension, GenStepParams parms, Faction faction)
+        {
+            return parms.sitePart.parms.threatPoints;
         }
 
         public override PawnGroupMaker GetPawnGroupMaker(FactionDef factionDef, PawnGroupMakerExtensionHEF pext, WorldObjectExtensionHEF wext)

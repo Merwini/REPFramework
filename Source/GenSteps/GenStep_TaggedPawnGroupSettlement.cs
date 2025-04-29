@@ -16,7 +16,17 @@ namespace rep.heframework
     {
         public override Faction GetMapFaction(Map map, GenStepParams parms)
         {
+            if (HEF_Settings.debugLogging)
+            {
+                Log.Message($"GetMapFaction (settlement) returning {map.ParentFaction}");
+            }
+
             return map.ParentFaction;
+        }
+
+        public override float GetUnmodifiedThreatPoints(WorldObjectExtensionHEF extension, GenStepParams parms, Faction faction)
+        {
+            return extension.defenderThreatPointsRange.RandomInRange;
         }
 
         public override PawnGroupMaker GetPawnGroupMaker(FactionDef factionDef, PawnGroupMakerExtensionHEF pext, WorldObjectExtensionHEF wext)

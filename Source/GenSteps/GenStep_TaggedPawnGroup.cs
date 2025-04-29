@@ -57,8 +57,10 @@ namespace rep.heframework
             }
 
             // Want to preserve this number for logging
-            float modifiedThreatPoints = parms.sitePart.parms.threatPoints * HEF_Utils.GetThreatPointModifierWithSites(HEF_Utils.FindExistingHEFSiteDefsFor(faction));
-            
+            float originalThreatPoints = GetUnmodifiedThreatPoints(objectExtension, parms, faction);
+
+            float modifiedThreatPoints = originalThreatPoints * HEF_Utils.GetThreatPointModifierWithSites(HEF_Utils.FindExistingHEFSiteDefsFor(faction));
+
             float clampedThreatPoints = objectExtension.defenderThreatPointsRange.ClampToRange(modifiedThreatPoints);
             if (clampedThreatPoints < 0f)
             {
@@ -67,7 +69,7 @@ namespace rep.heframework
 
             if (HEF_Settings.debugLogging)
             {
-                Log.Message($"Generating map defenders using {clampedThreatPoints} points after clamping. Was {modifiedThreatPoints} after modified by world sites. {parms.sitePart.parms.threatPoints} originally.");
+                Log.Message($"Generating map defenders using {clampedThreatPoints} points after clamping. Was {modifiedThreatPoints} after modified by world sites. {originalThreatPoints} originally.");
             }
 
             List<Pawn> pawns = GeneratePawnsFromGroupMaker(map, pawnGroupMaker, faction, clampedThreatPoints);
@@ -132,6 +134,22 @@ namespace rep.heframework
                 }
             }
 
+            if (HEF_Settings.debugLogging)
+            {
+                StringBuilder sb = new StringBuilder();
+                sb.AppendLine($"SplitPawnsUp divided {pawns.Count} pawns between {spawns.Count} spawn points");
+                foreach (var entry in spawnDict)
+                {
+                    sb.AppendLine($"Spawn point {entry.Key.point} has the following pawns:");
+                    foreach (var pawn in entry.Value)
+                    {
+                        sb.AppendLine($"{pawn.kindDef} with name {pawn.Name}");
+                    }
+                    sb.AppendLine();
+                }
+                Log.Message(sb.ToString());
+            }
+
             return spawnDict;
         }
 
@@ -171,13 +189,26 @@ namespace rep.heframework
 
         internal List<Pawn> GeneratePawnsFromGroupMaker(Map map, PawnGroupMaker pawnGroupMaker, Faction faction, float threatPoints)
         {
-            return pawnGroupMaker.GeneratePawns(new PawnGroupMakerParms
+            List<Pawn> list = pawnGroupMaker.GeneratePawns(new PawnGroupMakerParms
             {
                 groupKind = PawnGroupKindDefOf.Combat,
                 tile = map.Tile,
                 faction = faction,
                 points = threatPoints
             }).ToList();
+
+            if (HEF_Settings.debugLogging)
+            {
+                StringBuilder sb = new StringBuilder();
+                sb.AppendLine($"GeneratePawnsFromGroupMaker generated {list.Count} pawns:");
+                foreach (var pawn in list)
+                {
+                    sb.AppendLine($"{pawn.kindDef}");
+                }
+                Log.Message(sb.ToString());
+            }
+
+            return list;
         }
 
         public List<SpawnCounter> FindSpawnPoints(Map map)
@@ -229,6 +260,8 @@ namespace rep.heframework
         }
 
         public abstract Faction GetMapFaction(Map map, GenStepParams parms);
+
+        public abstract float GetUnmodifiedThreatPoints(WorldObjectExtensionHEF extension, GenStepParams parms, Faction faction);
 
         public abstract PawnGroupMaker GetPawnGroupMaker(FactionDef factionDef, PawnGroupMakerExtensionHEF pext, WorldObjectExtensionHEF wext);
     }

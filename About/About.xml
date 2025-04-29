@@ -1,11 +1,11 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <ModMetaData>
-	<name>REP Framework</name>
+	<name>RimWorld Enhancement Project Framework</name>
 	<author>Serina and Nuff</author>
 	<supportedVersions>
 		<li>1.5</li>
 	</supportedVersions>
-	<description>Framework for the Rimworld Extended Project.</description>
+	<description>Framework for the Rimworld Enhancement Project.</description>
 	<packageId>rep.framework</packageId>
 	<modDependencies>
 		<li>
@@ -14,4 +14,8 @@
 			<steamWorkshopUrl>https://steamcommunity.com/sharedfiles/filedetails/?id=2023507013</steamWorkshopUrl>
 		</li>
 	</modDependencies>
+    <loadAfter>
+        <li>oskarpotocki.vanillafactionsexpanded.core</li>
+        <li>CETeam.CombatExtended</li>
+    </loadAfter>
 </ModMetaData>

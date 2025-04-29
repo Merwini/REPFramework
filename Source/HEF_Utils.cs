@@ -404,11 +404,11 @@ namespace rep.heframework
         {
             if (parms.sitePart != null)
             {
-                return (WorldObjectExtensionHEF)parms.sitePart?.def.GetModExtension<WorldObjectExtensionHEF>();
+                return parms.sitePart?.def.GetModExtension<WorldObjectExtensionHEF>();
             }
 
             // Getting the extension for a faction settlement instead of site
-            return (WorldObjectExtensionHEF)factionDef.GetModExtension<WorldObjectExtensionHEF>();
+            return factionDef.GetModExtension<WorldObjectExtensionHEF>();
         }
 
         public static float GetThreatPointModifierWithSites(List<SitePartDef> siteDefs)
@@ -426,7 +426,7 @@ namespace rep.heframework
 
             if (HEF_Settings.debugLogging)
             {
-                Log.Message($"GetThreatPointModifierForFactionis returning a modifier of {modifier} based on {siteDefs.Count} sites");
+                Log.Message($"GetThreatPointModifierWithSites is returning a modifier of {modifier} based on {siteDefs.Count} sites");
             }
 
             return modifier;

@@ -1,5 +1,4 @@
 Ability to make site defs non-unique so multiples are allowed to be spawned
 Either make a mod to enable Mapmaking tools, or a mod option in framework to enable/disable them
 
-Rewrite HEF_SitePartWorker_Expansion
-Rewrite 
+Add an extension to greenscreen objects that says what category of thing to change them into?

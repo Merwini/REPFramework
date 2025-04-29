@@ -26,7 +26,7 @@ namespace rep.heframework
 
         public override float GetUnmodifiedThreatPoints(WorldObjectExtensionHEF extension, GenStepParams parms, Faction faction)
         {
-            return extension.defenderThreatPointsRange.RandomInRange;
+            return extension.settlementThreatPoints;
         }
 
         public override PawnGroupMaker GetPawnGroupMaker(FactionDef factionDef, PawnGroupMakerExtensionHEF pext, WorldObjectExtensionHEF wext)

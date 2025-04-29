@@ -21,7 +21,9 @@ namespace rep.heframework
 
         public FloatRange spawnThreatPointRange = new FloatRange(0, 1000000);
 
-        public FloatRange defenderThreatPointsRange = new FloatRange(240f, 10000f);
+        public FloatRange defenderThreatPointsRange = new FloatRange(240f, 20000f);
+
+        public float settlementThreatPoints = 6000f;
 
         public SimpleCurve threatPointCurve;
 

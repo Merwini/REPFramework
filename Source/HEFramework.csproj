@@ -66,6 +66,7 @@
     <Compile Include="GenSteps\GenStep_TaggedPawnGroupSite.cs" />
     <Compile Include="HarmonyPatches.cs" />
     <Compile Include="HefDefOf.cs" />
+    <Compile Include="HEF_Mod.cs" />
     <Compile Include="MapToolBuilding.cs" />
     <Compile Include="TaggedPawnGroupMaker.cs" />
     <Compile Include="HEF_Settings.cs" />

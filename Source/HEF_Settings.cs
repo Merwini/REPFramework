@@ -12,12 +12,19 @@ namespace rep.heframework
     public class HEF_Settings : ModSettings
     {
         //TODO friendly expansion will only be a relevant setting once war mechanics are implemented
-        public static bool FriendlyHEFsCanExpand = false;
+        public static bool friendlyHEFsCanExpand = false;
 
-        public static int earliestExpansionDays = 15; //TODO balance
+        public static int earliestExpansionDays = 30; //TODO balance
 
         public static bool debugLogging = false;
 
-        //TODO organize, customize, save
+        public override void ExposeData()
+        {
+            Scribe_Values.Look(ref friendlyHEFsCanExpand, "FriendlyHEFsCanExpand", false);
+            Scribe_Values.Look(ref debugLogging, "debugLogging", false);
+            Scribe_Values.Look(ref earliestExpansionDays, "earliestExpansionDays");
+
+            base.ExposeData();
+        }
     }
 }

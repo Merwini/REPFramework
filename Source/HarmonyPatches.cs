@@ -11,6 +11,7 @@ using Verse;
 using Verse.AI;
 using System.Reflection;
 using System.Reflection.Emit;
+using KCSG;
 
 namespace rep.heframework
 {
@@ -170,5 +171,15 @@ namespace rep.heframework
   
         }
 
+        [HarmonyPatch(typeof(KCSG.SymbolResolver_Settlement), "AddHostilePawnGroup")]
+        public static class SymbolResolver_Settlement_AddHostilePawnGroup_Prefix
+        {
+            static bool Prefix(Faction faction, Map map, ResolveParams parms, PawnGroupKindDef pawnGroup)
+            {
+                WorldObjectExtensionHEF extension = faction?.def.GetModExtension<WorldObjectExtensionHEF>();
+
+                return extension == null;
+            }
+        }
     }
 }

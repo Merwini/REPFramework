@@ -31,9 +31,16 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
+  <PropertyGroup>
+      <PublicizeAll>true</PublicizeAll>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="0Harmony">
       <HintPath>..\..\..\..\..\workshop\content\294100\2009463077\Current\Assemblies\0Harmony.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="KCSG">
+      <HintPath>..\..\..\..\..\workshop\content\294100\2023507013\1.5\Assemblies\KCSG.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="System.Core" />
@@ -102,6 +109,7 @@
   </ItemGroup>
   <ItemGroup>
     <Publicize Include="Assembly-CSharp" />
+    <Publicize Include="KCSG" />
   </ItemGroup>
   <ItemGroup>
     <None Include="TODO" />

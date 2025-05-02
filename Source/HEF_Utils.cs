@@ -78,62 +78,79 @@ namespace rep.heframework
             return list;
         }
 
-        public static List<SitePartDef> FindExistingHEFSiteDefsFor(Faction fact)
+        public static Dictionary<SitePartDef, int> FindExistingHEFSiteDefsFor(Faction fact)
         {
-            List<SitePartDef> list = FindDefsForSites(FindHEFSitesFor(fact));
+            Dictionary<SitePartDef, int> defCounts = FindDefCountsForSites(FindHEFSitesFor(fact));
 
             #region logging
             if (HEF_Settings.debugLogging)
             {
                 StringBuilder sb = new StringBuilder();
                 sb.AppendLine($"FindExistingHEFSiteDefsFor faction: {fact.Name} is returning:");
-                foreach (SitePartDef spd in list)
+                foreach (KeyValuePair<SitePartDef, int> kvp in defCounts)
                 {
-                    sb.AppendLine($"def: {spd.defName}");
+                    sb.AppendLine($"def: {kvp.Key.defName}, count: {kvp.Value}");
                 }
                 Log.Message(sb.ToString());
             }
             #endregion
 
-            return list;
+            return defCounts;
         }
 
-        public static List<SitePartDef> FindDefsForSites(List<Site> sites)
+        public static Dictionary<SitePartDef, int> FindDefCountsForSites(List<Site> sites)
         {
-            List<SitePartDef> list = sites?.Where(site => site != null)
-                         .Select(site => site.MainSitePartDef)
-                         .ToList() ?? new List<SitePartDef>();
+            Dictionary<SitePartDef, int> defCounts = new Dictionary<SitePartDef, int>();
+
+            if (sites != null)
+            {
+                foreach (Site site in sites)
+                {
+                    if (site?.MainSitePartDef != null)
+                    {
+                        SitePartDef def = site.MainSitePartDef;
+                        defCounts.TryGetValue(def, out int count);
+                        defCounts[def] = count + 1;
+                    }
+                }
+            }
 
             #region logging
             if (HEF_Settings.debugLogging)
             {
                 StringBuilder sb = new StringBuilder();
-                sb.AppendLine($"FindDefsForSites is returning:");
-                foreach (SitePartDef spd in list)
+                sb.AppendLine("FindDefCountsForSites is returning:");
+                foreach (var kvp in defCounts)
                 {
-                    sb.AppendLine($"def: {spd.defName}");
+                    sb.AppendLine($"def: {kvp.Key.defName}, count: {kvp.Value}");
                 }
                 Log.Message(sb.ToString());
             }
             #endregion
 
-            return list;
+            return defCounts;
         }
 
         public static List<SitePartDef> FindEligibleHEFSiteDefsFor(Faction fact)
         {
-            List<SitePartDef> usedDefs = FindExistingHEFSiteDefsFor(fact);
+            Dictionary<SitePartDef, int> usedCounts = FindExistingHEFSiteDefsFor(fact);
             List<SitePartDef> eligibleDefs = new List<SitePartDef>();
 
             foreach (SitePartDef def in DefDatabase<SitePartDef>.AllDefs)
             {
                 WorldObjectExtensionHEF extension = def.GetModExtension<WorldObjectExtensionHEF>();
                 if (extension != null 
-                    && extension.factionsToPawnGroups.Any(x => x.Faction == fact.def)
-                    && (!usedDefs.Contains(def) || !extension.siteIsUnique)) // Either doesn't already have one, or is allowed to be non-unique
+                    && extension.factionsToPawnGroups.Any(x => x.Faction == fact.def))
                     //TODO && cull choices based on min and max threat point values, so ou can separate early-game and late-game sites
+                    //TODO implement a List<string> prerequisiteTags on WorldObjectExtensionHEF and check if those tags are present, to enable sites that require another site first
                 {
-                    eligibleDefs.Add(def);
+                    {
+                        int count = usedCounts.TryGetValue(def, out int c) ? c : 0;
+                        if (count < extension.maximumSiteCount)
+                        {
+                            eligibleDefs.Add(def);
+                        }
+                    }
                 }
             }
 
@@ -192,10 +209,10 @@ namespace rep.heframework
         // this occurs after TryGenerateRaidInfo has already assigned parms.faction and diverted if that faction has PawnGroupMakerExtensionHEF
         public static bool TryGenerateExtendedRaidInfo(IncidentParms parms, out List<Pawn> pawns, bool debugTest = false)
         {
-            List<SitePartDef> hefSiteDefs = FindDefsForSites(FindHEFSitesFor(parms.faction));
+            Dictionary<SitePartDef, int> hefSiteDefs = FindDefCountsForSites(FindHEFSitesFor(parms.faction));
 
             // Due to the Expansion Site system, it will be easiest to select the PawnGroupMaker first, as there is otherwise a high probability that selected Strategy/ArrivalMode will have no legal PawnGroup
-            if (!TryResolveTaggedPawnGroup(parms, hefSiteDefs, out TaggedPawnGroupMaker groupMaker))
+            if (!TryResolveTaggedPawnGroup(parms, hefSiteDefs.Keys.ToList(), out TaggedPawnGroupMaker groupMaker))
             {
                 pawns = new List<Pawn>();
                 return false;
@@ -351,7 +368,7 @@ namespace rep.heframework
         }
 
         // Mostly copied from vanilla, with a multiplier based on world sites
-        public static float AdjustedRaidPoints(float points, List<SitePartDef> sites, PawnsArrivalModeDef raidArrivalMode, RaidStrategyDef raidStrategy, Faction faction, PawnGroupKindDef groupKind, RaidAgeRestrictionDef ageRestriction = null)
+        public static float AdjustedRaidPoints(float points, Dictionary<SitePartDef, int> sites, PawnsArrivalModeDef raidArrivalMode, RaidStrategyDef raidStrategy, Faction faction, PawnGroupKindDef groupKind, RaidAgeRestrictionDef ageRestriction = null)
         {
             float siteModifiedPoints = points * GetThreatPointModifierWithSites(sites);
 
@@ -411,22 +428,27 @@ namespace rep.heframework
             return factionDef.GetModExtension<WorldObjectExtensionHEF>();
         }
 
-        public static float GetThreatPointModifierWithSites(List<SitePartDef> siteDefs)
+        public static float GetThreatPointModifierWithSites(Dictionary<SitePartDef, int> siteDefsWithCounts)
         {
             float modifier = 1f;
+            int totalInstances = 0;
 
-            foreach (SitePartDef spd in siteDefs)
+            foreach (KeyValuePair<SitePartDef, int> entry in siteDefsWithCounts)
             {
+                SitePartDef spd = entry.Key;
+                int count = entry.Value;
+                totalInstances += count;
+
                 WorldObjectExtensionHEF extension = spd.GetModExtension<WorldObjectExtensionHEF>();
                 if (extension != null)
                 {
-                    modifier += extension.threatPointModifier;
+                    modifier += extension.threatPointModifier * count;
                 }
             }
 
             if (HEF_Settings.debugLogging)
             {
-                Log.Message($"GetThreatPointModifierWithSites is returning a modifier of {modifier} based on {siteDefs.Count} sites");
+                Log.Message($"GetThreatPointModifierWithSites is returning a modifier of {modifier} based on {totalInstances} site instances");
             }
 
             return modifier;

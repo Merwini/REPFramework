@@ -198,7 +198,7 @@ namespace rep.heframework
 
             //todo do I need to adjust the parms?
 
-            return extension.fireIncidentOnSpawn.Worker.TryExecuteWorker(parms);
+            return extension.fireIncidentOnSpawn.Worker.TryExecute(parms);
         }
     }
 }

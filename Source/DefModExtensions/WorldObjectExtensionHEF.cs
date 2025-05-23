@@ -35,6 +35,8 @@ namespace rep.heframework
 
         public int maximumSiteCount = 10;
 
+        public IncidentDef fireIncidentOnSpawn = null;
+
         #endregion
     }
 

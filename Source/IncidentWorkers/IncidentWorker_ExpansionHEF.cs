@@ -49,6 +49,12 @@ namespace rep.heframework
             if (!TryPlaceSite())
                 return false;
 
+            if (!TryFireIncident(parms))
+            {
+                site.Destroy(); // since it would have already been placed
+                return false;
+            }
+
             SendStandardLetter(parms, site, parms.faction.Name, site.Label, ""); //TODO set up letter and translate //TODO find a way to sneak explanations into site info
 
             return true;
@@ -181,6 +187,18 @@ namespace rep.heframework
         {
             Find.WorldObjects.Add(site);
             return true;
+        }
+
+        internal bool TryFireIncident(IncidentParms parms)
+        {
+            if (extension.fireIncidentOnSpawn == null)
+                return true;
+
+            //todo do I need to check that the IncidentDef exists? I think it would cause an error at game start if the xml is wrong
+
+            //todo do I need to adjust the parms?
+
+            return extension.fireIncidentOnSpawn.Worker.TryExecuteWorker(parms);
         }
     }
 }

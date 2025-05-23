@@ -273,6 +273,14 @@ namespace rep.heframework
 
             List<string> hefTags = FindStringsForDefs(siteDefs);
             PawnGroupMakerExtensionHEF extension = parms.faction.def.GetModExtension<PawnGroupMakerExtensionHEF>();
+
+            if (parms.questTag != null && parms.questTag.StartsWith(HEDebugActions.DebugPrefix))
+            {
+                string groupName = parms.questTag.Substring(HEDebugActions.DebugPrefix.Length);
+                groupMaker = extension.taggedPawnGroupMakers.FirstOrDefault(x => x.groupName.Equals(groupName));
+                return groupMaker == null;
+            }
+
             foreach (TaggedPawnGroupMaker tpgm in extension.taggedPawnGroupMakers)
             {
                 if (CheckIfAllTagsPresent(tpgm.requiredSiteTags, hefTags))
@@ -339,30 +347,55 @@ namespace rep.heframework
 
         public static void ResolveRaidStrategy(IncidentParms parms, TaggedPawnGroupMaker groupMaker)
         {
+            Map map = (Map)parms.target;
+            List<RaidStrategyDef> possibleStrats = new List<RaidStrategyDef>();
             if (parms.raidStrategy == null)
             {
-                parms.raidStrategy = groupMaker.allowedRaidStrategies.RandomElement(); //TODO consider using point curve weight
+                possibleStrats = groupMaker.allowedRaidStrategies;
+                possibleStrats.TryRandomElementByWeight((RaidStrategyDef d) => d.Worker.SelectionWeightForFaction(map, parms.faction, parms.points), out parms.raidStrategy);
+            }
+            else
+            {
+                possibleStrats.Add(parms.raidStrategy);
             }
 
             #region logging
             if (HEF_Settings.debugLogging)
             {
-                Log.Message($"ResolveRaidStrategy selected: {parms.raidStrategy.defName}");
+                StringBuilder sb = new StringBuilder();
+                sb.AppendLine($"ResolveRaidStrategy selected: {parms.raidStrategy.defName} from the following options:");
+                foreach (RaidStrategyDef def in possibleStrats)
+                {
+                    sb.AppendLine(def.defName);
+                }
+                Log.Message(sb.ToString());
             }
             #endregion
         }
 
         public static void ResolveRaidArriveMode(IncidentParms parms, TaggedPawnGroupMaker groupMaker)
         {
+            List<PawnsArrivalModeDef> possibleModes = new List<PawnsArrivalModeDef>();
             if (parms.raidArrivalMode == null)
             {
-                parms.raidArrivalMode = groupMaker.allowedArrivalModes.RandomElement();
+                possibleModes = groupMaker.allowedArrivalModes;
+                possibleModes.TryRandomElementByWeight((PawnsArrivalModeDef x) => x.Worker.GetSelectionWeight(parms), out parms.raidArrivalMode);
+            }
+            else
+            {
+                possibleModes.Add(parms.raidArrivalMode);
             }
 
             #region logging
             if (HEF_Settings.debugLogging)
             {
-                Log.Message($"ResolveRaidArriveMode selected: {parms.raidArrivalMode.defName}");
+                StringBuilder sb = new StringBuilder();
+                sb.AppendLine($"ResolveRaidArriveMode selected: {parms.raidArrivalMode.defName} from the following options:");
+                foreach (PawnsArrivalModeDef def in possibleModes)
+                {
+                    sb.AppendLine(def.defName);
+                }
+                Log.Message(sb.ToString());
             }
             #endregion
         }

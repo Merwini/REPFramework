@@ -1,0 +1,23 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Defs>
+
+	<IncidentDef Abstract="True" Name="HE_ExpBase">
+		<category>Misc</category>
+		<targetTags>
+			<li>World</li>
+		</targetTags>
+		<letterDef>NeutralEvent</letterDef>
+		<letterText>Intelligence reports indicate that {0} has completed construction of a {1}. {2}</letterText>
+	</IncidentDef>
+
+	<IncidentDef ParentName="HE_ExpBase">
+		<defName>HE_Expansion</defName>
+		<label>enemy expansion</label>
+		<workerClass>rep.heframework.IncidentWorker_ExpansionHE</workerClass>
+		<letterLabel>Military expansion</letterLabel>
+		<baseChance>2.6</baseChance>
+		<earliestDay>15</earliestDay>
+		<minRefireDays>15</minRefireDays>
+	</IncidentDef>
+    
+</Defs>

@@ -21,7 +21,7 @@ namespace rep.heframework
                 faction = map.ParentFaction;
             }
 
-            if (HEF_Settings.debugLogging)
+            if (HE_Settings.debugLogging)
             {
                 Log.Message($"GetMapFaction (site) returning {faction}");
             }
@@ -29,12 +29,12 @@ namespace rep.heframework
             return faction;
         }
 
-        public override float GetUnmodifiedThreatPoints(WorldObjectExtensionHEF extension, GenStepParams parms, Faction faction)
+        public override float GetUnmodifiedThreatPoints(WorldObjectExtensionHE extension, GenStepParams parms, Faction faction)
         {
             return parms.sitePart.parms.threatPoints;
         }
 
-        public override PawnGroupMaker GetPawnGroupMaker(FactionDef factionDef, PawnGroupMakerExtensionHEF pext, WorldObjectExtensionHEF wext)
+        public override PawnGroupMaker GetPawnGroupMaker(FactionDef factionDef, PawnGroupMakerExtensionHEF pext, WorldObjectExtensionHE wext)
         {
             string groupName = wext.factionsToPawnGroups.FirstOrDefault(link => link.Faction == factionDef).PawnGroups.RandomElement();
             PawnGroupMaker pawnGroupMaker = pext.taggedPawnGroupMakers.FirstOrDefault(pgm => pgm.groupName == groupName);

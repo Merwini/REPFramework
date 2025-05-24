@@ -10,7 +10,7 @@ using Verse;
 
 namespace rep.heframework
 {
-    public class WorldObjectExtensionHEF : DefModExtension
+    public class WorldObjectExtensionHE : DefModExtension
     {
         #region Fields
         public List<FactionGroupLink> factionsToPawnGroups;
@@ -36,6 +36,8 @@ namespace rep.heframework
         public int maximumSiteCount = 10;
 
         public IncidentDef fireIncidentOnSpawn = null;
+
+        public ThingDef artilleryProjectile;
 
         #endregion
     }

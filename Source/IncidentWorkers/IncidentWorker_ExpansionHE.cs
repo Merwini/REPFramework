@@ -10,18 +10,18 @@ using Verse;
 
 namespace rep.heframework
 {
-    public class IncidentWorker_ExpansionHEF : IncidentWorker
+    public class IncidentWorker_ExpansionHE : IncidentWorker
     {
         internal Dictionary<Faction, List<SitePartDef>> factionEligibleSitesDict;
         
         internal SitePartDef sitePartDef;
-        WorldObjectExtensionHEF extension;
+        WorldObjectExtensionHE extension;
         internal int tile;
         internal Site site;
 
         public override bool CanFireNowSub(IncidentParms parms)
         {
-            return (float)GenDate.DaysPassedSinceSettle >= HEF_Settings.earliestExpansionDays;
+            return (float)GenDate.DaysPassedSinceSettle >= HE_Settings.earliestExpansionDays;
         }
 
         public override bool TryExecuteWorker(IncidentParms parms)
@@ -35,7 +35,7 @@ namespace rep.heframework
             if (!TryResolveExpansionDef(parms))
                 return false;
 
-            extension = sitePartDef.GetModExtension<WorldObjectExtensionHEF>();
+            extension = sitePartDef.GetModExtension<WorldObjectExtensionHE>();
 
             if (!TryAdjustPoints(parms))
                 return false;
@@ -72,33 +72,33 @@ namespace rep.heframework
             // If debug tool forcing a chosen faction
             if (parms.faction != null && parms.faction.def.HasModExtension<PawnGroupMakerExtensionHEF>())
             {
-                factionEligibleSitesDict[parms.faction] = HEF_Utils.FindEligibleHEFSiteDefsFor(parms.faction);
-                if (HEF_Settings.debugLogging)
+                factionEligibleSitesDict[parms.faction] = HE_Utils.FindEligibleHESiteDefsFor(parms.faction);
+                if (HE_Settings.debugLogging)
                 {
                     sb.AppendLine($"PopulateFactionSiteDictionary had faction forced: {parms.faction.Name} with {factionEligibleSitesDict.TryGetValue(parms.faction).Count} sites available.");
                 }
             }
             else
             {
-                if (HEF_Settings.debugLogging)
+                if (HE_Settings.debugLogging)
                 {
                     sb.AppendLine("PopulateFactionSiteDictionary searching all factions for eligible sites.");
                 }
 
                 foreach (Faction fact in Find.FactionManager.AllFactions.Where(f => f.def.HasModExtension<PawnGroupMakerExtensionHEF>()))
                 {
-                    List<SitePartDef> list = HEF_Utils.FindEligibleHEFSiteDefsFor(fact);
+                    List<SitePartDef> list = HE_Utils.FindEligibleHESiteDefsFor(fact);
                     if (list.Count != 0)
                     {
                         factionEligibleSitesDict[fact] = list;
-                        if (HEF_Settings.debugLogging)
+                        if (HE_Settings.debugLogging)
                         {
                             sb.AppendLine($"Added {fact.Name} with {list.Count} sites available.");
                         }
                     }
                 }
             }
-            if (HEF_Settings.debugLogging)
+            if (HE_Settings.debugLogging)
             {
                 Log.Message(sb.ToString());
             }
@@ -109,12 +109,12 @@ namespace rep.heframework
         internal bool TryResolveExpansionFaction(IncidentParms parms)
         {
             List<Faction> eligibleFactions = factionEligibleSitesDict.Keys
-                .Where(f => HEF_Settings.friendlyHEFsCanExpand || f.HostileTo(Find.FactionManager.OfPlayer))
+                .Where(f => HE_Settings.friendlyHEFsCanExpand || f.HostileTo(Find.FactionManager.OfPlayer))
                 .ToList();
 
             if (eligibleFactions.NullOrEmpty())
             {
-                if (HEF_Settings.debugLogging)
+                if (HE_Settings.debugLogging)
                 {
                     Log.Message("TryResolveExpansionFaction unable to choose a faction, no factions with available sites.");
                 }
@@ -123,7 +123,7 @@ namespace rep.heframework
 
             eligibleFactions.TryRandomElement(out parms.faction);
 
-            if (HEF_Settings.debugLogging)
+            if (HE_Settings.debugLogging)
             {
                 Log.Message($"TryResolveExpansionFaction selected faction: {parms.faction.Name}");
             }
@@ -135,7 +135,7 @@ namespace rep.heframework
         {
             if (!factionEligibleSitesDict.TryGetValue(parms.faction, out List<SitePartDef> eligibleSitePartDefs) || eligibleSitePartDefs.NullOrEmpty())
             {
-                if (HEF_Settings.debugLogging)
+                if (HE_Settings.debugLogging)
                 {
                     Log.Message($"TryResolveExpansionDef unable to choose a SitePartDef, didn't get any eligible sites for faction: {parms.faction}");
                 }
@@ -145,7 +145,7 @@ namespace rep.heframework
             //TODO custom expansion patterns for different storytellers? e.x. has to spawn X minor expansions before doing a major one, random, spawn in a set pattern
             sitePartDef = eligibleSitePartDefs.RandomElementByWeight(s => s.selectionWeight);
 
-            if (HEF_Settings.debugLogging)
+            if (HE_Settings.debugLogging)
             {
                 Log.Message($"TryResolveExpansionDef selected SitePartDef {sitePartDef.defName} for faction: {parms.faction.Name}");
             }
@@ -159,7 +159,7 @@ namespace rep.heframework
             {
                 float defaultPoints = StorytellerUtility.DefaultThreatPointsNow(Find.World);
                 parms.points = extension.threatPointCurve.Evaluate(defaultPoints) * SiteTuning.SitePointRandomFactorRange.RandomInRange;
-                if (HEF_Settings.debugLogging)
+                if (HE_Settings.debugLogging)
                 {
                     Log.Message($"TryAdjustPoints threat points pre-curve: {defaultPoints}, post-curve: {parms.points}");
                 }
@@ -197,6 +197,10 @@ namespace rep.heframework
             //todo do I need to check that the IncidentDef exists? I think it would cause an error at game start if the xml is wrong
 
             //todo do I need to adjust the parms?
+
+            HE_IncidentParms heParms 
+
+            parms.podOpenDelay = tile; // can't pass the site directly to the IncidentWorker, but it will make it easier to find the associated site
 
             return extension.fireIncidentOnSpawn.Worker.TryExecute(parms);
         }

@@ -86,7 +86,7 @@ namespace rep.heframework
 
 			//Check that the site is HEF
 			SitePartDef mainPart = site.MainSitePartDef;
-			WorldObjectExtensionHEF siteExtension = (WorldObjectExtensionHEF)mainPart.GetModExtension<WorldObjectExtensionHEF>();
+			WorldObjectExtensionHE siteExtension = (WorldObjectExtensionHE)mainPart.GetModExtension<WorldObjectExtensionHE>();
 			if (siteExtension == null)
 			{
 				Log.Error($"Using HEF_SiteWorker_Expansion on non-HEF site {site.Label}. Destroying site.");

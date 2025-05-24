@@ -24,7 +24,7 @@ namespace rep.heframework
                 return;
             }
 
-            WorldObjectExtensionHEF extension = HEF_Utils.GetWorldObjectExtension(faction.def, parms);
+            WorldObjectExtensionHE extension = HE_Utils.GetWorldObjectExtension(faction.def, parms);
             if (extension == null)
             {
                 Log.Warning("GenStep_LootPerPawn for new map failed to find WorldObjectExtension. Unable to adjust loot.");
@@ -71,7 +71,7 @@ namespace rep.heframework
             return faction;
         }
 
-        public bool PopulateDictionary(Dictionary<ThingDef, int> lootLinkDict, WorldObjectExtensionHEF extension)
+        public bool PopulateDictionary(Dictionary<ThingDef, int> lootLinkDict, WorldObjectExtensionHE extension)
         {
             if (extension == null || extension.lootLinks.NullOrEmpty())
             {

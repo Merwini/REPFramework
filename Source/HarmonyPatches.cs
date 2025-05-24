@@ -108,7 +108,7 @@ namespace rep.heframework
             }
             else
             {
-                HEF_Utils.TryGenerateExtendedRaidInfo(parms, out pawns, debugTest);
+                HE_Utils.TryGenerateExtendedRaidInfo(parms, out pawns, debugTest);
                 return true;
             }
         }
@@ -120,7 +120,7 @@ namespace rep.heframework
             {
                 if (__instance is Site site)
                 {
-                    WorldObjectExtensionHEF extension = (WorldObjectExtensionHEF)site.MainSitePartDef?.modExtensions?.FirstOrDefault(x => x is WorldObjectExtensionHEF);
+                    WorldObjectExtensionHE extension = (WorldObjectExtensionHE)site.MainSitePartDef?.modExtensions?.FirstOrDefault(x => x is WorldObjectExtensionHE);
 
                     if (extension != null && extension.mapGenerator != null)
                     {
@@ -136,7 +136,7 @@ namespace rep.heframework
         {
             static void Postfix(Settlement __instance, ref MapGeneratorDef __result)
             {
-                WorldObjectExtensionHEF extension = (WorldObjectExtensionHEF)__instance.Faction?.def.modExtensions?.FirstOrDefault(x => x is WorldObjectExtensionHEF);
+                WorldObjectExtensionHE extension = (WorldObjectExtensionHE)__instance.Faction?.def.modExtensions?.FirstOrDefault(x => x is WorldObjectExtensionHE);
                 if (extension != null && extension.mapGenerator != null)
                 {
                     __result = extension.mapGenerator;
@@ -176,7 +176,7 @@ namespace rep.heframework
         {
             static bool Prefix(Faction faction, Map map, ResolveParams parms, PawnGroupKindDef pawnGroup)
             {
-                WorldObjectExtensionHEF extension = faction?.def.GetModExtension<WorldObjectExtensionHEF>();
+                WorldObjectExtensionHE extension = faction?.def.GetModExtension<WorldObjectExtensionHE>();
 
                 return extension == null;
             }

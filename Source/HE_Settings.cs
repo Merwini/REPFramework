@@ -9,7 +9,7 @@ using Verse;
 
 namespace rep.heframework
 {
-    public class HEF_Settings : ModSettings
+    public class HE_Settings : ModSettings
     {
         //TODO friendly expansion will only be a relevant setting once war mechanics are implemented
         public static bool friendlyHEFsCanExpand = false;

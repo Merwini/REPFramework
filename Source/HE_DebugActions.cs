@@ -7,7 +7,7 @@ using Verse;
 
 namespace rep.heframework
 {
-    public static class HEDebugActions
+    public static class HE_DebugActions
     {
         internal const string DebugPrefix = "HEDebugForced_";
 
@@ -15,7 +15,7 @@ namespace rep.heframework
         [DebugAction("RimWorld Enhancement Project", "List HE Factions", false, false, false, false, 0, false, actionType = DebugActionType.Action, allowedGameStates = AllowedGameStates.Playing)]
         public static void ListHEFactions()
         {
-            List<Faction> heFacts = HEF_Utils.ReturnHEFFactions();
+            List<Faction> heFacts = HE_Utils.ReturnHEFactions();
             if (heFacts.NullOrEmpty())
             {
                 Log.Warning("No HE Factions found");
@@ -33,14 +33,14 @@ namespace rep.heframework
         public static void ListHESitesFor() 
         {
             List<DebugMenuOption> list = new List<DebugMenuOption>();
-            List<Faction> heFacts = HEF_Utils.ReturnHEFFactions();
+            List<Faction> heFacts = HE_Utils.ReturnHEFactions();
 
             foreach (Faction f in heFacts)
             {
                 Faction faction = f;
                 list.Add(new DebugMenuOption(faction.Name + " (" + faction.def.defName + ")", DebugMenuOptionMode.Action, delegate
                 {
-                    List<Site> heSites = HEF_Utils.FindHEFSitesFor(faction);
+                    List<Site> heSites = HE_Utils.FindHESitesFor(faction);
                     if (heSites.NullOrEmpty())
                     {
                         Log.Warning("Selected faction has no active HE sites");
@@ -70,7 +70,7 @@ namespace rep.heframework
             IncidentParms parms = storytellerComp.GenerateParms(IncidentCategoryDefOf.ThreatBig, Find.CurrentMap);
             parms.forced = true;
             List<DebugMenuOption> factionList = new List<DebugMenuOption>();
-            foreach (Faction allHEFaction in HEF_Utils.ReturnHEFFactions())
+            foreach (Faction allHEFaction in HE_Utils.ReturnHEFactions())
             {
                 Faction localFac = allHEFaction;
                 factionList.Add(new DebugMenuOption(localFac.Name + " (" + localFac.def.defName + ")", DebugMenuOptionMode.Action, delegate

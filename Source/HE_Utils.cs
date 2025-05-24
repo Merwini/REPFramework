@@ -11,14 +11,14 @@ using UnityEngine;
 
 namespace rep.heframework
 {
-    public static class HEF_Utils
+    public static class HE_Utils
     {
-        public static List<Faction> ReturnHEFFactions()
+        public static List<Faction> ReturnHEFactions()
         {
             List<Faction> factions = Find.FactionManager.AllFactions.Where(f => (f.def.HasModExtension<PawnGroupMakerExtensionHEF>())).ToList();
 
             #region logging
-            if (HEF_Settings.debugLogging)
+            if (HE_Settings.debugLogging)
             {
                 StringBuilder sb = new StringBuilder();
                 sb.AppendLine($"ReturnHEFFactions is returning:");
@@ -33,12 +33,12 @@ namespace rep.heframework
             return factions;
         }
 
-        public static List<Faction> ReturnHostileHEFFactions()
+        public static List<Faction> ReturnHostileHEFactions()
         {
-            List<Faction> hostileFactions = ReturnHEFFactions().Where(f => f.HostileTo(Find.FactionManager.OfPlayer)).ToList();
+            List<Faction> hostileFactions = ReturnHEFactions().Where(f => f.HostileTo(Find.FactionManager.OfPlayer)).ToList();
 
             #region logging
-            if (HEF_Settings.debugLogging)
+            if (HE_Settings.debugLogging)
             {
                 StringBuilder sb = new StringBuilder();
                 sb.AppendLine($"ReturnHostileHEFFactions is returning:");
@@ -53,17 +53,17 @@ namespace rep.heframework
             return hostileFactions;
         }
 
-        public static List<Site> FindHEFSitesFor(Faction fact)
+        public static List<Site> FindHESitesFor(Faction fact)
         {
             List<Site> list = Find.WorldObjects.Sites
                 .Where(site => site != null
                                && site.Faction == fact
                                && site.MainSitePartDef != null
-                               && site.MainSitePartDef.HasModExtension<WorldObjectExtensionHEF>())
+                               && site.MainSitePartDef.HasModExtension<WorldObjectExtensionHE>())
                 .ToList();
 
             #region logging
-            if (HEF_Settings.debugLogging)
+            if (HE_Settings.debugLogging)
             {
                 StringBuilder sb = new StringBuilder();
                 sb.AppendLine($"FindHEFSitesFor faction: {fact.Name} is returning:");
@@ -78,12 +78,12 @@ namespace rep.heframework
             return list;
         }
 
-        public static Dictionary<SitePartDef, int> FindExistingHEFSiteDefsFor(Faction fact)
+        public static Dictionary<SitePartDef, int> FindExistingHESiteDefsFor(Faction fact)
         {
-            Dictionary<SitePartDef, int> defCounts = FindDefCountsForSites(FindHEFSitesFor(fact));
+            Dictionary<SitePartDef, int> defCounts = FindDefCountsForSites(FindHESitesFor(fact));
 
             #region logging
-            if (HEF_Settings.debugLogging)
+            if (HE_Settings.debugLogging)
             {
                 StringBuilder sb = new StringBuilder();
                 sb.AppendLine($"FindExistingHEFSiteDefsFor faction: {fact.Name} is returning:");
@@ -116,7 +116,7 @@ namespace rep.heframework
             }
 
             #region logging
-            if (HEF_Settings.debugLogging)
+            if (HE_Settings.debugLogging)
             {
                 StringBuilder sb = new StringBuilder();
                 sb.AppendLine("FindDefCountsForSites is returning:");
@@ -131,14 +131,14 @@ namespace rep.heframework
             return defCounts;
         }
 
-        public static List<SitePartDef> FindEligibleHEFSiteDefsFor(Faction fact)
+        public static List<SitePartDef> FindEligibleHESiteDefsFor(Faction fact)
         {
-            Dictionary<SitePartDef, int> usedCounts = FindExistingHEFSiteDefsFor(fact);
+            Dictionary<SitePartDef, int> usedCounts = FindExistingHESiteDefsFor(fact);
             List<SitePartDef> eligibleDefs = new List<SitePartDef>();
 
             foreach (SitePartDef def in DefDatabase<SitePartDef>.AllDefs)
             {
-                WorldObjectExtensionHEF extension = def.GetModExtension<WorldObjectExtensionHEF>();
+                WorldObjectExtensionHE extension = def.GetModExtension<WorldObjectExtensionHE>();
                 if (extension != null 
                     && extension.factionsToPawnGroups.Any(x => x.Faction == fact.def))
                     //TODO && cull choices based on min and max threat point values, so ou can separate early-game and late-game sites
@@ -155,7 +155,7 @@ namespace rep.heframework
             }
 
             #region logging
-            if (HEF_Settings.debugLogging)
+            if (HE_Settings.debugLogging)
             {
                 StringBuilder sb = new StringBuilder();
                 sb.AppendLine($"FindEligibleHEFSiteDefsFor faction: {fact.Name} is returning:");
@@ -177,7 +177,7 @@ namespace rep.heframework
                                      .ToList() ?? new List<string>();
 
             #region logging
-            if (HEF_Settings.debugLogging)
+            if (HE_Settings.debugLogging)
             {
                 StringBuilder sb = new StringBuilder();
                 sb.AppendLine($"FindStringsForDefs is returning:");
@@ -209,7 +209,7 @@ namespace rep.heframework
         // this occurs after TryGenerateRaidInfo has already assigned parms.faction and diverted if that faction has PawnGroupMakerExtensionHEF
         public static bool TryGenerateExtendedRaidInfo(IncidentParms parms, out List<Pawn> pawns, bool debugTest = false)
         {
-            Dictionary<SitePartDef, int> hefSiteDefs = FindDefCountsForSites(FindHEFSitesFor(parms.faction));
+            Dictionary<SitePartDef, int> hefSiteDefs = FindDefCountsForSites(FindHESitesFor(parms.faction));
 
             // Due to the Expansion Site system, it will be easiest to select the PawnGroupMaker first, as there is otherwise a high probability that selected Strategy/ArrivalMode will have no legal PawnGroup
             if (!TryResolveTaggedPawnGroup(parms, hefSiteDefs.Keys.ToList(), out TaggedPawnGroupMaker groupMaker))
@@ -274,9 +274,9 @@ namespace rep.heframework
             List<string> hefTags = FindStringsForDefs(siteDefs);
             PawnGroupMakerExtensionHEF extension = parms.faction.def.GetModExtension<PawnGroupMakerExtensionHEF>();
 
-            if (parms.questTag != null && parms.questTag.StartsWith(HEDebugActions.DebugPrefix))
+            if (parms.questTag != null && parms.questTag.StartsWith(HE_DebugActions.DebugPrefix))
             {
-                string groupName = parms.questTag.Substring(HEDebugActions.DebugPrefix.Length);
+                string groupName = parms.questTag.Substring(HE_DebugActions.DebugPrefix.Length);
                 groupMaker = extension.taggedPawnGroupMakers.FirstOrDefault(x => x.groupName.Equals(groupName));
                 return groupMaker == null;
             }
@@ -294,7 +294,7 @@ namespace rep.heframework
             }
 
             #region logging
-            if (HEF_Settings.debugLogging)
+            if (HE_Settings.debugLogging)
             {
                 sb.AppendLine($"TryResolveTaggedPawnGroup found the following potential TaggedPawnGroupMakers:");
                 foreach (TaggedPawnGroupMaker tpgm in possibleGroupMakers)
@@ -308,7 +308,7 @@ namespace rep.heframework
             {
                 groupMaker = null;
                 #region logging
-                if (HEF_Settings.debugLogging)
+                if (HE_Settings.debugLogging)
                 {
                     sb.AppendLine("No valid TaggedPawnGroupMakers found.");
                     Log.Message(sb.ToString());
@@ -321,7 +321,7 @@ namespace rep.heframework
             {
                 possibleGroupMakers = possibleGroupMakers.Where(x => x.groupTier == highestTier).ToList();
                 #region moreLogging
-                if (HEF_Settings.debugLogging)
+                if (HE_Settings.debugLogging)
                 {
                     sb.AppendLine($"TryResolveTaggedPawnGroup using only highest tier. Tier: {highestTier} Possible groups in that tier:");
                     foreach (TaggedPawnGroupMaker tpgm in possibleGroupMakers)
@@ -335,7 +335,7 @@ namespace rep.heframework
             possibleGroupMakers.TryRandomElementByWeight((TaggedPawnGroupMaker gm) => gm.commonality, out groupMaker);
 
             #region evenMoreLogging
-            if (HEF_Settings.debugLogging)
+            if (HE_Settings.debugLogging)
             {
                 sb.AppendLine($"TryResolveTaggedPawnGroup final groupMaker selection: {groupMaker.groupName ?? "unnamed"}");
                 Log.Message(sb.ToString());
@@ -360,7 +360,7 @@ namespace rep.heframework
             }
 
             #region logging
-            if (HEF_Settings.debugLogging)
+            if (HE_Settings.debugLogging)
             {
                 StringBuilder sb = new StringBuilder();
                 sb.AppendLine($"ResolveRaidStrategy selected: {parms.raidStrategy.defName} from the following options:");
@@ -387,7 +387,7 @@ namespace rep.heframework
             }
 
             #region logging
-            if (HEF_Settings.debugLogging)
+            if (HE_Settings.debugLogging)
             {
                 StringBuilder sb = new StringBuilder();
                 sb.AppendLine($"ResolveRaidArriveMode selected: {parms.raidArrivalMode.defName} from the following options:");
@@ -423,7 +423,7 @@ namespace rep.heframework
             siteModifiedPoints = Mathf.Max(points, raidStrategy.Worker.MinimumPoints(faction, groupKind) * 1.05f);
 
             #region logging
-            if (HEF_Settings.debugLogging)
+            if (HE_Settings.debugLogging)
             {
                 Log.Message($"AdjustedRaidPoints original: {points}, modified by world sites: {siteModifiedPoints}, post-curves: {curvedPoints}");
             }
@@ -450,15 +450,15 @@ namespace rep.heframework
             }
         }
 
-        public static WorldObjectExtensionHEF GetWorldObjectExtension(FactionDef factionDef, GenStepParams parms)
+        public static WorldObjectExtensionHE GetWorldObjectExtension(FactionDef factionDef, GenStepParams parms)
         {
             if (parms.sitePart != null)
             {
-                return parms.sitePart?.def.GetModExtension<WorldObjectExtensionHEF>();
+                return parms.sitePart?.def.GetModExtension<WorldObjectExtensionHE>();
             }
 
             // Getting the extension for a faction settlement instead of site
-            return factionDef.GetModExtension<WorldObjectExtensionHEF>();
+            return factionDef.GetModExtension<WorldObjectExtensionHE>();
         }
 
         public static float GetThreatPointModifierWithSites(Dictionary<SitePartDef, int> siteDefsWithCounts)
@@ -472,19 +472,47 @@ namespace rep.heframework
                 int count = entry.Value;
                 totalInstances += count;
 
-                WorldObjectExtensionHEF extension = spd.GetModExtension<WorldObjectExtensionHEF>();
+                WorldObjectExtensionHE extension = spd.GetModExtension<WorldObjectExtensionHE>();
                 if (extension != null)
                 {
                     modifier += extension.threatPointModifier * count;
                 }
             }
 
-            if (HEF_Settings.debugLogging)
+            if (HE_Settings.debugLogging)
             {
                 Log.Message($"GetThreatPointModifierWithSites is returning a modifier of {modifier} based on {totalInstances} site instances");
             }
 
             return modifier;
+        }
+
+        public static void CopyFields(object source, object destination, bool skipDefNameAndHash = false)
+        {
+            if (source == null || destination == null)
+            {
+                return;
+            }
+            Type sourceType = source.GetType();
+            Type destType = destination.GetType();
+
+            foreach (FieldInfo sourceField in sourceType.GetFields(BindingFlags.Public | BindingFlags.Instance))
+            {
+                if (skipDefNameAndHash && (sourceField.Name == "defName" || sourceField.Name == "shortHash"))
+                {
+                    continue;
+                }
+
+                FieldInfo destField = destType.GetField(sourceField.Name, BindingFlags.Public | BindingFlags.Instance);
+                if (destField != null && destField.FieldType == sourceField.FieldType)
+                {
+                    object value = sourceField.GetValue(source);
+                    if (destField != null)
+                    {
+                        destField.SetValue(destination, value);
+                    }
+                }
+            }
         }
     }
 }

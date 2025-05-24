@@ -16,7 +16,7 @@ namespace rep.heframework
     {
         public override Faction GetMapFaction(Map map, GenStepParams parms)
         {
-            if (HEF_Settings.debugLogging)
+            if (HE_Settings.debugLogging)
             {
                 Log.Message($"GetMapFaction (settlement) returning {map.ParentFaction}");
             }
@@ -24,12 +24,12 @@ namespace rep.heframework
             return map.ParentFaction;
         }
 
-        public override float GetUnmodifiedThreatPoints(WorldObjectExtensionHEF extension, GenStepParams parms, Faction faction)
+        public override float GetUnmodifiedThreatPoints(WorldObjectExtensionHE extension, GenStepParams parms, Faction faction)
         {
             return extension.settlementThreatPoints;
         }
 
-        public override PawnGroupMaker GetPawnGroupMaker(FactionDef factionDef, PawnGroupMakerExtensionHEF pext, WorldObjectExtensionHEF wext)
+        public override PawnGroupMaker GetPawnGroupMaker(FactionDef factionDef, PawnGroupMakerExtensionHEF pext, WorldObjectExtensionHE wext)
         {
             return factionDef.pawnGroupMakers.Where(pgm => pgm.kindDef == PawnGroupKindDefOf.Settlement).RandomElement();
         }

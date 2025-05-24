@@ -9,7 +9,7 @@ using Verse;
 
 namespace rep.heframework
 {
-    public class PawnGroupMakerExtensionHEF : DefModExtension
+    public class PawnGroupMakerExtensionHE : DefModExtension
     {
         #region Fields
         public bool alwaysUseHighestTier = false;

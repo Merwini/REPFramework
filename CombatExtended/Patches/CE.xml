@@ -7,7 +7,7 @@
 		<match Class="PatchOperationSequence">
 			<operations>
 				<li Class="PatchOperationReplace">
-					<xpath>Defs/ThingDef[@Name="HEF_RangeFinderBase"]/tools</xpath>
+					<xpath>Defs/ThingDef[@Name="HE_RangeFinderBase"]/tools</xpath>
 					<value>
 						<tools>
 							<li Class="CombatExtended.ToolCE">
@@ -23,41 +23,41 @@
 					</value>
 				</li>
 				<li Class="CombatExtended.PatchOperationMakeGunCECompatible">
-					<defName>HEF_RF_100C</defName>
+					<defName>HE_RF_100C</defName>
 					<Properties>
 						<verbClass>rep.heframework.Verb_RangeFinder</verbClass>
 						<hasStandardCommand>true</hasStandardCommand>
-						<defaultProjectile>HEF_RF_Blip</defaultProjectile>
+						<defaultProjectile>HE_RF_Blip</defaultProjectile>
 						<warmupTime>1</warmupTime>
 						<range>100</range>
 					</Properties>
 				</li>
 				<li Class="CombatExtended.PatchOperationMakeGunCECompatible">
-					<defName>HEF_RF_75C</defName>
+					<defName>HE_RF_75C</defName>
 					<Properties>
 						<verbClass>rep.heframework.Verb_RangeFinder</verbClass>
 						<hasStandardCommand>true</hasStandardCommand>
-						<defaultProjectile>HEF_RF_Blip</defaultProjectile>
+						<defaultProjectile>HE_RF_Blip</defaultProjectile>
 						<warmupTime>1</warmupTime>
 						<range>75</range>
 					</Properties>
 				</li>
 				<li Class="CombatExtended.PatchOperationMakeGunCECompatible">
-					<defName>HEF_RF_50C</defName>
+					<defName>HE_RF_50C</defName>
 					<Properties>
 						<verbClass>rep.heframework.Verb_RangeFinder</verbClass>
 						<hasStandardCommand>true</hasStandardCommand>
-						<defaultProjectile>HEF_RF_Blip</defaultProjectile>
+						<defaultProjectile>HE_RF_Blip</defaultProjectile>
 						<warmupTime>1</warmupTime>
 						<range>50</range>
 					</Properties>
 				</li>
 				<li Class="CombatExtended.PatchOperationMakeGunCECompatible">
-					<defName>HEF_RF_25C</defName>
+					<defName>HE_RF_25C</defName>
 					<Properties>
 						<verbClass>rep.heframework.Verb_RangeFinder</verbClass>
 						<hasStandardCommand>true</hasStandardCommand>
-						<defaultProjectile>HEF_RF_Blip</defaultProjectile>
+						<defaultProjectile>HE_RF_Blip</defaultProjectile>
 						<warmupTime>1</warmupTime>
 						<range>25</range>
 					</Properties>

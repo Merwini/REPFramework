@@ -70,7 +70,7 @@ namespace rep.heframework
             List<Faction> possibleFactions = new List<Faction>();
 
             // If debug tool forcing a chosen faction
-            if (parms.faction != null && parms.faction.def.HasModExtension<PawnGroupMakerExtensionHEF>())
+            if (parms.faction != null && parms.faction.def.HasModExtension<PawnGroupMakerExtensionHE>())
             {
                 factionEligibleSitesDict[parms.faction] = HE_Utils.FindEligibleHESiteDefsFor(parms.faction);
                 if (HE_Settings.debugLogging)
@@ -85,7 +85,7 @@ namespace rep.heframework
                     sb.AppendLine("PopulateFactionSiteDictionary searching all factions for eligible sites.");
                 }
 
-                foreach (Faction fact in Find.FactionManager.AllFactions.Where(f => f.def.HasModExtension<PawnGroupMakerExtensionHEF>()))
+                foreach (Faction fact in Find.FactionManager.AllFactions.Where(f => f.def.HasModExtension<PawnGroupMakerExtensionHE>()))
                 {
                     List<SitePartDef> list = HE_Utils.FindEligibleHESiteDefsFor(fact);
                     if (list.Count != 0)

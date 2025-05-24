@@ -12,7 +12,7 @@ using Verse.Grammar;
 
 namespace rep.heframework
 {
-    public class HEF_SitePartWorker_Expansion : SitePartWorker_Outpost
+    public class SitePartWorker_ExpansionHE : SitePartWorker_Outpost
     {
 		public override void Notify_GeneratedByQuestGen(SitePart part, Slate slate, List<Rule> outExtraDescriptionRules, Dictionary<string, string> outExtraDescriptionConstants)
 		{
@@ -66,30 +66,30 @@ namespace rep.heframework
 		{
 			pawnGroupMaker = null;
 
-			//Check that the site's faction is HEF
+			//Check that the site's faction is HE
 			FactionDef factionDef = parms.faction.def;
 
-			PawnGroupMakerExtensionHEF factExtension = (PawnGroupMakerExtensionHEF)parms.faction.def.GetModExtension<PawnGroupMakerExtensionHEF>();
+			PawnGroupMakerExtensionHE factExtension = (PawnGroupMakerExtensionHE)parms.faction.def.GetModExtension<PawnGroupMakerExtensionHE>();
 			if (factExtension == null)
             {
-				Log.Error($"Using HEF_SitePartWorker_Expansion on site for non-HEF faction {parms.faction.Name}. Destroying site.");
+				Log.Error($"Using HE_SitePartWorker_Expansion on site for non-HE faction {parms.faction.Name}. Destroying site.");
                 site.Destroy();
 				return false;
             }
 
 			if (factExtension.taggedPawnGroupMakers.NullOrEmpty())
             {
-				Log.Error($"Using HEF_SitePartWorker_Expansion on site for faction {parms.faction.Name} with misconfigured PawnGroupMakerExtension. Faction has no TaggedPawnGroupMakers");
+				Log.Error($"Using HE_SitePartWorker_Expansion on site for faction {parms.faction.Name} with misconfigured PawnGroupMakerExtension. Faction has no TaggedPawnGroupMakers");
 				site.Destroy();
 				return false;
 			}
 
-			//Check that the site is HEF
+			//Check that the site is HE
 			SitePartDef mainPart = site.MainSitePartDef;
 			WorldObjectExtensionHE siteExtension = (WorldObjectExtensionHE)mainPart.GetModExtension<WorldObjectExtensionHE>();
 			if (siteExtension == null)
 			{
-				Log.Error($"Using HEF_SiteWorker_Expansion on non-HEF site {site.Label}. Destroying site.");
+				Log.Error($"Using HE_SiteWorker_Expansion on non-HE site {site.Label}. Destroying site.");
 				site.Destroy();
 				return false;
             }

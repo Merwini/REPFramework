@@ -100,7 +100,7 @@ namespace rep.heframework
 
         public static bool IncidentWorker_Raid_Helper(IncidentParms parms, out List<Pawn> pawns, bool debugTest = false)
         {
-            PawnGroupMakerExtensionHEF ext = parms.faction.def.GetModExtension<PawnGroupMakerExtensionHEF>();
+            PawnGroupMakerExtensionHE ext = parms.faction.def.GetModExtension<PawnGroupMakerExtensionHE>();
             if (ext == null)
             {
                 pawns = null;
@@ -149,7 +149,7 @@ namespace rep.heframework
         {
             static void Postfix(Site __instance, ref bool alsoRemoveWorldObject)
             {
-                if (__instance.parts.Any(p => p.def.Worker is HEF_SitePartWorker_Expansion) && GenHostility.AnyHostileActiveThreatToPlayer(__instance.Map, countDormantPawnsAsHostile: true))
+                if (__instance.parts.Any(p => p.def.Worker is SitePartWorker_ExpansionHE) && GenHostility.AnyHostileActiveThreatToPlayer(__instance.Map, countDormantPawnsAsHostile: true))
                 {
                     alsoRemoveWorldObject = false;
                 }
@@ -162,7 +162,7 @@ namespace rep.heframework
             static bool Prefix()
             {
                 Map map = BaseGen.globalSettings.map;
-                if (map.generatorDef.genSteps.Any(g => g.defName == "HEF_TaggedPawnGroup"))
+                if (map.generatorDef.genSteps.Any(g => g.defName == "HE_TaggedPawnGroup"))
                 {
                     return false;
                 }

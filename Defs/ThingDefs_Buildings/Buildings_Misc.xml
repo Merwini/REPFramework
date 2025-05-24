@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Defs>
-    <ThingDef ParentName="BuildingBase" Abstract="True" Name="HEF_SpawnPointBase">
+    <ThingDef ParentName="BuildingBase" Abstract="True" Name="HE_SpawnPointBase">
         <thingClass>rep.heframework.MapToolBuilding</thingClass>
         <description>A guaranteed spawn point for enemies when generating a map. If you are seeing this in-game, something has gone wrong, please make a bug report to the HEF team.</description>
         <altitudeLayer>Building</altitudeLayer>
@@ -13,14 +13,14 @@
         <designationCategory Inherit="False">Misc</designationCategory>
         <rotatable>false</rotatable>
         <modExtensions>
-            <li Class="rep.heframework.MapToolExtensionHEF">
+            <li Class="rep.heframework.MapToolExtensionHE">
                 <isSpawnPoint>true</isSpawnPoint>
             </li>
         </modExtensions>
     </ThingDef>
 
-    <ThingDef ParentName="HEF_SpawnPointBase">
-        <defName>HEF_SpawnPoint</defName>
+    <ThingDef ParentName="HE_SpawnPointBase">
+        <defName>HE_SpawnPoint</defName>
         <label>spawn point</label>
         <graphicData>
             <texPath>HEFramework/SpawnPoint</texPath>
@@ -28,45 +28,45 @@
         </graphicData>
 	</ThingDef>
 
-    <ThingDef ParentName="HEF_SpawnPointBase">
-		<defName>HEF_SpawnPointRandom</defName>
+    <ThingDef ParentName="HE_SpawnPointBase">
+		<defName>HE_SpawnPointRandom</defName>
 		<label>random spawn point</label>
 		<graphicData>
 			<texPath>HEFramework/SpawnPoint50</texPath>
 			<graphicClass>Graphic_Single</graphicClass>
 		</graphicData>
         <modExtensions>
-            <li Class="rep.heframework.MapToolExtensionHEF">
+            <li Class="rep.heframework.MapToolExtensionHE">
                 <isSpawnPoint>true</isSpawnPoint>
                 <chance>0.5</chance>
             </li>
         </modExtensions>
 	</ThingDef>
 
-    <ThingDef ParentName="HEF_SpawnPointBase">
-		<defName>HEF_SpawnPointSingle</defName>
+    <ThingDef ParentName="HE_SpawnPointBase">
+		<defName>HE_SpawnPointSingle</defName>
 		<label>spawn point single</label>
 		<graphicData>
 			<texPath>HEFramework/SpawnPointSingle</texPath>
 			<graphicClass>Graphic_Single</graphicClass>
 		</graphicData>
         <modExtensions>
-            <li Class="rep.heframework.MapToolExtensionHEF">
+            <li Class="rep.heframework.MapToolExtensionHE">
                 <isSpawnPoint>true</isSpawnPoint>
                 <count>1</count>
             </li>
         </modExtensions>
 	</ThingDef>
 
-    <ThingDef ParentName="HEF_SpawnPointBase">
-		<defName>HEF_SpawnPointSingleRandom</defName>
+    <ThingDef ParentName="HE_SpawnPointBase">
+		<defName>HE_SpawnPointSingleRandom</defName>
 		<label>spawn point single random</label>
 		<graphicData>
 			<texPath>HEFramework/SpawnPointSingle50</texPath>
 			<graphicClass>Graphic_Single</graphicClass>
 		</graphicData>
         <modExtensions>
-            <li Class="rep.heframework.MapToolExtensionHEF">
+            <li Class="rep.heframework.MapToolExtensionHE">
                 <isSpawnPoint>true</isSpawnPoint>
                 <chance>0.5</chance>
                 <count>1</count>

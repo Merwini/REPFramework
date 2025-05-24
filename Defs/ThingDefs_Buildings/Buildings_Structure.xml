@@ -2,7 +2,7 @@
 <Defs>
 	<ThingDef ParentName="DoorBase">
 		<thingClass>rep.heframework.Building_DoorNoNPC</thingClass>
-		<defName>HEF_DoorNoNPC</defName>
+		<defName>HE_DoorNoNPC</defName>
 		<label>secure door</label>
 		<description>Divides rooms. Simple doors must be manually opened, which slows people down. The amount of slowdown depends on what the door is made of.</description>
 		<graphicData>

@@ -1,26 +1,26 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Defs>
 	<KCSG.SymbolDef>
-		<defName>HEF_DoorNoNPC_WoodLog</defName>
-		<thing>HEF_DoorNoNPC</thing>
+		<defName>HE_DoorNoNPC_WoodLog</defName>
+		<thing>HE_DoorNoNPC</thing>
 		<stuff>WoodLog</stuff>
 	</KCSG.SymbolDef>
 
 	<KCSG.SymbolDef>
-		<defName>HEF_DoorNoNPC_Steel</defName>
-		<thing>HEF_DoorNoNPC</thing>
+		<defName>HE_DoorNoNPC_Steel</defName>
+		<thing>HE_DoorNoNPC</thing>
 		<stuff>Steel</stuff>
 	</KCSG.SymbolDef>
 
 	<KCSG.SymbolDef>
-		<defName>HEF_DoorNoNPC_Plasteel</defName>
-		<thing>HEF_DoorNoNPC</thing>
+		<defName>HE_DoorNoNPC_Plasteel</defName>
+		<thing>HE_DoorNoNPC</thing>
 		<stuff>Plasteel</stuff>
 	</KCSG.SymbolDef>
 
 	<KCSG.SymbolDef>
-		<defName>HEF_DoorNoNPC_Uranium</defName>
-		<thing>HEF_DoorNoNPC</thing>
+		<defName>HE_DoorNoNPC_Uranium</defName>
+		<thing>HE_DoorNoNPC</thing>
 		<stuff>WoodLog</stuff>
 	</KCSG.SymbolDef>
 </Defs>

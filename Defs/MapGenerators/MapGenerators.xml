@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Defs>
     <MapGeneratorDef>
-        <defName>HEFMapGeneratorSite</defName>
+        <defName>HEMapGeneratorSite</defName>
         <genSteps>
             <li>ElevationFertility</li>
             <li>Terrain</li>
@@ -12,13 +12,13 @@
             <li>Snow</li>
             <li>Animals</li>
             <li>Fog</li>
-            <li>HEF_Degreenify</li>
-            <!--HEF_TaggedPawnGroupSite added by linkWithSite-->
+            <li>HE_Degreenify</li>
+            <!--HE_TaggedPawnGroupSite added by linkWithSite-->
         </genSteps>
     </MapGeneratorDef>
 
     <MapGeneratorDef>
-        <defName>HEFMapGeneratorSettlement</defName>
+        <defName>HEMapGeneratorSettlement</defName>
         <genSteps>
             <li>ElevationFertility</li>
             <li>Terrain</li>
@@ -30,26 +30,26 @@
             <li>Animals</li>
             <li>Fog</li>
             <li>KCSG_Settlement</li>
-            <li>HEF_Degreenify</li>
-            <li>HEF_TaggedPawnGroupSettlement</li>
+            <li>HE_Degreenify</li>
+            <li>HE_TaggedPawnGroupSettlement</li>
         </genSteps>
     </MapGeneratorDef>
 
     <GenStepDef>
-        <defName>HEF_Degreenify</defName>
+        <defName>HE_Degreenify</defName>
         <!--KCSG Settlement GenStep is 599-->
         <order>601</order>
         <genStep Class="rep.heframework.GenStep_DeGreenify"/>
     </GenStepDef>
 
     <GenStepDef>
-        <defName>HEF_TaggedPawnGroupSite</defName>
+        <defName>HE_TaggedPawnGroupSite</defName>
         <order>602</order>
         <genStep Class="rep.heframework.GenStep_TaggedPawnGroupSite"/>
     </GenStepDef>
         
     <GenStepDef>
-        <defName>HEF_TaggedPawnGroupSettlement</defName>
+        <defName>HE_TaggedPawnGroupSettlement</defName>
         <order>602</order>
         <genStep Class="rep.heframework.GenStep_TaggedPawnGroupSettlement"/>
     </GenStepDef>

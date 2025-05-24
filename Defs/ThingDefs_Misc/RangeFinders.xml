@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Defs>
-	<ThingDef ParentName="BaseWeapon" Abstract="True" Name="HEF_RangeFinderBase">
+	<ThingDef ParentName="BaseWeapon" Abstract="True" Name="HE_RangeFinderBase">
 		<description>A tool for staying within a certain distance of your target.</description>
 		<thingCategories>
 			<li>WeaponsRanged</li>
@@ -24,7 +24,7 @@
 		<tradeability>None</tradeability>
 		<soundInteract>Standard_Pickup</soundInteract>
 		<weaponTags>
-			<li>HEF_RF</li>
+			<li>HE_RF</li>
 			<li>NoSwitch</li>
 		</weaponTags>
 		<tools>
@@ -39,8 +39,8 @@
 		</tools>
 	</ThingDef>
 
-	<ThingDef ParentName="HEF_RangeFinderBase">
-		<defName>HEF_RF_100C</defName>
+	<ThingDef ParentName="HE_RangeFinderBase">
+		<defName>HE_RF_100C</defName>
 		<label>100 cell rangefinder</label>
 		<verbs>
 			<li>
@@ -51,12 +51,12 @@
 			</li>
 		</verbs>
 		<weaponTags>
-			<li>HEF_RF_100C</li>
+			<li>HE_RF_100C</li>
 		</weaponTags>
 	</ThingDef>
 
-	<ThingDef ParentName="HEF_RangeFinderBase">
-		<defName>HEF_RF_75C</defName>
+	<ThingDef ParentName="HE_RangeFinderBase">
+		<defName>HE_RF_75C</defName>
 		<label>75 cell rangefinder</label>
 		<verbs>
 			<li>
@@ -67,46 +67,46 @@
 			</li>
 		</verbs>
 		<weaponTags>
-			<li>HEF_RF_75C</li>
+			<li>HE_RF_75C</li>
 		</weaponTags>
 	</ThingDef>
 
-	<ThingDef ParentName="HEF_RangeFinderBase">
-		<defName>HEF_RF_50C</defName>
+	<ThingDef ParentName="HE_RangeFinderBase">
+		<defName>HE_RF_50C</defName>
 		<label>50 cell rangefinder</label>
 		<verbs>
 			<li>
 				<verbClass>Verb_LaunchProjectile</verbClass>
-				<defaultProjectile>HEF_RF_Blip</defaultProjectile>
+				<defaultProjectile>HE_RF_Blip</defaultProjectile>
 				<hasStandardCommand>true</hasStandardCommand>
 				<warmupTime>1</warmupTime>
 				<range>50</range>
 			</li>
 		</verbs>
 		<weaponTags>
-			<li>HEF_RF_50C</li>
+			<li>HE_RF_50C</li>
 		</weaponTags>
 	</ThingDef>
 
-	<ThingDef ParentName="HEF_RangeFinderBase">
-		<defName>HEF_RF_25C</defName>
+	<ThingDef ParentName="HE_RangeFinderBase">
+		<defName>HE_RF_25C</defName>
 		<label>25 cell rangefinder</label>
 		<verbs>
 			<li>
 				<verbClass>rep.heframework.Verb_Rangefinder</verbClass>
-				<defaultProjectile>HEF_RF_Blip</defaultProjectile>
+				<defaultProjectile>HE_RF_Blip</defaultProjectile>
 				<hasStandardCommand>true</hasStandardCommand>
 				<warmupTime>1</warmupTime>
 				<range>25</range>
 			</li>
 		</verbs>
 		<weaponTags>
-			<li>HEF_RF_25C</li>
+			<li>HE_RF_25C</li>
 		</weaponTags>
 	</ThingDef>
 
 	<ThingDef>
-		<defName>HEF_RF_Blip</defName>
+		<defName>HE_RF_Blip</defName>
 		<label>rangefinder blip</label>
 		<category>Projectile</category>
 		<tickerType>Normal</tickerType>

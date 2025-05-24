@@ -48,46 +48,46 @@ namespace rep.heframework
         private ThingDef PickRockType(Map map)
         {
             //TODO better compatibility with modded rock types?
-            return Find.World.NaturalRockTypesIn(map.Tile).RandomElement() ?? HefDefOf.Granite;
+            return Find.World.NaturalRockTypesIn(map.Tile).RandomElement() ?? HEDefOf.Granite;
         }
 
         private ThingDef StoneFromRock(ThingDef rockThing)
         {
             ThingDef brickThing;
-            if (rockThing == HefDefOf.Limestone)
+            if (rockThing == HEDefOf.Limestone)
             {
-                brickThing = HefDefOf.BlocksLimestone;
-				rockyTerrain = HefDefOf.Limestone_Rough;
-				flagstoneTerrain = HefDefOf.FlagstoneLimestone;
-				tileTerrain = HefDefOf.TileLimestone;
+                brickThing = HEDefOf.BlocksLimestone;
+				rockyTerrain = HEDefOf.Limestone_Rough;
+				flagstoneTerrain = HEDefOf.FlagstoneLimestone;
+				tileTerrain = HEDefOf.TileLimestone;
             }
-            else if (rockThing == HefDefOf.Slate)
+            else if (rockThing == HEDefOf.Slate)
             {
-                brickThing = HefDefOf.BlocksSlate;
-				rockyTerrain = HefDefOf.Slate_Rough;
-				flagstoneTerrain = HefDefOf.FlagstoneSlate;
-				tileTerrain = HefDefOf.TileSlate;
+                brickThing = HEDefOf.BlocksSlate;
+				rockyTerrain = HEDefOf.Slate_Rough;
+				flagstoneTerrain = HEDefOf.FlagstoneSlate;
+				tileTerrain = HEDefOf.TileSlate;
 			}
-            else if (rockThing == HefDefOf.Sandstone)
+            else if (rockThing == HEDefOf.Sandstone)
             {
-                brickThing = HefDefOf.BlocksSandstone;
-				rockyTerrain = HefDefOf.Sandstone_Rough;
-				flagstoneTerrain = HefDefOf.FlagstoneSandstone;
-				tileTerrain = HefDefOf.TileSandstone;
+                brickThing = HEDefOf.BlocksSandstone;
+				rockyTerrain = HEDefOf.Sandstone_Rough;
+				flagstoneTerrain = HEDefOf.FlagstoneSandstone;
+				tileTerrain = HEDefOf.TileSandstone;
 			}
-            else if (rockThing == HefDefOf.Marble)
+            else if (rockThing == HEDefOf.Marble)
             {
-                brickThing = HefDefOf.BlocksMarble;
-				rockyTerrain = HefDefOf.Marble_Rough;
-				flagstoneTerrain = HefDefOf.FlagstoneMarble;
-				tileTerrain = HefDefOf.TileMarble;
+                brickThing = HEDefOf.BlocksMarble;
+				rockyTerrain = HEDefOf.Marble_Rough;
+				flagstoneTerrain = HEDefOf.FlagstoneMarble;
+				tileTerrain = HEDefOf.TileMarble;
 			}
             else
             {
-                brickThing = HefDefOf.BlocksGranite;
-				rockyTerrain = HefDefOf.Granite_Rough;
-				flagstoneTerrain = HefDefOf.FlagstoneGranite;
-				tileTerrain = HefDefOf.TileGranite;
+                brickThing = HEDefOf.BlocksGranite;
+				rockyTerrain = HEDefOf.Granite_Rough;
+				flagstoneTerrain = HEDefOf.FlagstoneGranite;
+				tileTerrain = HEDefOf.TileGranite;
 			}
 
             return brickThing;
@@ -96,23 +96,23 @@ namespace rep.heframework
 		private void DegreenifyTerrainAt(IntVec3 cell, Map map, MapGenFloatGrid elevation, MapGenFloatGrid fertility, TerrainGrid terrainGrid)
         {
 			TerrainDef terrain = cell.GetTerrain(map);
-			if (terrain == HefDefOf.HEF_GreenSoil)
+			if (terrain == HEDefOf.HE_GreenSoil)
 			{
 				TerrainDef terrainDef = null;
 				terrainDef = TerrainFrom(cell, map, elevation[cell], fertility[cell], null, preferSolid: true);
 				terrainGrid.SetTerrain(cell, terrainDef);
 			}
-			else if (terrain == HefDefOf.HEF_GreenRockFloor)
+			else if (terrain == HEDefOf.HE_GreenRockFloor)
             {
 				terrainGrid.SetTerrain(cell, rockyTerrain);
 			}
 
-			else if (terrain == HefDefOf.HEF_GreenFlagstone)
+			else if (terrain == HEDefOf.HE_GreenFlagstone)
 			{
 				terrainGrid.SetTerrain(cell, flagstoneTerrain);
 			}
 
-			else if (terrain == HefDefOf.HEF_GreenBrick)
+			else if (terrain == HEDefOf.HE_GreenBrick)
 			{
 				terrainGrid.SetTerrain(cell, tileTerrain);
 			}
@@ -124,13 +124,13 @@ namespace rep.heframework
 			//Since e.g. plants would then only be checked once instead of twice
 			if (thing is Building building)
 			{
-				if (building.def == HefDefOf.HEF_GreenRock)
+				if (building.def == HEDefOf.HE_GreenRock)
 				{
 					IntVec3 c = building.Position;
 					building.DeSpawn();
 					GenSpawn.Spawn(rockThing, c, map);
 				}
-				else if (building.def == HefDefOf.HEF_GreenWall)
+				else if (building.def == HEDefOf.HE_GreenWall)
 				{
 					IntVec3 c = building.Position;
 					building.DeSpawn();

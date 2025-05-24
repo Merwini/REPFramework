@@ -60,7 +60,7 @@ namespace rep.heframework
 
         public Faction GetMapFaction(Map map, GenStepParams parms)
         {
-            //TODO move this into HEF_Utils and make GenStep_TaggedPawnGroup use it
+            //TODO move this into HE_Utils and make GenStep_TaggedPawnGroup use it
             Faction faction;
             faction = parms.sitePart?.site?.Faction;
 

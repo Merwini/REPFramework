@@ -15,13 +15,13 @@ namespace rep.heframework
     {
         public static List<Faction> ReturnHEFactions()
         {
-            List<Faction> factions = Find.FactionManager.AllFactions.Where(f => (f.def.HasModExtension<PawnGroupMakerExtensionHEF>())).ToList();
+            List<Faction> factions = Find.FactionManager.AllFactions.Where(f => (f.def.HasModExtension<PawnGroupMakerExtensionHE>())).ToList();
 
             #region logging
             if (HE_Settings.debugLogging)
             {
                 StringBuilder sb = new StringBuilder();
-                sb.AppendLine($"ReturnHEFFactions is returning:");
+                sb.AppendLine($"ReturnHEFactions is returning:");
                 foreach (Faction f in factions)
                 {
                     sb.AppendLine($"name: {f.Name}     def: {f.def.defName}");
@@ -41,7 +41,7 @@ namespace rep.heframework
             if (HE_Settings.debugLogging)
             {
                 StringBuilder sb = new StringBuilder();
-                sb.AppendLine($"ReturnHostileHEFFactions is returning:");
+                sb.AppendLine($"ReturnHostileHEFactions is returning:");
                 foreach (Faction f in hostileFactions)
                 {
                     sb.AppendLine($"name: {f.Name}    def: {f.def.defName}");
@@ -66,7 +66,7 @@ namespace rep.heframework
             if (HE_Settings.debugLogging)
             {
                 StringBuilder sb = new StringBuilder();
-                sb.AppendLine($"FindHEFSitesFor faction: {fact.Name} is returning:");
+                sb.AppendLine($"FindHESitesFor faction: {fact.Name} is returning:");
                 foreach (Site s in list)
                 {
                     sb.AppendLine($"label: {s.Label}    tile: {s.Tile}    def: {s.def.defName}");
@@ -86,7 +86,7 @@ namespace rep.heframework
             if (HE_Settings.debugLogging)
             {
                 StringBuilder sb = new StringBuilder();
-                sb.AppendLine($"FindExistingHEFSiteDefsFor faction: {fact.Name} is returning:");
+                sb.AppendLine($"FindExistingHESiteDefsFor faction: {fact.Name} is returning:");
                 foreach (KeyValuePair<SitePartDef, int> kvp in defCounts)
                 {
                     sb.AppendLine($"def: {kvp.Key.defName}, count: {kvp.Value}");
@@ -142,7 +142,7 @@ namespace rep.heframework
                 if (extension != null 
                     && extension.factionsToPawnGroups.Any(x => x.Faction == fact.def))
                     //TODO && cull choices based on min and max threat point values, so ou can separate early-game and late-game sites
-                    //TODO implement a List<string> prerequisiteTags on WorldObjectExtensionHEF and check if those tags are present, to enable sites that require another site first
+                    //TODO implement a List<string> prerequisiteTags on WorldObjectExtensionHE and check if those tags are present, to enable sites that require another site first
                 {
                     {
                         int count = usedCounts.TryGetValue(def, out int c) ? c : 0;
@@ -158,7 +158,7 @@ namespace rep.heframework
             if (HE_Settings.debugLogging)
             {
                 StringBuilder sb = new StringBuilder();
-                sb.AppendLine($"FindEligibleHEFSiteDefsFor faction: {fact.Name} is returning:");
+                sb.AppendLine($"FindEligibleHESiteDefsFor faction: {fact.Name} is returning:");
                 foreach (SitePartDef spd in eligibleDefs)
                 {
                     sb.AppendLine($"def: {spd.defName}");
@@ -206,7 +206,7 @@ namespace rep.heframework
 
         // debugTest represents whether the raid is being generated naturally or through dev tool, which would pre-fill some fields in parms
         // about half of this is copied from vanilla TryGenerateRaidInfo
-        // this occurs after TryGenerateRaidInfo has already assigned parms.faction and diverted if that faction has PawnGroupMakerExtensionHEF
+        // this occurs after TryGenerateRaidInfo has already assigned parms.faction and diverted if that faction has PawnGroupMakerExtensionHE
         public static bool TryGenerateExtendedRaidInfo(IncidentParms parms, out List<Pawn> pawns, bool debugTest = false)
         {
             Dictionary<SitePartDef, int> hefSiteDefs = FindDefCountsForSites(FindHESitesFor(parms.faction));
@@ -272,7 +272,7 @@ namespace rep.heframework
             int highestTier = 0;
 
             List<string> hefTags = FindStringsForDefs(siteDefs);
-            PawnGroupMakerExtensionHEF extension = parms.faction.def.GetModExtension<PawnGroupMakerExtensionHEF>();
+            PawnGroupMakerExtensionHE extension = parms.faction.def.GetModExtension<PawnGroupMakerExtensionHE>();
 
             if (parms.questTag != null && parms.questTag.StartsWith(HE_DebugActions.DebugPrefix))
             {

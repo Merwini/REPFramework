@@ -35,7 +35,7 @@ namespace rep.heframework
 
             FactionDef factionDef = faction.def;
 
-            PawnGroupMakerExtensionHEF factionExtension = factionDef.GetModExtension<PawnGroupMakerExtensionHEF>();
+            PawnGroupMakerExtensionHE factionExtension = factionDef.GetModExtension<PawnGroupMakerExtensionHE>();
             if (factionExtension == null)
             {
                 Log.Error($"Tried to generate pawns for new map, but def {factionDef.defName} for faction {faction.Name} lacks a PawnGroupMakerExtension.");
@@ -225,7 +225,7 @@ namespace rep.heframework
 
             foreach (Thing thing in map.listerThings.AllThings)
             {
-                MapToolExtensionHEF extension = thing.def.GetModExtension<MapToolExtensionHEF>();
+                MapToolExtensionHE extension = thing.def.GetModExtension<MapToolExtensionHE>();
                 if (extension != null)
                 {
                     spawnerPointThings.Add(thing);
@@ -263,7 +263,7 @@ namespace rep.heframework
 
         public abstract float GetUnmodifiedThreatPoints(WorldObjectExtensionHE extension, GenStepParams parms, Faction faction);
 
-        public abstract PawnGroupMaker GetPawnGroupMaker(FactionDef factionDef, PawnGroupMakerExtensionHEF pext, WorldObjectExtensionHE wext);
+        public abstract PawnGroupMaker GetPawnGroupMaker(FactionDef factionDef, PawnGroupMakerExtensionHE pext, WorldObjectExtensionHE wext);
     }
 
     public class SpawnCounter

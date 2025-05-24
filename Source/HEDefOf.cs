@@ -7,22 +7,22 @@ using System.Reflection;
 using System.Text;
 using Verse;
 
-namespace rep.heframework
+namespace rep.HEramework
 {
     [DefOf]
-    public class HefDefOf
+    public class HEDefOf
     {
-        public static ThingDef HEF_SpawnPoint;
-        public static ThingDef HEF_SpawnPointRandom;
-        public static ThingDef HEF_SpawnPointSingle;
-        public static ThingDef HEF_SpawnPointSingleRandom;
+        public static ThingDef HE_SpawnPoint;
+        public static ThingDef HE_SpawnPointRandom;
+        public static ThingDef HE_SpawnPointSingle;
+        public static ThingDef HE_SpawnPointSingleRandom;
 
-        public static ThingDef HEF_GreenWall;
-        public static ThingDef HEF_GreenRock;
-        public static TerrainDef HEF_GreenSoil;
-        public static TerrainDef HEF_GreenRockFloor;
-        public static TerrainDef HEF_GreenFlagstone;
-        public static TerrainDef HEF_GreenBrick;
+        public static ThingDef HE_GreenWall;
+        public static ThingDef HE_GreenRock;
+        public static TerrainDef HE_GreenSoil;
+        public static TerrainDef HE_GreenRockFloor;
+        public static TerrainDef HE_GreenFlagstone;
+        public static TerrainDef HE_GreenBrick;
 
         public static ThingDef Wall;
         public static TerrainDef Soil;

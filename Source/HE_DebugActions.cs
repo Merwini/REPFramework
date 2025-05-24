@@ -76,7 +76,7 @@ namespace rep.heframework
                 factionList.Add(new DebugMenuOption(localFac.Name + " (" + localFac.def.defName + ")", DebugMenuOptionMode.Action, delegate
                 {
                     parms.faction = localFac;
-                    PawnGroupMakerExtensionHEF extension = localFac.def.GetModExtension<PawnGroupMakerExtensionHEF>(); //faction would not have been an option if this was null, no check needed
+                    PawnGroupMakerExtensionHE extension = localFac.def.GetModExtension<PawnGroupMakerExtensionHE>(); //faction would not have been an option if this was null, no check needed
                     List<DebugMenuOption> tagList = new List<DebugMenuOption>();
                     foreach (TaggedPawnGroupMaker tpgm in extension.taggedPawnGroupMakers.Where(x => x.groupName != null))
                     {

@@ -51,6 +51,10 @@ namespace rep.heframework
 
             if (!TryFireIncident(parms))
             {
+                if (HE_Settings.debugLogging)
+                {
+                    Log.Message($"On-spawn incident for site {sitePartDef.defName} failed to fire. Removing site. Incident: {extension.fireIncidentOnSpawn.defName}");
+                }
                 site.Destroy(); // since it would have already been placed
                 return false;
             }
@@ -198,11 +202,11 @@ namespace rep.heframework
 
             //todo do I need to adjust the parms?
 
-            HE_IncidentParms heParms 
+            HE_IncidentParms heParms = new HE_IncidentParms();
+            HE_Utils.CopyFields(parms, heParms);
+            heParms.site = site;
 
-            parms.podOpenDelay = tile; // can't pass the site directly to the IncidentWorker, but it will make it easier to find the associated site
-
-            return extension.fireIncidentOnSpawn.Worker.TryExecute(parms);
+            return extension.fireIncidentOnSpawn.Worker.TryExecute(heParms);
         }
     }
 }

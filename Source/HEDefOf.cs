@@ -7,7 +7,7 @@ using System.Reflection;
 using System.Text;
 using Verse;
 
-namespace rep.HEramework
+namespace rep.heframework
 {
     [DefOf]
     public class HEDefOf

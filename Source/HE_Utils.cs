@@ -268,6 +268,17 @@ namespace rep.heframework
         {
             StringBuilder sb = new StringBuilder();
 
+            if (parms is HE_IncidentParms heParms && heParms.taggedGroupMaker != null)
+            {
+                groupMaker = heParms.taggedGroupMaker;
+                if (HE_Settings.debugLogging)
+                {
+                    sb.AppendLine($"TryResolveTaggedPawnGroup early return due to forced TaggedPawnGroupMaker {(heParms.taggedGroupMaker.groupName != null ? heParms.taggedGroupMaker.groupName : "unnamed")}");
+                    Log.Message(sb.ToString());
+                    return true;
+                }
+            }
+
             List<TaggedPawnGroupMaker> possibleGroupMakers = new List<TaggedPawnGroupMaker>();
             int highestTier = 0;
 

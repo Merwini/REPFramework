@@ -40,6 +40,32 @@ namespace rep.heframework
 
         public ThingDef artilleryProjectile;
 
+        public int shellsPerBarrage = 3;
+
+        public int numberOfBarrages = 4;
+
+        public float forcedMissRadius = 9f;
+
+        public int ticksBetweenShells = 300; // 5 seconds
+
+        public float shellVariability = 0f;
+
+        public int ticksBetweenBarrages = 15000; // quarter of an in-game day
+
+        public float barrageVariability = 0f;
+
+        public bool doWaveRaids = false;
+
+        public string waveRaidGroupName = null;
+
+        public float waveRaidPointMultiplier = 0.25f;
+
+        public bool doFinalRaid = false;
+
+        public string finalRaidGroupName = null;
+
+        public float finalRaidPointMultiplier = 1f;
+
         #endregion
     }
 

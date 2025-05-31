@@ -87,59 +87,64 @@ namespace rep.heframework
             }
         }
 
-        public bool StartArtillerySiege(Faction siegingFaction, Site sourceSite, ThingDef artilleryProjectile, IncidentParms parms, int shellsPerBarrage = 1, int numberOfBarrages = 1, float forcedMissRadius = 9, int ticksBetweenShells = 300, float shellVariability = 0, int ticksBetweenBarrages = 60000, float barrageVariability = 0, List<IntVec3> targetCells = null, bool doWaveRaids = false, bool doFinalRaid = false, TaggedPawnGroupMaker waveRaidGroup = null, float waveRaidPoints = 0, TaggedPawnGroupMaker finalRaidGroup = null, float finalRaidPoints = 0)
+        public bool StartArtillerySiege(Faction siegingFaction, Site sourceSite, IncidentParms parms, WorldObjectExtensionHE extension)
         {
-            //TODO validate inputs are not illegal, like <1 ticks between shells/barrages
-
-            // Don't start a siege if one is already in progress, or if one of the required arguments is null
-            if (siegeInProgress || siegingFaction == null || sourceSite == null || artilleryProjectile == null || parms == null)
+            // Unfixable missing data
+            if (siegeInProgress || siegingFaction == null || sourceSite == null || parms == null || extension == null || extension.artilleryProjectile == null)
                 return false;
 
-            // Fix inputs with a warning if any are invalid or likely to cause problems
-            if (shellsPerBarrage < 1)
-            {
-                shellsPerBarrage = 1;
-                Log.Warning("MapComponent_ArtillerySiege tried to start artillery siege with 0 or negative shellsPerBarrage");
-            }
-            
-            if (numberOfBarrages == 0)
-            {
-                numberOfBarrages = 1;
-                Log.Warning("MapComponent_ArtillerySiege tried to start artillery siege with 0 barrages");
-            }
+            // Fixable misconfigurations
+            int shellsPerBarrage = Mathf.Max(1, extension.shellsPerBarrage);
+            if (extension.shellsPerBarrage < 1)
+                Log.Warning("Artillery siege config had shellsPerBarrage < 1. Defaulting to 1.");
 
-            if (ticksBetweenShells < 1)
-            {
-                ticksBetweenShells = 60;
-                Log.Warning("MapComponent_ArtillerySiege tried to start artillery siege with 0 or negative ticks between shells being fired");
-            }
+            int numberOfBarrages = extension.numberOfBarrages == 0 ? 1 : extension.numberOfBarrages;
+            if (extension.numberOfBarrages == 0)
+                Log.Warning("Artillery siege config had 0 barrages. Defaulting to 1.");
 
-            if (ticksBetweenBarrages < 1)
-            {
-                ticksBetweenBarrages = 60000;
-                Log.Warning("MapComponent_ArtillerySiege tried to start artillery siege with 0 or negative ticks between artillery barrages");
-            }
+            int ticksBetweenShells = extension.ticksBetweenShells < 1 ? 60 : extension.ticksBetweenShells;
+            if (extension.ticksBetweenShells < 1)
+                Log.Warning("Artillery siege config had ticksBetweenShells < 1. Defaulting to 60.");
+
+            int ticksBetweenBarrages = extension.ticksBetweenBarrages < 1 ? 60000 : extension.ticksBetweenBarrages;
+            if (extension.ticksBetweenBarrages < 1)
+                Log.Warning("Artillery siege config had ticksBetweenBarrages < 1. Defaulting to 60000.");
+
 
             this.siegingFaction = siegingFaction;
             this.sourceSite = sourceSite;
-            this.artilleryProjectile = artilleryProjectile;
+            this.artilleryProjectile = extension.artilleryProjectile;
             this.parms = parms;
 
             this.shellsPerBarrage = shellsPerBarrage;
             this.numberOfBarrages = numberOfBarrages;
-            this.forcedMissRadius = forcedMissRadius;
+            this.forcedMissRadius = extension.forcedMissRadius;
             this.ticksBetweenShells = ticksBetweenShells;
             this.ticksBetweenBarrages = ticksBetweenBarrages;
-            this.shellVariability = shellVariability;
-            this.barrageVariability = barrageVariability;
+            this.shellVariability = extension.shellVariability;
+            this.barrageVariability = extension.barrageVariability;
 
-            this.originalTargetCells = targetCells;
-            this.doWaveRaids = doWaveRaids;
-            this.waveRaidGroup = waveRaidGroup;
-            this.waveRaidPoints = waveRaidPoints;
-            this.doFinalRaid = doFinalRaid;
-            this.finalRaidGroup = finalRaidGroup;
-            this.finalRaidPoints = finalRaidPoints;
+            this.originalTargetCells = null;
+            this.doWaveRaids = extension.doWaveRaids;
+            this.doFinalRaid = extension.doFinalRaid;
+
+            PawnGroupMakerExtensionHE factionExt = siegingFaction.def.GetModExtension<PawnGroupMakerExtensionHE>();
+            if (factionExt != null)
+            {
+                if (doWaveRaids)
+                {
+                    waveRaidGroup = factionExt.taggedPawnGroupMakers?.FirstOrDefault(x =>
+                        string.Equals(x.groupName, extension.waveRaidGroupName, StringComparison.OrdinalIgnoreCase));
+                    waveRaidPoints = parms.points * extension.waveRaidPointMultiplier;
+                }
+
+                if (doFinalRaid)
+                {
+                    finalRaidGroup = factionExt.taggedPawnGroupMakers?.FirstOrDefault(x =>
+                        string.Equals(x.groupName, extension.finalRaidGroupName, StringComparison.OrdinalIgnoreCase));
+                    finalRaidPoints = parms.points * extension.finalRaidPointMultiplier;
+                }
+            }
 
             artilleryOriginCell = GetEdgeCellTowardsWorldTile(map, sourceSite.Tile);
             ticksUntilNextBarrage = CalcCooldownVariable(ticksBetweenBarrages, barrageVariability);
@@ -148,7 +153,7 @@ namespace rep.heframework
 
             if (targetCells.NullOrEmpty())
             {
-                Log.Warning("Failed to start siege due to no target cells selected");
+                Log.Warning("Failed to start siege due to no valid target cells.");
                 return false;
             }
 

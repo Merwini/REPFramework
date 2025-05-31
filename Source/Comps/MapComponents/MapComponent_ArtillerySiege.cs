@@ -95,6 +95,31 @@ namespace rep.heframework
             if (siegeInProgress || siegingFaction == null || sourceSite == null || artilleryProjectile == null || parms == null)
                 return false;
 
+            // Fix inputs with a warning if any are invalid or likely to cause problems
+            if (shellsPerBarrage < 1)
+            {
+                shellsPerBarrage = 1;
+                Log.Warning("MapComponent_ArtillerySiege tried to start artillery siege with 0 or negative shellsPerBarrage");
+            }
+            
+            if (numberOfBarrages == 0)
+            {
+                numberOfBarrages = 1;
+                Log.Warning("MapComponent_ArtillerySiege tried to start artillery siege with 0 barrages");
+            }
+
+            if (ticksBetweenShells < 1)
+            {
+                ticksBetweenShells = 60;
+                Log.Warning("MapComponent_ArtillerySiege tried to start artillery siege with 0 or negative ticks between shells being fired");
+            }
+
+            if (ticksBetweenBarrages < 1)
+            {
+                ticksBetweenBarrages = 60000;
+                Log.Warning("MapComponent_ArtillerySiege tried to start artillery siege with 0 or negative ticks between artillery barrages");
+            }
+
             this.siegingFaction = siegingFaction;
             this.sourceSite = sourceSite;
             this.artilleryProjectile = artilleryProjectile;
@@ -116,7 +141,6 @@ namespace rep.heframework
             this.finalRaidGroup = finalRaidGroup;
             this.finalRaidPoints = finalRaidPoints;
 
-            //more stuff
             artilleryOriginCell = GetEdgeCellTowardsWorldTile(map, sourceSite.Tile);
             ticksUntilNextBarrage = CalcCooldownVariable(ticksBetweenBarrages, barrageVariability);
             barragesLeftInSiege = numberOfBarrages;

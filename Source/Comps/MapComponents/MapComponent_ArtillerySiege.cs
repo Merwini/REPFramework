@@ -24,6 +24,7 @@ namespace rep.heframework
         Faction siegingFaction;
         Site sourceSite;
         ThingDef artilleryProjectile;
+        IncidentParms parms;
         List<IntVec3> originalTargetCells;
 
         bool doWaveRaids;
@@ -75,12 +76,12 @@ namespace rep.heframework
             }
 
             // StartBarrage() resets the ticks, so don't need to validate that a barrage isn't already in progress
-            if (ticksUntilNextBarrage == 0)
+            if (ticksUntilNextBarrage <= 0)
             {
                 StartBarrage();
             }
 
-            if (ticksUntilNextShell == 0)
+            if (ticksUntilNextShell <= 0)
             {
                 FireShell();
             }
@@ -97,6 +98,7 @@ namespace rep.heframework
             this.siegingFaction = siegingFaction;
             this.sourceSite = sourceSite;
             this.artilleryProjectile = artilleryProjectile;
+            this.parms = parms;
 
             this.shellsPerBarrage = shellsPerBarrage;
             this.numberOfBarrages = numberOfBarrages;
@@ -118,7 +120,7 @@ namespace rep.heframework
             artilleryOriginCell = GetEdgeCellTowardsWorldTile(map, sourceSite.Tile);
             ticksUntilNextBarrage = CalcCooldownVariable(ticksBetweenBarrages, barrageVariability);
             barragesLeftInSiege = numberOfBarrages;
-            targetCells = ValidateTargets(originalTargetCells);
+            this.targetCells = ValidateTargets(originalTargetCells);
 
             if (targetCells.NullOrEmpty())
             {
@@ -170,34 +172,107 @@ namespace rep.heframework
             }
         }
 
-        public void DoRaid()
+        private void DoRaid()
         {
+            HE_IncidentParms heParms;
+            if (doWaveRaids || doFinalRaid)
+            {
+                heParms = PrepRaidParms();
+            }
+            else
+            {
+                return;
+            }
+
             if (doWaveRaids && barragesLeftInSiege != 0)
             {
-                //TODO spawn raid using wave group
+                DoWaveRaid(heParms);
             }
             else if (doFinalRaid && barragesLeftInSiege == 0)
             {
-                //TODO spawn raid using final group
+                DoFinalRaid(heParms);
             }
+        }
+
+        private HE_IncidentParms PrepRaidParms()
+        {
+            HE_IncidentParms heParms = new HE_IncidentParms();
+            HE_Utils.CopyFields(parms, heParms);
+            return heParms;
+        }
+
+        private void DoWaveRaid(HE_IncidentParms heParms)
+        {
+            if (waveRaidPoints <= 0)
+            {
+                Log.Error($"MapComponent_ArtillerySiege tried to send a wave raid between barrages with 0 or negative raid points for faction {siegingFaction}");
+                return;
+            }
+
+            heParms.points = waveRaidPoints;
+            if (waveRaidGroup != null)
+            {
+                heParms.taggedGroupMaker = waveRaidGroup;
+            }
+            else
+            {
+                HE_Utils.TryResolveTaggedPawnGroup(heParms, HE_Utils.FindDefCountsForSites(HE_Utils.FindHESitesFor(parms.faction)).Keys.ToList(), out TaggedPawnGroupMaker groupMaker);
+                heParms.taggedGroupMaker = groupMaker;
+            }
+
+            // With a TaggedPawnGroupMaker in the HE_IncidentParms, this framework's raid generation detour should handle the rest
+            IncidentDefOf.RaidEnemy.Worker.TryExecuteWorker(heParms);
+        }
+
+        private void DoFinalRaid(HE_IncidentParms heParms)
+        {
+            if (finalRaidPoints <= 0)
+            {
+                Log.Error($"MapComponent_ArtillerySiege tried to send a final raid with 0 or negative raid points for faction {siegingFaction}");
+                return;
+            }
+
+            heParms.points = finalRaidPoints;
+            heParms.taggedGroupMaker = finalRaidGroup;
+
+            if (finalRaidGroup != null)
+            {
+                heParms.taggedGroupMaker = finalRaidGroup;
+            }
+            else
+            {
+                HE_Utils.TryResolveTaggedPawnGroup(heParms, HE_Utils.FindDefCountsForSites(HE_Utils.FindHESitesFor(parms.faction)).Keys.ToList(), out TaggedPawnGroupMaker groupMaker);
+                heParms.taggedGroupMaker = groupMaker;
+            }
+
+            // With a TaggedPawnGroupMaker in the HE_IncidentParms, this framework's raid generation detour should handle the rest
+            IncidentDefOf.RaidEnemy.Worker.TryExecuteWorker(heParms);
         }
 
         public virtual void FireShell()
         {
-            //TODO spawn shell, choose target, launch shell, reset timer
-            Projectile shell = SpawnShell();
-            IntVec3 target = ChooseTarget();
-            LaunchShell(shell, target);
-            shellsLeftInBarrage--;
-            if (shellsLeftInBarrage == 0)
+            try
             {
+                Projectile shell = SpawnShell();
+                IntVec3 target = ChooseTarget();
+                LaunchShell(shell, target);
+                shellsLeftInBarrage--;
+                if (shellsLeftInBarrage == 0)
+                {
+                    EndBarrage();
+                }
+            }
+            catch(Exception ex)
+            {
+                Log.Error("Exception while firing artillery shell. To prevent devestation, ending the siege immediately. Exception is:\n" + ex.ToString());
                 EndBarrage();
+                EndArtillerySiege();
             }
         }
 
         Projectile SpawnShell()
         {
-            //Shell ThingDef should have already been validated in StartArtillerySiege
+            // Shell ThingDef should have already been validated in StartArtillerySiege
             Projectile shell = (Projectile)ThingMaker.MakeThing(artilleryProjectile);
             GenSpawn.Spawn(shell, artilleryOriginCell, map);
 
@@ -247,6 +322,14 @@ namespace rep.heframework
             }
         }
 
+        public void ForceBarrageTimer(int ticks = 1)
+        {
+            if (ticksBetweenShells >= 1)
+            {
+                ticksUntilNextBarrage = ticks;
+            }
+        }
+
         private void SetBarrageCooldown()
         {
             ticksUntilNextBarrage = CalcCooldownVariable(ticksBetweenBarrages, barrageVariability);
@@ -272,7 +355,7 @@ namespace rep.heframework
 
         public static IntVec3 GetEdgeCellTowardsWorldTile(Map map, int sourceWorldTile)
         {
-            if (map == null || map.Tile != -1 || sourceWorldTile != -1)
+            if (map == null || map.Tile == -1 || sourceWorldTile == -1)
             {
                 Log.Warning("Invalid world tile or map has no tile.");
                 return CellFinder.RandomEdgeCell(map);
@@ -412,7 +495,7 @@ namespace rep.heframework
 
             TaggedString waveText = doWaveRaids ? "HE_LetterWaveArtillerySiege".Translate() : TaggedString.Empty;
             TaggedString finalRaidText = doFinalRaid ? "HE_LetterRaidArtillerySiege".Translate() : TaggedString.Empty;
-            TaggedString barrageText = (numberOfBarrages <= 0) ? new TaggedString(numberOfBarrages.ToString()) : "HE_Unlimited".Translate(); // Apparently 
+            TaggedString barrageText = (numberOfBarrages >= 0) ? new TaggedString(numberOfBarrages.ToString()) : "HE_Unlimited".Translate();
 
             NamedArgument[] textArgs = new NamedArgument[]
             {
@@ -432,5 +515,7 @@ namespace rep.heframework
                 textArgs
             );
         }
+
+        //TODO ExposeData()
     }
 }

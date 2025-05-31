@@ -137,7 +137,7 @@ namespace rep.heframework
         public void EndArtillerySiege()
         {
             siegeInProgress = false;
-            Messages.Message($"The artillery siege by {siegingFaction.Name} has come to an end.", MessageTypeDefOf.NegativeEvent);
+            Messages.Message("HE_AlertSiegeEnded".Translate(siegingFaction.Name), MessageTypeDefOf.NegativeEvent);
         }
 
         public void StartBarrage()
@@ -147,7 +147,7 @@ namespace rep.heframework
             shellsLeftInBarrage = shellsPerBarrage;
             SetBarrageCooldown();
             SetShellCooldown();
-            Messages.Message($"Take cover! {siegingFaction.Name} is firing an artillery barrage!", MessageTypeDefOf.NegativeEvent);
+            Messages.Message("HE_AlertBarrageStarted".Translate(siegingFaction.Name), MessageTypeDefOf.NegativeEvent);
         }
 
         public void EndBarrage()
@@ -163,7 +163,7 @@ namespace rep.heframework
             //else so that it doesn't do both alerts, since EndSiege has its own
             else
             {
-                Messages.Message($"The artillery barrage is ending.", MessageTypeDefOf.NeutralEvent);
+                Messages.Message($"HE_AlertBarrageEnded".Translate(), MessageTypeDefOf.NeutralEvent);
             }
 
             if (newTargetsCached && !cachedTargetCells.NullOrEmpty())
@@ -315,11 +315,7 @@ namespace rep.heframework
                 return;
             }
 
-            targetCells.Clear();
-            foreach (IntVec3 c in newTargets)
-            {
-                targetCells.Add(c);
-            }
+            targetCells = newTargets.ToList();
         }
 
         public void ForceBarrageTimer(int ticks = 1)
@@ -401,91 +397,97 @@ namespace rep.heframework
             return cell;
         }
 
-        // TODO optimize this, it's really performance-heavy. Although it only runs once, so maybe it's okay? Need to see how long it takes in practice.
+        // TODO gauge performance of this on a real map
         public List<IntVec3> ValidateTargets(List<IntVec3> initialTargets)
         {
-            List<IntVec3> newTargets = new List<IntVec3>();
+            List<IntVec3> newTargets = FilterInvalidTargetCells(initialTargets);
 
-            // Don't target cells under mountain
-            if (initialTargets != null)
-            {
-                foreach (IntVec3 c in initialTargets)
-                {
-                    if (c.InBounds(map) && map.roofGrid.RoofAt(c) != RoofDefOf.RoofRockThick)
-                    {
-                        newTargets.Add(c);
-                    }
-                }
-            }
-
-            // If a null or empty list was passed, or list was made empty by removing impenetrable targets, try to populate the list
             if (newTargets.Count == 0)
             {
-                List<Room> playerRooms = new List<Room>();
-
-                // Try to find some rooms owned by the player with penetrable roof
-                foreach (Room room in map.regionGrid.allRooms)
-                {
-                    if (!room.TouchesMapEdge &&
-                        room.Owners.Any(p => p.Faction == Faction.OfPlayer))
-                    {
-                        bool hasPenetrableRoof = false;
-
-                        foreach (IntVec3 cell in room.Cells.Take(100))
-                        {
-                            RoofDef roof = map.roofGrid.RoofAt(cell);
-                            if (roof == RoofDefOf.RoofConstructed || roof == RoofDefOf.RoofRockThin)
-                            {
-                                hasPenetrableRoof = true;
-                                break;
-                            }
-                        }
-
-                        if (hasPenetrableRoof)
-                        {
-                            playerRooms.Add(room);
-                            if (playerRooms.Count >= 10)
-                                break;
-                        }
-                    }
-                }
-
-                // Pick a cell from each found room to target
-                foreach (Room room in playerRooms)
-                {
-                    IntVec3 randCell = room.Cells
-                        .Where(c =>
-                        {
-                            RoofDef roof = map.roofGrid.RoofAt(c);
-                            return roof == RoofDefOf.RoofConstructed || roof == RoofDefOf.RoofRockThin;
-                        })
-                        .RandomElementWithFallback(IntVec3.Invalid);
-
-                    if (randCell.IsValid)
-                    {
-                        newTargets.Add(randCell);
-                    }
-                }
+                newTargets = GetTargetCellsFromPlayerRooms();
             }
 
-            // If no cells were selected, probably because no legal Rooms were found, try to target 10 random player-owned structures
             if (newTargets.Count == 0)
             {
-                List<Thing> ownedStructures = map.listerThings.ThingsInGroup(ThingRequestGroup.BuildingArtificial)
-                    .Where(t => t.Faction == Faction.OfPlayer &&
-                                t.Position.InBounds(map) &&
-                                map.roofGrid.RoofAt(t.Position) != RoofDefOf.RoofRockThick)
-                    .OrderBy(_ => Rand.Value)
-                    .Take(10)
-                    .ToList();
-
-                foreach (Thing structure in ownedStructures)
-                {
-                    newTargets.Add(structure.Position);
-                }
+                newTargets = GetTargetCellsFromPlayerStructures();
             }
 
             return newTargets;
+        }
+
+        private List<IntVec3> FilterInvalidTargetCells(List<IntVec3> cells)
+        {
+            List<IntVec3> result = new List<IntVec3>();
+            if (cells == null)
+                return result;
+
+            foreach (IntVec3 c in cells)
+            {
+                if (c.InBounds(map) && map.roofGrid.RoofAt(c) != RoofDefOf.RoofRockThick)
+                {
+                    result.Add(c);
+                }
+            }
+            return result;
+        }
+
+        // Tries to return a list of coordinates, each corresponding to a cell chosen at random from a room owned by the player that can be penetrated by mortar shells
+        // TODO reevaluate magic numbers
+        private List<IntVec3> GetTargetCellsFromPlayerRooms()
+        {
+            List<IntVec3> result = new List<IntVec3>();
+            List<Room> playerRooms = new List<Room>();
+
+            foreach (Room room in map.regionGrid.allRooms)
+            {
+                if (!room.TouchesMapEdge &&
+                    room.Owners.Any(p => p.Faction == Faction.OfPlayer))
+                {
+                    bool hasPenetrableRoof = room.Cells.Take(100).Any(cell =>
+                    {
+                        RoofDef roof = map.roofGrid.RoofAt(cell);
+                        return roof == RoofDefOf.RoofConstructed || roof == RoofDefOf.RoofRockThin;
+                    });
+
+                    if (hasPenetrableRoof)
+                    {
+                        playerRooms.Add(room);
+                        if (playerRooms.Count >= 10)
+                            break;
+                    }
+                }
+            }
+
+            foreach (Room room in playerRooms)
+            {
+                IntVec3 randCell = room.Cells
+                    .Where(c =>
+                    {
+                        RoofDef roof = map.roofGrid.RoofAt(c);
+                        return roof == RoofDefOf.RoofConstructed || roof == RoofDefOf.RoofRockThin;
+                    })
+                    .RandomElementWithFallback(IntVec3.Invalid);
+
+                if (randCell.IsValid)
+                {
+                    result.Add(randCell);
+                }
+            }
+
+            return result;
+        }
+
+        // Used if no coordinates were found by GetTargetCellsFromPlayerRooms, tries to target outdoor structures owned by the player
+        private List<IntVec3> GetTargetCellsFromPlayerStructures()
+        {
+            return map.listerThings.ThingsInGroup(ThingRequestGroup.BuildingArtificial)
+                .Where(t => t.Faction == Faction.OfPlayer &&
+                            t.Position.InBounds(map) &&
+                            map.roofGrid.RoofAt(t.Position) != RoofDefOf.RoofRockThick)
+                .OrderBy(_ => Rand.Value)
+                .Take(10)
+                .Select(t => t.Position)
+                .ToList();
         }
 
         void DoSiegeLetter(IncidentParms parms)
@@ -516,6 +518,67 @@ namespace rep.heframework
             );
         }
 
-        //TODO ExposeData()
+        public override void ExposeData()
+        {
+            Scribe_Values.Look(ref siegeInProgress, "siegeInProgress", false);
+            Scribe_Values.Look(ref barrageInProgress, "barrageInProgress", false);
+            Scribe_Values.Look(ref shellsPerBarrage, "shellsPerBarrage", 1);
+            Scribe_Values.Look(ref numberOfBarrages, "numberOfBarrages", 1);
+            Scribe_Values.Look(ref forcedMissRadius, "forcedMissRadius", 9f);
+            Scribe_Values.Look(ref ticksBetweenShells, "ticksBetweenShells", 300);
+            Scribe_Values.Look(ref ticksBetweenBarrages, "ticksBetweenBarrages", 60000);
+            Scribe_Values.Look(ref barrageVariability, "barrageVariability", 0f);
+            Scribe_Values.Look(ref shellVariability, "shellVariability", 0f);
+            Scribe_Values.Look(ref ticksUntilNextBarrage, "ticksUntilNextBarrage", 0);
+            Scribe_Values.Look(ref ticksUntilNextShell, "ticksUntilNextShell", 0);
+            Scribe_Values.Look(ref barragesLeftInSiege, "barragesLeftInSiege", 0);
+            Scribe_Values.Look(ref shellsLeftInBarrage, "shellsLeftInBarrage", 0);
+
+            Scribe_Values.Look(ref newTargetsCached, "newTargetsCached", false);
+            Scribe_Collections.Look(ref targetCells, "targetCells", LookMode.Value);
+            Scribe_Collections.Look(ref cachedTargetCells, "cachedTargetCells", LookMode.Value);
+            Scribe_Collections.Look(ref originalTargetCells, "originalTargetCells", LookMode.Value);
+            Scribe_Values.Look(ref artilleryOriginCell, "artilleryOriginCell");
+
+            Scribe_References.Look(ref siegingFaction, "siegingFaction");
+            Scribe_References.Look(ref sourceSite, "sourceSite");
+            Scribe_Defs.Look(ref artilleryProjectile, "artilleryProjectile");
+            Scribe_Deep.Look(ref parms, "incidentParms");
+
+            Scribe_Values.Look(ref doWaveRaids, "doWaveRaids", false);
+            Scribe_Values.Look(ref doFinalRaid, "doFinalRaid", false);
+            Scribe_Values.Look(ref waveRaidPoints, "waveRaidPoints", 0f);
+            Scribe_Values.Look(ref finalRaidPoints, "finalRaidPoints", 0f);
+            Scribe_Deep.Look(ref waveRaidGroup, "waveRaidGroup");
+            Scribe_Deep.Look(ref finalRaidGroup, "finalRaidGroup");
+
+            string waveGroupName = waveRaidGroup?.groupName;
+            string finalGroupName = finalRaidGroup?.groupName;
+            Scribe_Values.Look(ref waveGroupName, "waveRaidGroupName");
+            Scribe_Values.Look(ref finalGroupName, "finalRaidGroupName");
+
+            if (Scribe.mode == LoadSaveMode.PostLoadInit)
+            {
+                waveRaidGroup = null;
+                if (!waveGroupName.NullOrEmpty() && siegingFaction != null)
+                {
+                    PawnGroupMakerExtensionHE ext = siegingFaction.def.GetModExtension<PawnGroupMakerExtensionHE>();
+                    if (ext != null)
+                    {
+                        waveRaidGroup = ext.taggedPawnGroupMakers?.FirstOrDefault(g => g.groupName == waveGroupName);
+                    }
+                }
+
+                finalRaidGroup = null;
+                if (!finalGroupName.NullOrEmpty() && siegingFaction != null)
+                {
+                    PawnGroupMakerExtensionHE ext = siegingFaction.def.GetModExtension<PawnGroupMakerExtensionHE>();
+                    if (ext != null)
+                    {
+                        finalRaidGroup = ext.taggedPawnGroupMakers?.FirstOrDefault(g => g.groupName == finalGroupName);
+                    }
+                }
+            }
+        }
     }
 }

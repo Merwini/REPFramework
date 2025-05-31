@@ -4,7 +4,9 @@
     <HE_LetterTextArtillerySiege>{0} has started an artillery siege of your colony. Reports indicate they have enough munitions to fire {1} artillery barrages.{2}{3} The siege can be ended early by destroying the expansion site responsible for the siege.</HE_LetterTextArtillerySiege>
     <HE_LetterWaveArtillerySiege> After each barrage they will send a small raid.</HE_LetterWaveArtillerySiege>
     <HE_LetterRaidArtillerySiege> After the final barrage, they will send a full-sized raid.</HE_LetterRaidArtillerySiege>
-
-
+    <HE_AlertSiegeEnded>The artillery siege by {0} has come to an end.</HE_AlertSiegeEnded>
+    <HE_AlertBarrageStarted>Take cover! {0} is firing an artillery barrage!</HE_AlertBarrageStarted>
+    <HE_AlertBarrageEnded>The artillery barrage is ending.</HE_AlertBarrageEnded>
+    
     <HE_Unlimited>unlimited</HE_Unlimited>
 </LanguageData>

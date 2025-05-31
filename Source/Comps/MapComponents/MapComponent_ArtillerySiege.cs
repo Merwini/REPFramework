@@ -86,12 +86,12 @@ namespace rep.heframework
             }
         }
 
-        public bool StartArtillerySiege(Faction siegingFaction, Site sourceSite, ThingDef artilleryProjectile, int shellsPerBarrage = 1, int numberOfBarrages = 1, float forcedMissRadius = 9, int ticksBetweenShells = 300, float shellVariability = 0, int ticksBetweenBarrages = 60000, float barrageVariability = 0, List<IntVec3> targetCells = null, bool doWaveRaids = false, bool doFinalRaid = false, TaggedPawnGroupMaker waveRaidGroup = null, float waveRaidPoints = 0, TaggedPawnGroupMaker finalRaidGroup = null, float finalRaidPoints = 0)
+        public bool StartArtillerySiege(Faction siegingFaction, Site sourceSite, ThingDef artilleryProjectile, IncidentParms parms, int shellsPerBarrage = 1, int numberOfBarrages = 1, float forcedMissRadius = 9, int ticksBetweenShells = 300, float shellVariability = 0, int ticksBetweenBarrages = 60000, float barrageVariability = 0, List<IntVec3> targetCells = null, bool doWaveRaids = false, bool doFinalRaid = false, TaggedPawnGroupMaker waveRaidGroup = null, float waveRaidPoints = 0, TaggedPawnGroupMaker finalRaidGroup = null, float finalRaidPoints = 0)
         {
             //TODO validate inputs are not illegal, like <1 ticks between shells/barrages
 
             // Don't start a siege if one is already in progress, or if one of the required arguments is null
-            if (siegeInProgress || siegingFaction == null || sourceSite == null || artilleryProjectile == null)
+            if (siegeInProgress || siegingFaction == null || sourceSite == null || artilleryProjectile == null || parms == null)
                 return false;
 
             this.siegingFaction = siegingFaction;
@@ -117,10 +117,17 @@ namespace rep.heframework
             //more stuff
             artilleryOriginCell = GetEdgeCellTowardsWorldTile(map, sourceSite.Tile);
             ticksUntilNextBarrage = CalcCooldownVariable(ticksBetweenBarrages, barrageVariability);
+            barragesLeftInSiege = numberOfBarrages;
+            targetCells = ValidateTargets(originalTargetCells);
+
+            if (targetCells.NullOrEmpty())
+            {
+                Log.Warning("Failed to start siege due to no target cells selected");
+                return false;
+            }
 
             siegeInProgress = true;
-
-            //TODO decide if letter warning of siege should be done here or by the incident that starts the siege
+            DoSiegeLetter(parms);
 
             return true;
         }
@@ -134,6 +141,7 @@ namespace rep.heframework
         public void StartBarrage()
         {
             barrageInProgress = true;
+            barragesLeftInSiege--;
             shellsLeftInBarrage = shellsPerBarrage;
             SetBarrageCooldown();
             SetShellCooldown();
@@ -143,13 +151,23 @@ namespace rep.heframework
         public void EndBarrage()
         {
             barrageInProgress = false;
+
             DoRaid();
-            //TODO check if barrages left == 0, end Siege if so
+
+            if (barragesLeftInSiege == 0)
+            {
+                EndArtillerySiege();
+            }
+            //else so that it doesn't do both alerts, since EndSiege has its own
+            else
+            {
+                Messages.Message($"The artillery barrage is ending.", MessageTypeDefOf.NeutralEvent);
+            }
+
             if (newTargetsCached && !cachedTargetCells.NullOrEmpty())
             {
                 UpdateTargetCells(cachedTargetCells);
             }
-            Messages.Message($"The artillery barrage is ending.", MessageTypeDefOf.NeutralEvent);
         }
 
         public void DoRaid()
@@ -164,18 +182,22 @@ namespace rep.heframework
             }
         }
 
-        //TODO virtual for CE version? Do I need one, or will patching in a CE-compatible ThingDef for the projectile be good?
         public virtual void FireShell()
         {
             //TODO spawn shell, choose target, launch shell, reset timer
             Projectile shell = SpawnShell();
             IntVec3 target = ChooseTarget();
-            shell.Launch
+            LaunchShell(shell, target);
+            shellsLeftInBarrage--;
+            if (shellsLeftInBarrage == 0)
+            {
+                EndBarrage();
+            }
         }
 
         Projectile SpawnShell()
         {
-            //Shell ThingDef should have been validated in StartArtillerySiege
+            //Shell ThingDef should have already been validated in StartArtillerySiege
             Projectile shell = (Projectile)ThingMaker.MakeThing(artilleryProjectile);
             GenSpawn.Spawn(shell, artilleryOriginCell, map);
 
@@ -194,6 +216,16 @@ namespace rep.heframework
             int newZ = Mathf.Clamp(missTarget.z, 0, map.Size.z - 1);
 
             return new IntVec3(newX, 0, newZ);
+        }
+
+        // Virtual for CE override?
+        public virtual void LaunchShell(Projectile shell, IntVec3 target)
+        {
+            shell.Launch(
+                launcher: shell, 
+                intendedTarget: target,
+                usedTarget: target,
+                hitFlags: ProjectileHitFlags.All);
         }
 
         public void UpdateTargetCells(List<IntVec3> newTargets)
@@ -284,6 +316,121 @@ namespace rep.heframework
             }
 
             return cell;
+        }
+
+        // TODO optimize this, it's really performance-heavy. Although it only runs once, so maybe it's okay? Need to see how long it takes in practice.
+        public List<IntVec3> ValidateTargets(List<IntVec3> initialTargets)
+        {
+            List<IntVec3> newTargets = new List<IntVec3>();
+
+            // Don't target cells under mountain
+            if (initialTargets != null)
+            {
+                foreach (IntVec3 c in initialTargets)
+                {
+                    if (c.InBounds(map) && map.roofGrid.RoofAt(c) != RoofDefOf.RoofRockThick)
+                    {
+                        newTargets.Add(c);
+                    }
+                }
+            }
+
+            // If a null or empty list was passed, or list was made empty by removing impenetrable targets, try to populate the list
+            if (newTargets.Count == 0)
+            {
+                List<Room> playerRooms = new List<Room>();
+
+                // Try to find some rooms owned by the player with penetrable roof
+                foreach (Room room in map.regionGrid.allRooms)
+                {
+                    if (!room.TouchesMapEdge &&
+                        room.Owners.Any(p => p.Faction == Faction.OfPlayer))
+                    {
+                        bool hasPenetrableRoof = false;
+
+                        foreach (IntVec3 cell in room.Cells.Take(100))
+                        {
+                            RoofDef roof = map.roofGrid.RoofAt(cell);
+                            if (roof == RoofDefOf.RoofConstructed || roof == RoofDefOf.RoofRockThin)
+                            {
+                                hasPenetrableRoof = true;
+                                break;
+                            }
+                        }
+
+                        if (hasPenetrableRoof)
+                        {
+                            playerRooms.Add(room);
+                            if (playerRooms.Count >= 10)
+                                break;
+                        }
+                    }
+                }
+
+                // Pick a cell from each found room to target
+                foreach (Room room in playerRooms)
+                {
+                    IntVec3 randCell = room.Cells
+                        .Where(c =>
+                        {
+                            RoofDef roof = map.roofGrid.RoofAt(c);
+                            return roof == RoofDefOf.RoofConstructed || roof == RoofDefOf.RoofRockThin;
+                        })
+                        .RandomElementWithFallback(IntVec3.Invalid);
+
+                    if (randCell.IsValid)
+                    {
+                        newTargets.Add(randCell);
+                    }
+                }
+            }
+
+            // If no cells were selected, probably because no legal Rooms were found, try to target 10 random player-owned structures
+            if (newTargets.Count == 0)
+            {
+                List<Thing> ownedStructures = map.listerThings.ThingsInGroup(ThingRequestGroup.BuildingArtificial)
+                    .Where(t => t.Faction == Faction.OfPlayer &&
+                                t.Position.InBounds(map) &&
+                                map.roofGrid.RoofAt(t.Position) != RoofDefOf.RoofRockThick)
+                    .OrderBy(_ => Rand.Value)
+                    .Take(10)
+                    .ToList();
+
+                foreach (Thing structure in ownedStructures)
+                {
+                    newTargets.Add(structure.Position);
+                }
+            }
+
+            return newTargets;
+        }
+
+        void DoSiegeLetter(IncidentParms parms)
+        {
+            TaggedString baseLabel = "HE_LetterLabelArtillerySiege".Translate();
+            TaggedString baseText = "HE_LetterTextArtillerySiege".Translate();
+
+            TaggedString waveText = doWaveRaids ? "HE_LetterWaveArtillerySiege".Translate() : TaggedString.Empty;
+            TaggedString finalRaidText = doFinalRaid ? "HE_LetterRaidArtillerySiege".Translate() : TaggedString.Empty;
+            TaggedString barrageText = (numberOfBarrages <= 0) ? new TaggedString(numberOfBarrages.ToString()) : "HE_Unlimited".Translate(); // Apparently 
+
+            NamedArgument[] textArgs = new NamedArgument[]
+            {
+            siegingFaction.Name,      // {0}
+            barrageText,              // {1}
+            waveText,                 // {2}
+            finalRaidText             // {3}
+            };
+
+            IncidentWorker.SendIncidentLetter(
+                baseLabel,
+                baseText,
+                LetterDefOf.ThreatBig,
+                parms,
+                sourceSite,
+                null,
+                textArgs
+            );
         }
     }
 }

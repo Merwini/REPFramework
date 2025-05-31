@@ -34,11 +34,25 @@ namespace rep.heframework
                 return false;
             }
 
-            //get the MapComponent_ArtillerySiege for the map
+            WorldObjectExtensionHE extension = heParms.site.MainSitePartDef.GetModExtension<WorldObjectExtensionHE>();
+
+            if (extension == null)
+            {
+                if (HE_Settings.debugLogging)
+                {
+                    Log.Message($"IncidentWorker_ArtilleryCamp returning false due to missing WorldObjectExtensionHE on site {site.Label}");
+                }
+                return false;
+            }
+            
             MapComponent_ArtillerySiege comp = map.GetComponent<MapComponent_ArtillerySiege>();
 
-            //set up a StartSiege method on the comp. Call it here
-                //feed it faction, how many shells, how often, how long it last, raid info?
+            //TODO put more arguments in extension, use them
+            comp.StartArtillerySiege(
+                siegingFaction: parms.faction,
+                sourceSite: heParms.site,
+                artilleryProjectile: extension.artilleryProjectile,
+                parms: parms);
 
             return true;
         }

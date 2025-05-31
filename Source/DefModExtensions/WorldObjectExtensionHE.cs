@@ -12,7 +12,6 @@ namespace rep.heframework
 {
     public class WorldObjectExtensionHE : DefModExtension
     {
-        #region Fields
         public List<FactionGroupLink> factionsToPawnGroups;
 
         public MapGeneratorDef mapGenerator;
@@ -36,6 +35,8 @@ namespace rep.heframework
         public int maximumSiteCount = 10;
 
         public IncidentDef fireIncidentOnSpawn = null;
+
+        #region ArtilleryStuff
 
         public ThingDef artilleryProjectile;
 

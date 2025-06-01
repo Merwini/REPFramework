@@ -17,8 +17,6 @@ namespace rep.heframework
 
         public float threatPointAdjustmentFlat = 0;
 
-        public string pawnGroupMakerName;
-
         Map map;
 
         public override void Generate(Map map, GenStepParams parms)

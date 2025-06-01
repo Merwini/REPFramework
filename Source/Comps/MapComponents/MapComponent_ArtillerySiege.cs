@@ -18,6 +18,7 @@ namespace rep.heframework
         float forcedMissRadius;
         int ticksBetweenShells;
         int ticksBetweenBarrages;
+        int ticksUntilFirstBarrage;
         float barrageVariability;
         float shellVariability;
 
@@ -41,7 +42,7 @@ namespace rep.heframework
         int ticksUntilNextShell;
         int barragesLeftInSiege;
         int shellsLeftInBarrage;
-        IntVec3 artilleryOriginCell;
+        IntVec2 artilleryDirection;
 
         List<IntVec3> targetCells;
         bool newTargetsCached;
@@ -119,6 +120,7 @@ namespace rep.heframework
             this.shellsPerBarrage = shellsPerBarrage;
             this.numberOfBarrages = numberOfBarrages;
             this.forcedMissRadius = extension.forcedMissRadius;
+            this.ticksUntilFirstBarrage = extension.ticksUntilFirstBarrage;
             this.ticksBetweenShells = ticksBetweenShells;
             this.ticksBetweenBarrages = ticksBetweenBarrages;
             this.shellVariability = extension.shellVariability;
@@ -146,8 +148,8 @@ namespace rep.heframework
                 }
             }
 
-            artilleryOriginCell = GetEdgeCellTowardsWorldTile(map, sourceSite.Tile);
-            ticksUntilNextBarrage = CalcCooldownVariable(ticksBetweenBarrages, barrageVariability);
+            artilleryDirection = GetEdgeCellTowardsWorldTile(map, sourceSite.Tile);
+            ticksUntilNextBarrage = ticksUntilFirstBarrage;
             barragesLeftInSiege = numberOfBarrages;
             this.targetCells = ValidateTargets(originalTargetCells);
 
@@ -159,6 +161,11 @@ namespace rep.heframework
 
             siegeInProgress = true;
             DoSiegeLetter(parms);
+
+            if (HE_Settings.debugLogging)
+            {
+                Log.Message($"Starting siege on map {map.Parent.Label}. Sieging faction: {siegingFaction}. Projectile: {artilleryProjectile.defName}. Shells per barrage: {shellsPerBarrage}. Number of barrages: {numberOfBarrages}. Ticks between shells: {ticksBetweenShells}. Ticks between barrages: {ticksBetweenBarrages}. Ticks until first barrage: {ticksUntilFirstBarrage}.");
+            }
 
             return true;
         }
@@ -177,13 +184,25 @@ namespace rep.heframework
             SetBarrageCooldown();
             SetShellCooldown();
             Messages.Message("HE_AlertBarrageStarted".Translate(siegingFaction.Name), MessageTypeDefOf.NegativeEvent);
+
+            if (HE_Settings.debugLogging)
+            {
+                Log.Message($"Starting barrage. Barrages left in siege: {barragesLeftInSiege}. Shells in barrage: {shellsLeftInBarrage}. Barrage cooldown set to: {ticksUntilNextBarrage}. Shell cooldown set to: {ticksUntilNextShell}");
+            }
         }
 
         public void EndBarrage()
         {
             barrageInProgress = false;
 
-            DoRaid();
+            try
+            {
+                DoRaid();
+            }
+            catch (Exception ex)
+            {
+                Log.Error("Exception while spawning raid for artillery siege. Exception is:\n" + ex.ToString());
+            }
 
             if (barragesLeftInSiege == 0)
             {
@@ -227,6 +246,7 @@ namespace rep.heframework
         {
             HE_IncidentParms heParms = new HE_IncidentParms();
             HE_Utils.CopyFields(parms, heParms);
+            heParms.target = map;
             return heParms;
         }
 
@@ -280,31 +300,73 @@ namespace rep.heframework
 
         public virtual void FireShell()
         {
+            Projectile shell = null;
+            IntVec3 target = IntVec3.Zero;
             try
             {
-                Projectile shell = SpawnShell();
-                IntVec3 target = ChooseTarget();
+                target = ChooseTarget();
+                shell = SpawnShell(target);
                 LaunchShell(shell, target);
                 shellsLeftInBarrage--;
-                if (shellsLeftInBarrage == 0)
+                if (shellsLeftInBarrage <= 0)
                 {
                     EndBarrage();
                 }
+                else
+                {
+                    SetShellCooldown();
+                }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 Log.Error("Exception while firing artillery shell. To prevent devestation, ending the siege immediately. Exception is:\n" + ex.ToString());
                 EndBarrage();
                 EndArtillerySiege();
             }
+            finally
+            {
+                if (HE_Settings.debugLogging)
+                {
+                    Log.Message($"Fired shell {(shell != null ? shell.def.defName : null)} at target {target}. Shells left in barrage: {shellsLeftInBarrage}. Cooldown reset to: {ticksUntilNextShell}");
+                }
+            }
         }
 
-        Projectile SpawnShell()
+        Projectile SpawnShell(IntVec3 target)
         {
-            // Shell ThingDef should have already been validated in StartArtillerySiege
-            Projectile shell = (Projectile)ThingMaker.MakeThing(artilleryProjectile);
-            GenSpawn.Spawn(shell, artilleryOriginCell, map);
+            IntVec3 spawnCell;
 
+            if (artilleryDirection == IntVec2.North)
+            {
+                spawnCell = new IntVec3(target.x, 0, map.Size.z - 1);
+            }
+            else if (artilleryDirection == IntVec2.South)
+            {
+                spawnCell = new IntVec3(target.x, 0, 0);
+            }
+            else if (artilleryDirection == IntVec2.East)
+            {
+                spawnCell = new IntVec3(map.Size.x - 1, 0, target.z);
+            }
+            else if (artilleryDirection == IntVec2.West)
+            {
+                spawnCell = new IntVec3(0, 0, target.z);
+            }
+            else
+            {
+                Log.Warning("SpawnShell Invalid artilleryDirection; defaulting to map center.");
+                spawnCell = new IntVec3(map.Size.x / 2, 0, map.Size.z - 1);
+            }
+
+            // Shell ThingDef should have already been validated in StartArtillerySiege
+            Projectile shell = ThingMaker.MakeThing(artilleryProjectile) as Projectile;
+            if (shell == null)
+            {
+                Log.Error("Failed to cast artillery projectile to Projectile.");
+                return null;
+            }
+
+            GenSpawn.Spawn(shell, spawnCell, map);
             return shell;
         }
 
@@ -378,12 +440,12 @@ namespace rep.heframework
             return (sourceSite != null && !sourceSite.Destroyed);
         }
 
-        public static IntVec3 GetEdgeCellTowardsWorldTile(Map map, int sourceWorldTile)
+        public static IntVec2 GetEdgeCellTowardsWorldTile(Map map, int sourceWorldTile)
         {
             if (map == null || map.Tile == -1 || sourceWorldTile == -1)
             {
-                Log.Warning("Invalid world tile or map has no tile.");
-                return CellFinder.RandomEdgeCell(map);
+                Log.Warning("GetEdgeCellTowardsWorldTile: Invalid world tile or map has no tile.");
+                return IntVec2.North;
             }
 
             // Find the angle between the settlement map and the Site responsible for the artillery
@@ -397,33 +459,22 @@ namespace rep.heframework
             // Pick a random cell along the map edge matching that angle
             // I think an unpassable cell will be fine since artillery flies overhead
             // Will anyone notice if the origin cell doesn't exactly match the angle? Probably not worth it to be more precise
-            IntVec3 cell;
             if (angle >= 45f && angle < 135f)
             {
-                // North
-                int x = Rand.Range(0, map.Size.x);
-                cell = new IntVec3(x, 0, map.Size.z - 1);
+                return IntVec2.North;
             }
             else if (angle >= 135f && angle < 225f)
             {
-                // West
-                int z = Rand.Range(0, map.Size.z);
-                cell = new IntVec3(0, 0, z);
+                return IntVec2.West;
             }
             else if (angle >= 225f && angle < 315f)
             {
-                // South
-                int x = Rand.Range(0, map.Size.x);
-                cell = new IntVec3(x, 0, 0);
+                return IntVec2.South;
             }
             else
             {
-                // East
-                int z = Rand.Range(0, map.Size.z);
-                cell = new IntVec3(map.Size.x - 1, 0, z);
+                return IntVec2.East;
             }
-
-            return cell;
         }
 
         // TODO gauge performance of this on a real map
@@ -554,6 +605,7 @@ namespace rep.heframework
             Scribe_Values.Look(ref shellsPerBarrage, "shellsPerBarrage", 1);
             Scribe_Values.Look(ref numberOfBarrages, "numberOfBarrages", 1);
             Scribe_Values.Look(ref forcedMissRadius, "forcedMissRadius", 9f);
+            Scribe_Values.Look(ref ticksUntilFirstBarrage, "ticksUntilFirstBarrage", 180000);
             Scribe_Values.Look(ref ticksBetweenShells, "ticksBetweenShells", 300);
             Scribe_Values.Look(ref ticksBetweenBarrages, "ticksBetweenBarrages", 60000);
             Scribe_Values.Look(ref barrageVariability, "barrageVariability", 0f);
@@ -567,7 +619,7 @@ namespace rep.heframework
             Scribe_Collections.Look(ref targetCells, "targetCells", LookMode.Value);
             Scribe_Collections.Look(ref cachedTargetCells, "cachedTargetCells", LookMode.Value);
             Scribe_Collections.Look(ref originalTargetCells, "originalTargetCells", LookMode.Value);
-            Scribe_Values.Look(ref artilleryOriginCell, "artilleryOriginCell");
+            Scribe_Values.Look(ref artilleryDirection, "artilleryDirection");
 
             Scribe_References.Look(ref siegingFaction, "siegingFaction");
             Scribe_References.Look(ref sourceSite, "sourceSite");

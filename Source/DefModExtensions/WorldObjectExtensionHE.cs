@@ -46,6 +46,8 @@ namespace rep.heframework
 
         public float forcedMissRadius = 9f;
 
+        public int ticksUntilFirstBarrage = 180000; // three days
+
         public int ticksBetweenShells = 300; // 5 seconds
 
         public float shellVariability = 0f;

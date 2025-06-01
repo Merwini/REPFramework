@@ -77,12 +77,12 @@ namespace rep.heframework
             }
 
             // StartBarrage() resets the ticks, so don't need to validate that a barrage isn't already in progress
-            if (ticksUntilNextBarrage <= 0)
+            if (!barrageInProgress && ticksUntilNextBarrage <= 0)
             {
                 StartBarrage();
             }
 
-            if (ticksUntilNextShell <= 0)
+            if (barrageInProgress && ticksUntilNextShell <= 0)
             {
                 FireShell();
             }
@@ -164,7 +164,7 @@ namespace rep.heframework
 
             if (HE_Settings.debugLogging)
             {
-                Log.Message($"Starting siege on map {map.Parent.Label}. Sieging faction: {siegingFaction}. Projectile: {artilleryProjectile.defName}. Shells per barrage: {shellsPerBarrage}. Number of barrages: {numberOfBarrages}. Ticks between shells: {ticksBetweenShells}. Ticks between barrages: {ticksBetweenBarrages}. Ticks until first barrage: {ticksUntilFirstBarrage}.");
+                Log.Message($"Starting siege on map {map.Parent.Label}. Sieging faction: {siegingFaction}. Projectile: {artilleryProjectile.defName}. Shells per barrage: {shellsPerBarrage}. Number of barrages: {numberOfBarrages}. Ticks between shells: {ticksBetweenShells}. Ticks between barrages: {ticksBetweenBarrages}. Ticks until first barrage: {ticksUntilNextBarrage}.");
             }
 
             return true;
@@ -327,7 +327,7 @@ namespace rep.heframework
             {
                 if (HE_Settings.debugLogging)
                 {
-                    Log.Message($"Fired shell {(shell != null ? shell.def.defName : null)} at target {target}. Shells left in barrage: {shellsLeftInBarrage}. Cooldown reset to: {ticksUntilNextShell}");
+                    Log.Message($"Fired shell {(shell != null ? shell.def.defName : null)} at target {target}. Shells left in barrage: {shellsLeftInBarrage}. Cooldown reset to: {ticksUntilNextShell}.");
                 }
             }
         }
@@ -492,6 +492,17 @@ namespace rep.heframework
                 newTargets = GetTargetCellsFromPlayerStructures();
             }
 
+            if (HE_Settings.debugLogging)
+            {
+                StringBuilder sb = new StringBuilder();
+                sb.AppendLine($"ValidateTargets ended with {newTargets.Count} targets. Targets are:");
+                foreach (IntVec3 target in newTargets)
+                {
+                    sb.AppendLine(target.ToString());
+                }
+                Log.Message(sb.ToString());
+            }
+
             return newTargets;
         }
 
@@ -508,6 +519,12 @@ namespace rep.heframework
                     result.Add(c);
                 }
             }
+
+            if (HE_Settings.debugLogging)
+            {
+                Log.Message($"FilterInvalidTargetCells started with {cells.Count} target cells. Returned {result.Count} after filtering.");
+            }
+
             return result;
         }
 
@@ -520,38 +537,50 @@ namespace rep.heframework
 
             foreach (Room room in map.regionGrid.allRooms)
             {
-                if (!room.TouchesMapEdge &&
-                    room.Owners.Any(p => p.Faction == Faction.OfPlayer))
-                {
-                    bool hasPenetrableRoof = room.Cells.Take(100).Any(cell =>
-                    {
-                        RoofDef roof = map.roofGrid.RoofAt(cell);
-                        return roof == RoofDefOf.RoofConstructed || roof == RoofDefOf.RoofRockThin;
-                    });
+                // CellCount < 3 should filter out vanilla door "rooms" and micro-rooms. Larger modded doors like garage doors could be a problem, but not sure what the solution would be.
+                if (room.CellCount < 3 || room.TouchesMapEdge)
+                    continue;
 
-                    if (hasPenetrableRoof)
-                    {
-                        playerRooms.Add(room);
-                        if (playerRooms.Count >= 10)
-                            break;
-                    }
+                // Only consider rooms with player-owned buildings
+                if (!room.ContainedAndAdjacentThings.Any(t => t.Faction == Faction.OfPlayer && t.def.category == ThingCategory.Building))
+                    continue;
+
+                // Must have penetrable roof
+                bool hasPenetrableRoof = room.Cells.Take(100).Any(cell =>
+                {
+                    RoofDef roof = map.roofGrid.RoofAt(cell);
+                    return roof == RoofDefOf.RoofConstructed || roof == RoofDefOf.RoofRockThin;
+                });
+
+                if (hasPenetrableRoof)
+                {
+                    playerRooms.Add(room);
+                    if (playerRooms.Count >= 10)
+                        break;
                 }
             }
 
             foreach (Room room in playerRooms)
             {
+                // Randomize cell order before selecting
                 IntVec3 randCell = room.Cells
                     .Where(c =>
                     {
                         RoofDef roof = map.roofGrid.RoofAt(c);
                         return roof == RoofDefOf.RoofConstructed || roof == RoofDefOf.RoofRockThin;
                     })
-                    .RandomElementWithFallback(IntVec3.Invalid);
+                    .InRandomOrder()
+                    .FirstOrDefault();
 
                 if (randCell.IsValid)
                 {
                     result.Add(randCell);
                 }
+            }
+
+            if (HE_Settings.debugLogging)
+            {
+                Log.Message($"GetTargetCellsFromPlayerRooms returning {result.Count} target cells.");
             }
 
             return result;
@@ -560,7 +589,7 @@ namespace rep.heframework
         // Used if no coordinates were found by GetTargetCellsFromPlayerRooms, tries to target outdoor structures owned by the player
         private List<IntVec3> GetTargetCellsFromPlayerStructures()
         {
-            return map.listerThings.ThingsInGroup(ThingRequestGroup.BuildingArtificial)
+            List<IntVec3> result = map.listerThings.ThingsInGroup(ThingRequestGroup.BuildingArtificial)
                 .Where(t => t.Faction == Faction.OfPlayer &&
                             t.Position.InBounds(map) &&
                             map.roofGrid.RoofAt(t.Position) != RoofDefOf.RoofRockThick)
@@ -568,6 +597,13 @@ namespace rep.heframework
                 .Take(10)
                 .Select(t => t.Position)
                 .ToList();
+
+            if (HE_Settings.debugLogging)
+            {
+                Log.Message($"GetTargetCellsFromPlayerRooms returning {result.Count} target cells.");
+            }
+
+            return result;
         }
 
         void DoSiegeLetter(IncidentParms parms)
@@ -630,8 +666,6 @@ namespace rep.heframework
             Scribe_Values.Look(ref doFinalRaid, "doFinalRaid", false);
             Scribe_Values.Look(ref waveRaidPoints, "waveRaidPoints", 0f);
             Scribe_Values.Look(ref finalRaidPoints, "finalRaidPoints", 0f);
-            Scribe_Deep.Look(ref waveRaidGroup, "waveRaidGroup");
-            Scribe_Deep.Look(ref finalRaidGroup, "finalRaidGroup");
 
             string waveGroupName = waveRaidGroup?.groupName;
             string finalGroupName = finalRaidGroup?.groupName;

@@ -411,13 +411,10 @@ namespace rep.heframework
             #endregion
         }
 
-        // Mostly copied from vanilla, with a multiplier based on world sites
+        // Mostly copied from vanilla, with a multiplier based on world sites and preserving value for
         public static float AdjustedRaidPoints(float points, Dictionary<SitePartDef, int> sites, PawnsArrivalModeDef raidArrivalMode, RaidStrategyDef raidStrategy, Faction faction, PawnGroupKindDef groupKind, RaidAgeRestrictionDef ageRestriction = null)
         {
-            float siteModifiedPoints = points * GetThreatPointModifierWithSites(sites);
-
-            float curvedPoints = siteModifiedPoints;
-
+            float curvedPoints = points;
 
             if (raidArrivalMode.pointsFactorCurve != null)
             {
@@ -431,16 +428,18 @@ namespace rep.heframework
             {
                 curvedPoints *= ageRestriction.threatPointsFactor;
             }
-            siteModifiedPoints = Mathf.Max(points, raidStrategy.Worker.MinimumPoints(faction, groupKind) * 1.05f);
+            curvedPoints = Mathf.Max(curvedPoints, raidStrategy.Worker.MinimumPoints(faction, groupKind) * 1.05f);
+
+            float siteModifiedPoints = points * GetThreatPointModifierWithSites(sites);
 
             #region logging
             if (HE_Settings.debugLogging)
             {
-                Log.Message($"AdjustedRaidPoints original: {points}, modified by world sites: {siteModifiedPoints}, post-curves: {curvedPoints}");
+                Log.Message($"AdjustedRaidPoints original: {points}, post-curves: {curvedPoints}, modified by world sites: {siteModifiedPoints}");
             }
             #endregion
 
-            return curvedPoints;
+            return siteModifiedPoints;
         }
 
         public static IEnumerable<Pawn> GeneratePawns(PawnGroupMakerParms parms, PawnGroupMaker groupMaker, bool warnOnZeroResults = true)

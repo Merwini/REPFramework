@@ -300,13 +300,13 @@ namespace rep.heframework
 
         public virtual void FireShell()
         {
-            Projectile shell = null;
+            ThingWithComps shell = null;
             IntVec3 target = IntVec3.Zero;
             try
             {
                 target = ChooseTarget();
                 shell = SpawnShell(target);
-                LaunchShell(shell, target);
+                //LaunchShell(shell, target);
                 shellsLeftInBarrage--;
                 if (shellsLeftInBarrage <= 0)
                 {
@@ -332,10 +332,31 @@ namespace rep.heframework
             }
         }
 
-        Projectile SpawnShell(IntVec3 target)
+        ThingWithComps SpawnShell(IntVec3 target)
         {
-            IntVec3 spawnCell;
+            if (artilleryProjectile == null || artilleryProjectile.projectile == null)
+            {
+                Log.Error("Tried to spawn artillery shell, but artilleryProjectile or its properties are null.");
+                return null;
+            }
 
+            Type projectilePropsType = artilleryProjectile.projectile.GetType();
+
+            if (!HE_Settings.artillarySpawnDelegate.TryGetValue(projectilePropsType, out var spawnFunc))
+            {
+                Log.Error($"No spawn delegate registered for projectile type: {projectilePropsType.FullName}");
+                return null;
+            }
+
+            ThingWithComps shell = spawnFunc(artilleryProjectile);
+
+            if (shell == null)
+            {
+                Log.Error($"Spawn delegate for {projectilePropsType.FullName} returned null.");
+                return null;
+            }
+
+            IntVec3 spawnCell;
             if (artilleryDirection == IntVec2.North)
             {
                 spawnCell = new IntVec3(target.x, 0, map.Size.z - 1);
@@ -354,16 +375,8 @@ namespace rep.heframework
             }
             else
             {
-                Log.Warning("SpawnShell Invalid artilleryDirection; defaulting to map center.");
+                Log.Warning("SpawnShell Invalid artilleryDirection; defaulting to map center of North edge.");
                 spawnCell = new IntVec3(map.Size.x / 2, 0, map.Size.z - 1);
-            }
-
-            // Shell ThingDef should have already been validated in StartArtillerySiege
-            Projectile shell = ThingMaker.MakeThing(artilleryProjectile) as Projectile;
-            if (shell == null)
-            {
-                Log.Error("Failed to cast artillery projectile to Projectile.");
-                return null;
             }
 
             GenSpawn.Spawn(shell, spawnCell, map);
@@ -693,6 +706,42 @@ namespace rep.heframework
                         finalRaidGroup = ext.taggedPawnGroupMakers?.FirstOrDefault(g => g.groupName == finalGroupName);
                     }
                 }
+            }
+        }
+    }
+
+    [StaticConstructorOnStartup]
+    class HE_PopulateArtilleryDicts
+    {
+        static HE_PopulateArtilleryDicts()
+        {
+            Func<ThingDef, ThingWithComps> spawnFunc = new Func<ThingDef, ThingWithComps>(SpawnArtilleryProjectileVanilla);
+            Action<ThingWithComps, IntVec3> launchAction = new Action<ThingWithComps, IntVec3>(LaunchArtilleryShellVanilla);
+
+            HE_Settings.artillarySpawnDelegate.Add(typeof(ProjectileProperties), spawnFunc);
+            HE_Settings.artilleryLaunchDelegate.Add(typeof(Projectile), launchAction);
+        }
+
+        public static ThingWithComps SpawnArtilleryProjectileVanilla(ThingDef def)
+        {
+            Projectile projectile = ThingMaker.MakeThing(def) as Projectile;
+
+            return projectile;
+        }
+
+        public static void LaunchArtilleryShellVanilla(ThingWithComps thing, IntVec3 target)
+        {
+            if (thing is Projectile shell)
+            {
+                shell.Launch(
+                            launcher: shell,
+                            intendedTarget: target,
+                            usedTarget: target,
+                            hitFlags: ProjectileHitFlags.All);
+            }
+            else
+            {
+                Log.Error($"LaunchArtilleryShellVanilla tried to launch non-projectile. label: {thing.Label}, defName: {thing.def?.defName}, type: {thing.GetType()}");
             }
         }
     }

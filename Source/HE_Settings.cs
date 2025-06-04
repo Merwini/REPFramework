@@ -18,6 +18,10 @@ namespace rep.heframework
 
         public static bool debugLogging = false;
 
+
+        public static Dictionary<Type, Func<ThingDef, ThingWithComps>> artillarySpawnDelegate = new Dictionary<Type, Func<ThingDef, ThingWithComps>>();
+        public static Dictionary<Type, Delegate> artilleryLaunchDelegate = new Dictionary<Type, Delegate>();
+
         public override void ExposeData()
         {
             Scribe_Values.Look(ref friendlyHEFsCanExpand, "FriendlyHEFsCanExpand", false);

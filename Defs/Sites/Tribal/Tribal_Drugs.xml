@@ -1,0 +1,80 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Defs>
+    <SitePartDef ParentName="HE_Site_Base">
+        <defName>HE_Site_Tribal_Drugs</defName>
+        <label>tribal drug fields</label>
+        <description>A tribal village turning psychoid into Yayo.</description>
+        <arrivedLetter>There is an enemy pyschoid growing village in this area.</arrivedLetter>
+        <selectionWeight>1</selectionWeight>
+        <tags>
+            <li>HE_Tribal_Drugs</li>
+        </tags>
+        <modExtensions>
+            <li Class="rep.heframework.WorldObjectExtensionHE">
+                <mapGenerator>HEMapGeneratorSite</mapGenerator>
+                <threatPointModifier>0.15</threatPointModifier>
+                <maximumSiteCount>3</maximumSiteCount>
+                <spawnThreatPointRange>900~10000</spawnThreatPointRange>
+                <threatPointCurve>
+                    <points>
+                        <li>(100,120)</li>
+                        <li>(1000,600)</li>
+                        <li>(2000,1200)</li>
+                        <li>(3000,1600)</li>
+                        <li>(4000,1800)</li>
+                        <li>(5000,2000)</li>
+                        <li>(10000,3000)</li>
+                    </points>
+                </threatPointCurve>
+                <factionsToPawnGroups>
+                    <TribeCivil>
+                        <li>TribalDrugged</li>
+                    </TribeCivil>
+                    <TribeRough>
+                        <li>TribalDrugged</li>
+                    </TribeRough>
+                    <TribeSavage>
+                        <li>TribalDrugged</li>
+                    </TribeSavage>
+                    <TribeRoughNeanderthal MayRequire="ludeon.rimworld.biotech">
+                        <!--TODO make drugged xeno-tribals-->
+                        <li>TribalDrugged</li>
+                    </TribeRoughNeanderthal>
+                    <TribeSavageImpid MayRequire="ludeon.rimworld.biotech">
+                        <!--TODO make drugged xeno-tribals-->
+                        <li>TribalDrugged</li>
+                    </TribeSavageImpid>
+                </factionsToPawnGroups>
+                <lootLinks>
+                    <Yayo>4</Yayo>
+                </lootLinks>
+            </li>
+        </modExtensions>
+    </SitePartDef>
+
+    <GenStepDef>
+        <defName>HE_Site_Tribal_Drugs_Struct</defName>
+        <linkWithSite>HE_Site_Tribal_Drugs</linkWithSite>
+        <order>450</order>
+        <genStep Class="KCSG.GenStep_CustomStructureGen">
+            <structureLayoutDefs>
+                <li>HE_Site_Tribal_Drug_One</li>
+                <li>HE_Site_Tribal_Drug_Two</li>
+            </structureLayoutDefs>
+            <preventBridgeable>true</preventBridgeable>
+        </genStep>
+    </GenStepDef>
+    <GenStepDef>
+        <defName>HE_Site_Tribal_Drugs_Enemies</defName>
+        <linkWithSite>HE_Site_Tribal_Drugs</linkWithSite>
+        <order>451</order>
+        <genStep Class="rep.heframework.GenStep_TaggedPawnGroupSite">
+        </genStep>
+    </GenStepDef>
+    <GenStepDef>
+        <defName>HE_Site_Tribal_Drugs_Loot</defName>
+        <linkWithSite>HE_Site_Tribal_Drugs</linkWithSite>
+        <order>452</order>
+        <genStep Class="rep.heframework.GenStep_LootPerPawn"/>
+    </GenStepDef>
+</Defs>

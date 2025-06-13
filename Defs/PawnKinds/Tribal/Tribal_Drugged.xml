@@ -1,0 +1,212 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Defs>
+    <PawnKindDef ParentName="TribalPenitentBase">
+        <defName>HE_Tribal_Penitent_Drug</defName>
+        <label>drugged penitent</label>
+        <combatPower>45</combatPower>
+        <startingHediffs>
+            <li>
+                <def>YayoHigh</def>
+                <severity>0.75</severity>
+                <chance>1</chance>
+            </li>
+        </startingHediffs>
+        <inventoryOptions>
+            <subOptionsTakeAll>
+                <li>
+                    <thingDef>Yayo</thingDef>
+                    <countRange>1~2</countRange>
+                </li>
+            </subOptionsTakeAll>
+        </inventoryOptions>
+    </PawnKindDef>
+
+    <PawnKindDef ParentName="TribalArcherBase">
+        <defName>HE_Tribal_Archer_Drug</defName>
+        <label>drugged archer</label>
+        <combatPower>50</combatPower>
+        <startingHediffs>
+            <li>
+                <def>YayoHigh</def>
+                <severity>0.75</severity>
+                <chance>1</chance>
+            </li>
+        </startingHediffs>
+        <inventoryOptions>
+            <subOptionsTakeAll>
+                <li>
+                    <thingDef>Yayo</thingDef>
+                    <countRange>1~2</countRange>
+                </li>
+            </subOptionsTakeAll>
+        </inventoryOptions>
+    </PawnKindDef>
+
+    <PawnKindDef ParentName="TribalWarriorBase">
+        <defName>HE_Tribal_Warrior_Drug</defName>
+        <label>drugged warrior</label>
+        <combatPower>67</combatPower>
+        <startingHediffs>
+            <li>
+                <def>YayoHigh</def>
+                <severity>0.75</severity>
+                <chance>1</chance>
+            </li>
+        </startingHediffs>
+        <inventoryOptions>
+            <subOptionsTakeAll>
+                <li>
+                    <thingDef>Yayo</thingDef>
+                    <countRange>1~2</countRange>
+                </li>
+            </subOptionsTakeAll>
+        </inventoryOptions>
+    </PawnKindDef>
+
+    <PawnKindDef ParentName="Tribal_Hunter">
+        <defName>HE_Tribal_Hunter_Drug</defName>
+        <label>drugged hunter</label>
+        <combatPower>67</combatPower>
+        <startingHediffs>
+            <li>
+                <def>YayoHigh</def>
+                <severity>0.75</severity>
+                <chance>1</chance>
+            </li>
+        </startingHediffs>
+        <inventoryOptions>
+            <subOptionsTakeAll>
+                <li>
+                    <thingDef>Yayo</thingDef>
+                    <countRange>1~2</countRange>
+                </li>
+            </subOptionsTakeAll>
+        </inventoryOptions>
+    </PawnKindDef>
+
+    <PawnKindDef ParentName="TribalBase">
+        <defName>HE_Tribal_Berserker_Drug</defName>
+        <label>drugged berserker</label>
+        <combatPower>72</combatPower>
+        <canBeSapper>true</canBeSapper>
+        <apparelMoney>200~550</apparelMoney>
+        <apparelRequired>
+            <li>Apparel_WarMask</li>
+        </apparelRequired>
+        <weaponMoney>300~300</weaponMoney>
+        <weaponTags>
+            <li>NeolithicMeleeAdvanced</li>
+        </weaponTags>
+        <requiredWorkTags>
+            <li>Violent</li>
+        </requiredWorkTags>
+        <initialWillRange>2~4</initialWillRange>
+        <initialResistanceRange>13~20</initialResistanceRange>
+        <startingHediffs>
+            <li>
+                <def>YayoHigh</def>
+                <severity>0.75</severity>
+                <chance>1</chance>
+            </li>
+        </startingHediffs>
+        <inventoryOptions>
+            <subOptionsTakeAll>
+                <li>
+                    <thingDef>Yayo</thingDef>
+                    <countRange>1~2</countRange>
+                </li>
+            </subOptionsTakeAll>
+        </inventoryOptions>
+    </PawnKindDef>
+
+    <PawnKindDef ParentName="TribalBase">
+        <defName>HE_Tribal_HeavyArcher_Drug</defName>
+        <label>drugged heavy archer</label>
+        <combatPower>84</combatPower>
+        <apparelMoney>200~550</apparelMoney>
+        <apparelRequired>
+            <li>Apparel_WarMask</li>
+        </apparelRequired>
+        <weaponMoney>250~250</weaponMoney>
+        <weaponTags>
+            <li>NeolithicRangedHeavy</li>
+        </weaponTags>
+        <disallowedTraits>
+            <li>Brawler</li>
+        </disallowedTraits>
+        <requiredWorkTags>
+            <li>Violent</li>
+        </requiredWorkTags>
+        <initialWillRange>2~4</initialWillRange>
+        <initialResistanceRange>14~22</initialResistanceRange>
+        <startingHediffs>
+            <li>
+                <def>YayoHigh</def>
+                <severity>0.75</severity>
+                <chance>1</chance>
+            </li>
+        </startingHediffs>
+        <inventoryOptions>
+            <subOptionsTakeAll>
+                <li>
+                    <thingDef>Yayo</thingDef>
+                    <countRange>1~2</countRange>
+                </li>
+            </subOptionsTakeAll>
+        </inventoryOptions>
+    </PawnKindDef>
+
+    <PawnKindDef ParentName="TribalChiefBase">
+        <defName>NE_Tribal_ChiefMelee_Drug</defName>
+        <label>drugged berserker chief</label>
+        <weaponTags>
+            <li>NeolithicMeleeAdvanced</li>
+            <li>MedievalMeleeAdvanced</li>
+        </weaponTags>
+        <initialResistanceRange>38~58</initialResistanceRange>
+        <combatPower>94</combatPower>
+        <startingHediffs>
+            <li>
+                <def>YayoHigh</def>
+                <severity>0.75</severity>
+                <chance>1</chance>
+            </li>
+        </startingHediffs>
+        <inventoryOptions>
+            <subOptionsTakeAll>
+                <li>
+                    <thingDef>Yayo</thingDef>
+                    <countRange>1~2</countRange>
+                </li>
+            </subOptionsTakeAll>
+        </inventoryOptions>
+    </PawnKindDef>
+
+    <PawnKindDef ParentName="TribalChiefBase">
+        <defName>HE_Tribal_ChiefRanged_Drug</defName>
+        <label>drugged archer chief</label>
+        <weaponTags>
+            <li>NeolithicRangedChief</li>
+        </weaponTags>
+        <disallowedTraits>
+            <li>Brawler</li>
+        </disallowedTraits>
+        <initialResistanceRange>16~26</initialResistanceRange>
+        <combatPower>94</combatPower>
+        <startingHediffs>
+            <li>
+                <def>YayoHigh</def>
+                <severity>0.75</severity>
+                <chance>1</chance>
+            </li>
+        </startingHediffs>
+        <inventoryOptions>
+            <subOptionsTakeAll>
+                <li>
+                    <thingDef>Yayo</thingDef>
+                    <countRange>1~2</countRange>
+                </li>
+            </subOptionsTakeAll>
+        </inventoryOptions>
+    </PawnKindDef>
+</Defs>

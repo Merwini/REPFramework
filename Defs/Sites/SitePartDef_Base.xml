@@ -1,0 +1,28 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Defs>
+
+    <SitePartDef Abstract="True" Name="HE_Site_Base">
+        <label>military expansion</label>
+        <description>A military expansion granting your enemies access to new threats.</description>
+        <workerClass>rep.heframework.SitePartWorker_ExpansionHE</workerClass>
+        <siteTexture>World/WorldObjects/Sites/Outpost</siteTexture>
+        <expandingIconTexture>World/WorldObjects/Expanding/Sites/Outpost</expandingIconTexture>
+        <applyFactionColorToSiteTexture>true</applyFactionColorToSiteTexture>
+        <showFactionInInspectString>true</showFactionInInspectString>
+        <requiresFaction>true</requiresFaction>
+        <approachOrderString>Attack {0}</approachOrderString>
+        <approachingReportString>Attacking {0}</approachingReportString>
+        <arrivedLetter>There is an enemy military expansion in this area.</arrivedLetter>
+        <arrivedLetterDef>NegativeEvent</arrivedLetterDef>
+        <wantsThreatPoints>true</wantsThreatPoints>
+        <minThreatPoints>200</minThreatPoints>
+        <badEvenIfNoMap>true</badEvenIfNoMap>
+        <tags/>
+        <excludesTags>
+            <li>MechCluster</li>
+            <li>MechClusterForceNoConditionCauser</li>
+            <li>SleepingMechanoids</li>
+            <li>Manhunters</li>
+        </excludesTags>
+    </SitePartDef>
+</Defs>

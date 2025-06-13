@@ -1,0 +1,108 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Patch>
+
+    <!-- Outlander factions -->
+    <Operation Class="PatchOperationAddModExtension">
+        <xpath>Defs/FactionDef[@Name="OutlanderFactionBase"]</xpath>
+        <value>
+            <li Class="rep.heframework.PawnGroupMakerExtensionHE">
+                <alwaysUseHighestTier>true</alwaysUseHighestTier>
+
+                <taggedPawnGroupMakers>
+                    <li>
+                        <kindDef>Combat</kindDef>
+                        <groupName>BasicSoldiers</groupName>
+                        <commonality>1</commonality>
+                        <groupTier>1</groupTier>
+                        <allowedRaidStrategies>
+                            <li>ImmediateAttack</li>
+                        </allowedRaidStrategies>
+                        <allowedArrivalModes>
+                            <li>EdgeWalkIn</li>
+                            <li>EdgeWalkInGroups</li>
+                        </allowedArrivalModes>
+                        <options>
+                            <Town_Guard>20</Town_Guard>
+                            <Grenadier_Destructive>1.5</Grenadier_Destructive>
+                            <Mercenary_Slasher>7</Mercenary_Slasher>
+                            <Mercenary_Gunner>10</Mercenary_Gunner>
+                            <Mercenary_Elite>10</Mercenary_Elite>
+                            <Town_Councilman>20</Town_Councilman>
+                        </options>
+                    </li>
+                    <li>
+                        <kindDef>Combat</kindDef>
+                        <groupName>DropPodders</groupName>
+                        <commonality>1</commonality>
+                        <groupTier>2</groupTier>
+                        <allowedRaidStrategies>
+                            <li>ImmediateAttack</li>
+                            <li>ImmediateAttackSmart</li>
+                        </allowedRaidStrategies>
+                        <allowedArrivalModes>
+                            <li>CenterDrop</li>
+                            <li>RandomDrop</li>
+                        </allowedArrivalModes>
+                        <requiredSiteTags>
+                            <li>HE_Industrial_Chemfuel</li>
+                        </requiredSiteTags>
+                        <options>
+                            <Town_Guard>10</Town_Guard>
+                            <Grenadier_Destructive>1.5</Grenadier_Destructive>
+                            <Mercenary_Slasher>7</Mercenary_Slasher>
+                            <Mercenary_Gunner>10</Mercenary_Gunner>
+                            <Mercenary_Elite>10</Mercenary_Elite>
+                            <Town_Councilman>10</Town_Councilman>
+                        </options>
+                    </li>
+                    <li>
+                        <kindDef>Combat</kindDef>
+                        <groupName>MercenariesOnly</groupName>
+                        <commonality>1</commonality>
+                        <groupTier>2</groupTier>
+                        <allowedRaidStrategies>
+                            <li>ImmediateAttack</li>
+                            <li>ImmediateAttackSmart</li>
+                            <li>Siege</li>
+                        </allowedRaidStrategies>
+                        <allowedArrivalModes>
+                            <li>EdgeWalkIn</li>
+                            <li>EdgeWalkInGroups</li>
+                        </allowedArrivalModes>
+                        <requiredSiteTags>
+                            <li>HE_Outlander_Elites</li>
+                        </requiredSiteTags>
+                        <options>
+                            <Mercenary_Slasher>7</Mercenary_Slasher>
+                            <Mercenary_Gunner>10</Mercenary_Gunner>
+                            <Mercenary_Heavy>3</Mercenary_Heavy>
+                            <Mercenary_Elite>10</Mercenary_Elite>
+                        </options>
+                    </li>
+                </taggedPawnGroupMakers>
+            </li>
+        </value>
+    </Operation>
+
+    <Operation Class="PatchOperationAddModExtension">
+        <xpath>Defs/FactionDef[@Name="OutlanderFactionBase"]</xpath>
+        <value>
+            <li Class="rep.heframework.WorldObjectExtensionHE">
+                <mapGenerator>HEMapGeneratorSettlement</mapGenerator>
+                <defenderThreatPointsRange>4000~8000</defenderThreatPointsRange>
+            </li>
+        </value>
+    </Operation>
+
+    <Operation Class="PatchOperationAddModExtension">
+        <xpath>Defs/FactionDef[@Name="OutlanderFactionBase"]</xpath>
+        <value>
+            <li Class="KCSG.CustomGenOption">
+                <preventBridgeable>true</preventBridgeable>
+                <chooseFromlayouts>
+                    <li>TODO</li>
+                </chooseFromlayouts>
+            </li>
+        </value>
+    </Operation>
+</Patch>

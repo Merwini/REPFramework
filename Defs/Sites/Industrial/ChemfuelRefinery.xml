@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Defs>
-    <SitePartDef>
+    <SitePartDef ParentName="HE_Site_Base">
         <defName>HE_Site_Chemfuel</defName>
         <label>Chemfuel Refinery</label>
         <description>An expansion site producing chemfuel for use by drop pods.</description>

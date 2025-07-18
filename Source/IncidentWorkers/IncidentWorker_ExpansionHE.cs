@@ -16,7 +16,7 @@ namespace rep.heframework
         
         internal SitePartDef sitePartDef;
         WorldObjectExtensionHE extension;
-        internal int tile;
+        internal PlanetTile tile;
         internal Site site;
 
         public override bool CanFireNowSub(IncidentParms parms)
@@ -174,7 +174,7 @@ namespace rep.heframework
 
         internal bool TrySelectTile()
         {
-            TileFinder.TryFindNewSiteTile(out tile, extension.minimumTileDistance, extension.maximumTileDistance, false, TileFinderMode.Near);
+            TileFinder.TryFindNewSiteTile(out tile, extension.minimumTileDistance, extension.maximumTileDistance, false, tileFinderMode: TileFinderMode.Near);
 
             return tile >= 0;
         }

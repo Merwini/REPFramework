@@ -1,0 +1,57 @@
+Core Factions:
+    Civil Outlander
+    Rough Outlander
+        inherits PawnGroupMakers from Civil Outlander
+    Gentle Tribe
+    Fierce Tribe
+    Savage Tribe
+    Pirate Gang
+    Mechanoid Hive
+    Insect geneline
+
+Royalty Factions:
+    Shattered Empire
+
+Ideology Factions:
+    none
+
+Biotech Factions:
+    Rough pig union
+    fierce neanderthal tribe
+    savage impid tribe
+    yttakin pirates
+    waster pirates
+    sanguophages (hidden, no bases/raids)
+
+Anomaly Factions:
+    Cult of Horax
+
+
+
+Tribal - buildings are rounded to give a more primative feel, chaotic layout
+    Tribal Coalition Seat - Effect: use better PawnKinds (more berserkers, more heavy archers, more chiefs). Map: tribal village around a large central building
+    Psychoid Fields? - Effect: gives raiders Yayo.
+    Trading Post - Effect: gives raiders gunsmithing-tier guns (assume trading with industrials)
+    Animal Pens - Effect: gives raiders combat animals (wargs, bears, boars, etc.)
+    Flame Arrow camp? - Effect: "artillery siege" but it's just one large barrage of flame arrows before raid
+
+
+Outlanders/Pig union can share sites - Maps are blockish and gridlike. Also, no center drop raids without the site
+    Tribal outreach center. Effect: larger threat point multiplier, but higher proportion of poorly-equipped PawnKinds. Map: tribal village built around outlander fort/bunker
+    Component Manufactory. Effect: better-equipped PawnKinds. Map: Blockish factory
+    Biofuel refining site. Effect: re-enables center drop. Map: crops (to refine) and defenses.
+    Artillery Camp - Normal shells
+
+
+Pirate - Maps look like shacks built around crashed ships, mixed materials
+    Crashed Bulk Good Trader - Effect: ????
+    Crashed Combat Supplier - Effect: use only mercenary PawnKinds (better equipped)
+    Crashed Exotic Goods Trader - Effect: Add PawnKinds with only spacer gear and bionics/archotech?
+    Crashed Slave Ship - Effect: larger threat point modifier, but higher proportion of poorly-equipped PawnKinds
+
+
+Empire - Maps have a Helenistic vibe, large central buildings and smaller servant buildings, with defenses in between the two instead of at the perimeter
+    Power Armory - Effect: send only (or at least more) recon/marine armor PawnKinds
+    Aristocrat's Enclave - Effect: send more nobles with psycasts
+    Mechsignal Spoofing Station? - Effect: send one or more mechanoid raids before the Empire raid?
+    Artillery camp - Single antigrain shell per barrage? Or aerodrone strikes?

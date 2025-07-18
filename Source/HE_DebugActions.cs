@@ -11,8 +11,7 @@ namespace rep.heframework
     {
         internal const string DebugPrefix = "HEDebugForced_";
 
-        //TODO 1.5
-        [DebugAction("RimWorld Enhancement Project", "List HE Factions", false, false, false, false, 0, false, actionType = DebugActionType.Action, allowedGameStates = AllowedGameStates.Playing)]
+        [DebugAction("RimWorld Enhancement Project", "List HE Factions", false, false, false, false, false, 0, false, actionType = DebugActionType.Action, allowedGameStates = AllowedGameStates.Playing)]
         public static void ListHEFactions()
         {
             List<Faction> heFacts = HE_Utils.ReturnHEFactions();
@@ -29,7 +28,7 @@ namespace rep.heframework
             }
         }
 
-        [DebugAction("RimWorld Enhancement Project", "List HE Sites for...", false, false, false, false, 0, false, actionType = DebugActionType.Action, allowedGameStates = AllowedGameStates.Playing)]
+        [DebugAction("RimWorld Enhancement Project", "List HE Sites for...", false, false, false, false, false, 0, false, actionType = DebugActionType.Action, allowedGameStates = AllowedGameStates.Playing)]
         public static void ListHESitesFor() 
         {
             List<DebugMenuOption> list = new List<DebugMenuOption>();
@@ -58,7 +57,7 @@ namespace rep.heframework
             Find.WindowStack.Add(new Dialog_DebugOptionListLister(list));
         }
 
-        [DebugAction("RimWorld Enhancement Project", "Execute HE raid with groupName...", false, false, false, false, 0, false, actionType = DebugActionType.Action, allowedGameStates = AllowedGameStates.Playing)]
+        [DebugAction("RimWorld Enhancement Project", "Execute HE raid with groupName...", false, false, false, false, false, 0, false, actionType = DebugActionType.Action, allowedGameStates = AllowedGameStates.Playing)]
         public static void ExecuteRaidGroupName()
         {
             //List HE factions, pick one

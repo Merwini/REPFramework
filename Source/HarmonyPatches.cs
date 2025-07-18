@@ -181,5 +181,44 @@ namespace rep.heframework
                 return extension == null;
             }
         }
+
+        //trying to get terrain to resolve first, so that plants spawn correctly
+        [HarmonyPatch(typeof(KCSG.StructureLayoutDef), "ResolveLayouts")]
+        public static class StructureLayoutDef_ResolveLayouts_Patch
+        {
+            static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions, ILGenerator generator)
+            {
+                var codes = new List<CodeInstruction>(instructions);
+                MethodInfo resolveSymbols = AccessTools.Method(typeof(KCSG.StructureLayoutDef), nameof(KCSG.StructureLayoutDef.ResolveSymbols));
+                MethodInfo resolveTerrain = AccessTools.Method(typeof(KCSG.StructureLayoutDef), nameof(KCSG.StructureLayoutDef.ResolveTerrain));
+                int symbolIndex = -1;
+                int terrainIndex = -1;
+
+                for (int i = 0; i < codes.Count; i++)
+                {
+                    Log.Message(codes[i].ToString());
+                    if (codes[i].opcode == OpCodes.Call && codes[i].operand == resolveSymbols)
+                    {
+                        symbolIndex = i;
+                    }
+                    if (codes[i].opcode == OpCodes.Call && codes[i].operand == resolveTerrain)
+                    {
+                        terrainIndex = i;
+                    }
+                }
+
+                if (symbolIndex >= 0 && terrainIndex >= 0)
+                {
+                    Log.Message($"{symbolIndex}   {terrainIndex}");
+                    Log.Message(codes[symbolIndex].ToString());
+                    Log.Message(codes[terrainIndex].ToString());
+                    codes.Swap(symbolIndex, terrainIndex);
+                    Log.Message(codes[symbolIndex].ToString());
+                    Log.Message(codes[terrainIndex].ToString());
+                }
+
+                return codes.AsEnumerable();
+            }
+        }
     }
 }

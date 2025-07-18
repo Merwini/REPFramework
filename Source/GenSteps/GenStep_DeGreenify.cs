@@ -98,8 +98,8 @@ namespace rep.heframework
 			TerrainDef terrain = cell.GetTerrain(map);
 			if (terrain == HEDefOf.HE_GreenSoil)
 			{
-				TerrainDef terrainDef = null;
-				terrainDef = TerrainFrom(cell, map, elevation[cell], fertility[cell], null, preferSolid: true);
+				TerrainDef terrainDef;
+				terrainDef = TerrainFrom(cell, map, elevation[cell], fertility[cell], preferRock: false);
 				terrainGrid.SetTerrain(cell, terrainDef);
 			}
 			else if (terrain == HEDefOf.HE_GreenRockFloor)
@@ -140,62 +140,55 @@ namespace rep.heframework
 			}
 		}
 
-		//Exact copy of vanilla
-		private TerrainDef TerrainFrom(IntVec3 c, Map map, float elevation, float fertility, RiverMaker river, bool preferSolid)
-		{
-			TerrainDef terrainDef = null;
-			if (river != null)
-			{
-				terrainDef = river.TerrainAt(c, recordForValidation: true);
-			}
-			if (terrainDef == null && preferSolid)
-			{
-				return GenStep_RocksFromGrid.RockDefAt(c).building.naturalTerrain;
-			}
-			TerrainDef terrainDef2 = BeachMaker.BeachTerrainAt(c, map.Biome);
-			if (terrainDef2 == TerrainDefOf.WaterOceanDeep)
-			{
-				return terrainDef2;
-			}
-			if (terrainDef != null && terrainDef.IsRiver)
-			{
-				return terrainDef;
-			}
-			if (terrainDef2 != null)
-			{
-				return terrainDef2;
-			}
-			if (terrainDef != null)
-			{
-				return terrainDef;
-			}
-			for (int i = 0; i < map.Biome.terrainPatchMakers.Count; i++)
-			{
-				terrainDef2 = map.Biome.terrainPatchMakers[i].TerrainAt(c, map, fertility);
-				if (terrainDef2 != null)
-				{
-					return terrainDef2;
-				}
-			}
-			if (elevation > 0.55f && elevation < 0.61f)
-			{
-				return TerrainDefOf.Gravel;
-			}
-			if (elevation >= 0.61f)
-			{
-				return GenStep_RocksFromGrid.RockDefAt(c).building.naturalTerrain;
-			}
-			terrainDef2 = TerrainThreshold.TerrainAtValue(map.Biome.terrainsByFertility, fertility);
-			if (terrainDef2 != null)
-			{
-				return terrainDef2;
-			}
-			if (!debug_WarnedMissingTerrain)
-			{
-				Log.Error("No terrain found in biome " + map.Biome.defName + " for elevation=" + elevation + ", fertility=" + fertility);
-				debug_WarnedMissingTerrain = true;
-			}
-			return TerrainDefOf.Sand;
-		}
-	}
+        //Exact copy of vanilla
+        public static TerrainDef TerrainFrom(IntVec3 c, Map map, float elevation, float fertility, bool preferRock)
+        {
+            TerrainDef terrainDef = null;
+            BiomeDef biomeDef = map.BiomeAt(c);
+            bool flag = map.TileInfo.Mutators.Any((TileMutatorDef m) => m.preventsPondGeneration);
+            if (!map.TileInfo.Mutators.Any((TileMutatorDef m) => m.preventPatches))
+            {
+                foreach (TerrainPatchMaker terrainPatchMaker in biomeDef.terrainPatchMakers)
+                {
+                    if (!flag || !terrainPatchMaker.isPond)
+                    {
+                        terrainDef = terrainPatchMaker.TerrainAt(c, map, fertility);
+                        if (terrainDef != null)
+                        {
+                            break;
+                        }
+                    }
+                }
+            }
+            if (terrainDef == null)
+            {
+                if (elevation > 0.55f && elevation < 0.61f && !biomeDef.noGravel)
+                {
+                    terrainDef = biomeDef.gravelTerrain ?? TerrainDefOf.Gravel;
+                }
+                else if (elevation >= 0.61f)
+                {
+                    terrainDef = GenStep_RocksFromGrid.RockDefAt(c).building.naturalTerrain;
+                }
+            }
+            if (terrainDef == null)
+            {
+                terrainDef = TerrainThreshold.TerrainAtValue(biomeDef.terrainsByFertility, fertility);
+            }
+            if (terrainDef == null)
+            {
+                if (!debug_WarnedMissingTerrain)
+                {
+                    Log.Error("No terrain found in biome " + biomeDef.defName + " for elevation=" + elevation + ", fertility=" + fertility);
+                    debug_WarnedMissingTerrain = true;
+                }
+                terrainDef = TerrainDefOf.Sand;
+            }
+            if (preferRock && terrainDef.supportsRock)
+            {
+                terrainDef = GenStep_RocksFromGrid.RockDefAt(c).building.naturalTerrain;
+            }
+            return terrainDef;
+        }
+    }
 }

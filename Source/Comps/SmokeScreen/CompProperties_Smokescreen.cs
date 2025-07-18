@@ -9,7 +9,7 @@ using Verse;
 
 namespace rep.heframework
 {
-    public partial class CompProperties_Smokescreen : CompProperties
+    public class CompProperties_Smokescreen : CompProperties
     {
         public ThingDef smokeProjectile;
 
